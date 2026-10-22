@@ -34,5 +34,9 @@ flutter run
 [테스트 전략](docs/testing.md), 구조적 결정은
 [아키텍처](docs/architecture.md)를 참고하세요.
 
+공통 UI를 구현할 때는 [디자인 시스템](docs/design-system.md)과
+[컴포넌트 명세](docs/component-specs.md)를 기준으로 삼습니다. 플랫폼에서
+사용하는 원본 토큰은 `shared/design-tokens.json`에 있습니다.
+
 확정되지 않은 제품·API 항목은 [확인 필요 항목](docs/open-questions.md)에
 기록합니다.
