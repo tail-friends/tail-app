@@ -1,0 +1,48 @@
+name: 버그 신고
+description: 재현 가능한 결함을 기록합니다.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 작업 목적
+      description: 문제가 사용자에게 미치는 영향을 작성해 주세요.
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 플랫폼
+      multiple: true
+      options: [Android, iOS, 공통, 백엔드 연계]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 재현 절차
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 작업 범위
+      description: 기대 결과, 실제 결과와 수정 범위를 작성해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 조건
+      value: "- [ ] 재현 테스트가 수정 전 실패하고 수정 후 통과한다."
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: 테스트 항목
+      value: "- [ ] 회귀 테스트\n- [ ] 관련 자동 테스트"
+    validations:
+      required: true
