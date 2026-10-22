@@ -22,6 +22,12 @@ Pull Request와 `develop`, `main` push에서 고정된 Flutter 버전으로 포�
 정적 분석, 테스트와 debug APK 빌드를 수행한다. 릴리스 서명과 배포는 별도의
 보호된 워크플로로 분리한다.
 
+- 워크플로는 모든 PR에서 실행된다. `android-app/`, `shared/`, `.fvmrc`,
+  워크플로 파일이 바뀌지 않았으면 `verify` 잡은 건너뛰며, 건너뛴 잡은 필수
+  체크에서 통과로 취급된다.
+- Flutter 버전은 `.fvmrc`에서 읽는다. 버전을 바꿀 때는 `.fvmrc`만 고친다.
+- JDK는 Android 빌드 설정에 맞춰 17로 고정한다.
+
 ## 출시 전 추가 검증
 
 - Android application ID와 버전 정책 확정
