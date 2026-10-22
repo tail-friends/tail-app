@@ -12,9 +12,15 @@ permissions:
   contents: read
   pull-requests: read
 
+# 같은 브랜치에 새로 push하면 이전 실행은 취소한다
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       android: ${{ steps.filter.outputs.android }}
     steps:
@@ -33,6 +39,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: android-app
@@ -53,6 +60,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      # debug APK 빌드의 Gradle 의존성을 캐시한다
+      - uses: gradle/actions/setup-gradle@v4
       - name: Install dependencies
         run: flutter pub get
       - name: Check formatting
