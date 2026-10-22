@@ -2,17 +2,12 @@ name: Flutter CI
 
 on:
   pull_request:
-    branches: [develop, main]
-    paths:
-      - "android-app/**"
-      - ".fvmrc"
-      - ".github/workflows/flutter-ci.yml"
   push:
     branches: [develop, main]
-    paths:
-      - "android-app/**"
-      - ".fvmrc"
-      - ".github/workflows/flutter-ci.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -20,23 +15,94 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: android-app
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          flutter-version: "3.41.7"
+          fetch-depth: 0
+
+      - name: Detect Android-related changes
+        id: changes
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+          PUSH_HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base_sha="$PR_BASE_SHA"
+            head_sha="$PR_HEAD_SHA"
+            separator="..."
+          else
+            base_sha="$PUSH_BASE_SHA"
+            head_sha="$PUSH_HEAD_SHA"
+            separator=".."
+          fi
+
+          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]] || \
+            ! git cat-file -e "${base_sha}^{commit}" 2>/dev/null || \
+            ! git cat-file -e "${head_sha}^{commit}" 2>/dev/null; then
+            echo "android=true" >> "$GITHUB_OUTPUT"
+            echo "Unable to determine a complete diff; running Flutter verification."
+          elif git diff --quiet "${base_sha}${separator}${head_sha}" -- \
+            android-app/ \
+            .fvmrc \
+            .github/workflows/flutter-ci.yml \
+            shared/design-tokens.json; then
+            echo "android=false" >> "$GITHUB_OUTPUT"
+            echo "No Android-related changes detected."
+          else
+            echo "android=true" >> "$GITHUB_OUTPUT"
+            echo "Android-related changes detected."
+          fi
+
+      - name: Skip Flutter verification
+        if: steps.changes.outputs.android != 'true'
+        run: echo "Flutter verification is not required for this change."
+
+      - name: Set up JDK 17
+        if: steps.changes.outputs.android == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle cache
+        if: steps.changes.outputs.android == 'true'
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Flutter
+        if: steps.changes.outputs.android == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
           channel: stable
           cache: true
+
       - name: Install dependencies
+        if: steps.changes.outputs.android == 'true'
+        working-directory: android-app
         run: flutter pub get
+
       - name: Check formatting
+        if: steps.changes.outputs.android == 'true'
+        working-directory: android-app
         run: dart format --output=none --set-exit-if-changed lib test
+
       - name: Analyze
+        if: steps.changes.outputs.android == 'true'
+        working-directory: android-app
         run: flutter analyze
+
       - name: Test
+        if: steps.changes.outputs.android == 'true'
+        working-directory: android-app
         run: flutter test
+
       - name: Build debug APK
+        if: steps.changes.outputs.android == 'true'
+        working-directory: android-app
         run: flutter build apk --debug
