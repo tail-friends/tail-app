@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,6 +50,18 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       await tester.tap(find.byType(AppButton));
       expect(taps, 0);
+    });
+
+    testWidgets('비활성화 상태는 탭 콜백을 실행하지 않는다', (tester) async {
+      await tester.pumpWidget(
+        _host(const AppButton(label: '저장', onPressed: null)),
+      );
+
+      await tester.tap(find.byType(AppButton));
+      expect(
+        tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+        0.4,
+      );
     });
   });
 
@@ -100,6 +114,29 @@ void main() {
     expect(find.text('이름을 확인해 주세요'), findsOneWidget);
   });
 
+  testWidgets('TextField는 선택적으로 현재 글자 수를 표시한다', (tester) async {
+    final controller = TextEditingController(text: '욱이');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          width: 342,
+          child: AppTextField(
+            label: '이름',
+            controller: controller,
+            maxLength: 30,
+            showCounter: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('2/30'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), '도마뱀');
+    await tester.pump();
+    expect(find.text('3/30'), findsOneWidget);
+  });
+
   testWidgets('Chip은 모든 tone의 레이블을 표시한다', (tester) async {
     await tester.pumpWidget(
       _host(
@@ -134,6 +171,90 @@ void main() {
     expect(
       icons.every((icon) => icon.width == 16 && icon.height == 16),
       isTrue,
+    );
+    for (final tab in AppTab.values) {
+      final size = tester.getSize(
+        find.byKey(ValueKey('app_bottom_navigation_${tab.name}_touch_target')),
+      );
+      expect(size.width, greaterThanOrEqualTo(44), reason: tab.name);
+      expect(size.height, greaterThanOrEqualTo(44), reason: tab.name);
+    }
+  });
+
+  testWidgets('BottomNavigation은 현재 탭의 선택 semantics를 제공한다', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        AppBottomNavigation(currentTab: AppTab.records, onTabSelected: (_) {}),
+      ),
+    );
+
+    final selected = tester.getSemantics(
+      find.byKey(const ValueKey('app_bottom_navigation_records_touch_target')),
+    );
+    final unselected = tester.getSemantics(
+      find.byKey(const ValueKey('app_bottom_navigation_habitat_touch_target')),
+    );
+    expect(selected.flagsCollection.isSelected, ui.Tristate.isTrue);
+    expect(unselected.flagsCollection.isSelected, ui.Tristate.isFalse);
+  });
+
+  testWidgets('좁은 화면에서도 하단 탭 터치 영역과 레이아웃을 유지한다', (tester) async {
+    tester.view.physicalSize = const Size(240, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _host(
+        AppBottomNavigation(currentTab: AppTab.habitat, onTabSelected: (_) {}),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    for (final tab in AppTab.values) {
+      final size = tester.getSize(
+        find.byKey(ValueKey('app_bottom_navigation_${tab.name}_touch_target')),
+      );
+      expect(size.width, greaterThanOrEqualTo(44), reason: tab.name);
+      expect(size.height, greaterThanOrEqualTo(44), reason: tab.name);
+    }
+  });
+
+  testWidgets('텍스트를 200%로 확대해도 주요 컴포넌트가 overflow되지 않는다', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.mist,
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: Scaffold(
+            body: SizedBox(
+              width: 342,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppButton(label: '저장', onPressed: () {}),
+                  const AppTextField(
+                    label: '이름',
+                    hintText: '예: 욱이',
+                    maxLength: 30,
+                    showCounter: true,
+                  ),
+                  AppBottomNavigation(
+                    currentTab: AppTab.habitat,
+                    onTabSelected: (_) {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getSize(find.byType(AppBottomNavigation)).height,
+      greaterThanOrEqualTo(54),
     );
   });
 

@@ -44,7 +44,9 @@
 - 색상: glass gradient, 활성 탭 bg/surface, 비활성 text/icon tertiary
 - Variant: Active=사육장, 기록, 내 아이들, 마이
 - 상태: 현재 탭 selected, 나머지 unselected
-- 공통 동작: 선택 상태와 탭 의미를 접근성에 제공. 실제 라우팅은 화면 기능에서 연결
+- 공통 동작: Figma의 38px 선택 capsule 외형을 유지하면서 각 탭의 실제 터치
+  영역은 최소 44×44px로 확장한다. 선택 상태와 탭 의미를 접근성에 제공하며
+  실제 라우팅은 화면 기능에서 연결한다.
 
 ## Row/Record (`4:121`)
 
@@ -62,7 +64,9 @@
 - 색상: glass surface, label secondary, hint tertiary, error danger
 - 글꼴: Label/Medium 및 Body/Regular
 - 상태: 기본, focused(플랫폼 포커스), error, disabled
-- 공통 동작: label은 hint와 별도로 유지한다. 입력 제한·키보드 타입을 호출자가 제공하고 오류를 텍스트로 알린다.
+- 공통 동작: label은 hint와 별도로 유지한다. 입력 제한·키보드 타입을 호출자가
+  제공하고 오류를 텍스트로 알린다. `showCounter`를 선택하면 개체 등록 화면
+  (`31:2984`)처럼 현재 글자 수/최대 글자 수를 우측 하단에 표시한다.
 
 ## AppCard (화면 참조 `15:410`, `32:2898`)
 

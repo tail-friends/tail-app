@@ -79,11 +79,7 @@ class AppButton extends StatelessWidget {
       ),
       AppButtonVariant.ghost => AppGlassSurface(
         borderRadius: radius,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xB3FFFFFF), Color(0x59FFFFFF)],
-        ),
+        gradient: AppColors.ghostGradient,
         child: content,
       ),
     };

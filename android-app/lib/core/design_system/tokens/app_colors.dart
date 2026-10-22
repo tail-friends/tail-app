@@ -6,6 +6,9 @@ abstract final class AppColors {
   static const sunken = Color(0xFFECE9E3);
   static const primaryBackground = Color(0xFF1E1C1A);
   static const primarySoft = Color(0xFFEFE9DF);
+  static const infoSoft = Color(0xFFE7ECEE);
+  static const glass = Color(0x8CFFFFFF);
+  static const glassStrong = Color(0xBFFFFFFF);
 
   static const textPrimary = Color(0xFF1E1C1A);
   static const textComponentPrimary = Color(0xFF3B3631);
@@ -22,8 +25,10 @@ abstract final class AppColors {
   static const dangerSoft = Color(0xFFF3E4DF);
   static const borderDefault = Color(0xFFDEDAD2);
   static const borderStrong = Color(0xFFABA498);
+  static const borderGlass = Color(0xE6FFFFFF);
   static const iconPrimary = Color(0xFF34312D);
   static const iconMuted = Color(0xFFABA498);
+  static const iconAccent = Color(0xFFB8A07A);
 
   static const socialApple = Color(0xFF3B3631);
   static const socialKakao = Color(0xFFFEE500);
@@ -45,6 +50,12 @@ abstract final class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xC7FFFFFF), Color(0x66FFFFFF)],
+  );
+
+  static const ghostGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xB3FFFFFF), Color(0x59FFFFFF)],
   );
 
   static const mistScreenGradient = LinearGradient(

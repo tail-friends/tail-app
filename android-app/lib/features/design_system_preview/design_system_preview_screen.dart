@@ -118,6 +118,7 @@ class _DesignSystemPreviewScreenState extends State<DesignSystemPreviewScreen> {
                     hintText: '예: 욱이',
                     isRequired: true,
                     maxLength: 30,
+                    showCounter: true,
                   ),
                   SizedBox(height: AppSpacing.x4),
                   AppTextField(
@@ -126,6 +127,7 @@ class _DesignSystemPreviewScreenState extends State<DesignSystemPreviewScreen> {
                     errorText: '메모를 확인해 주세요',
                     maxLines: 3,
                     maxLength: 300,
+                    showCounter: true,
                   ),
                 ],
               ),

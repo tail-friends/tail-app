@@ -32,7 +32,7 @@ class AppBottomNavigation extends StatelessWidget {
       child: AppGlassSurface(
         borderRadius: BorderRadius.circular(AppRadius.full),
         blur: 20,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         boxShadow: const [
           BoxShadow(
             color: Color(0x143D3329),
@@ -41,24 +41,20 @@ class AppBottomNavigation extends StatelessWidget {
           ),
         ],
         child: Row(
-          children: AppTab.values
-              .map(
-                (tab) => Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: tab == AppTab.profile ? 0 : 8,
-                    ),
-                    child: _NavigationItem(
-                      tab: tab,
-                      label: _items[tab]!.label,
-                      assetName: _items[tab]!.assetName,
-                      selected: currentTab == tab,
-                      onTap: () => onTabSelected(tab),
-                    ),
-                  ),
+          children: [
+            for (final (index, tab) in AppTab.values.indexed) ...[
+              if (index > 0) const SizedBox(width: 8),
+              Expanded(
+                child: _NavigationItem(
+                  tab: tab,
+                  label: _items[tab]!.label,
+                  assetName: _items[tab]!.assetName,
+                  selected: currentTab == tab,
+                  onTap: () => onTabSelected(tab),
                 ),
-              )
-              .toList(growable: false),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -84,46 +80,63 @@ class _NavigationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(AppRadius.full);
     return Semantics(
+      key: ValueKey('app_bottom_navigation_${tab.name}_touch_target'),
       button: true,
       selected: selected,
       label: label,
       child: Material(
-        color: selected ? AppColors.surface : Colors.transparent,
+        color: Colors.transparent,
         borderRadius: radius,
-        elevation: selected ? 2 : 0,
-        shadowColor: const Color(0x33000000),
         child: InkWell(
           borderRadius: radius,
           onTap: onTap,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 38),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ExcludeSemantics(
-                    child: SvgPicture.asset(
-                      'assets/icons/nav_${assetName}_${selected ? 'active' : 'inactive'}.svg',
-                      width: 16,
-                      height: 16,
+            constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+            child: Center(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: double.infinity,
+                constraints: const BoxConstraints(minHeight: 38),
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.surface : Colors.transparent,
+                  borderRadius: radius,
+                  boxShadow: selected
+                      ? const [
+                          BoxShadow(
+                            color: Color(0x33000000),
+                            offset: Offset(1, 2),
+                            blurRadius: 3,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ExcludeSemantics(
+                      child: SvgPicture.asset(
+                        'assets/icons/nav_${assetName}_${selected ? 'active' : 'inactive'}.svg',
+                        width: 16,
+                        height: 16,
+                      ),
                     ),
-                  ),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.fade,
-                    softWrap: false,
-                    style: AppTypography.captionRegular.copyWith(
-                      fontSize: 10,
-                      height: 13 / 10,
-                      color: selected
-                          ? AppColors.textComponentPrimary
-                          : AppColors.textTertiary,
+                    Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.fade,
+                      softWrap: false,
+                      style: AppTypography.captionRegular.copyWith(
+                        fontSize: 10,
+                        height: 13 / 10,
+                        color: selected
+                            ? AppColors.textComponentPrimary
+                            : AppColors.textTertiary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

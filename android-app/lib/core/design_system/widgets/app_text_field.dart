@@ -16,13 +16,14 @@ class AppTextField extends StatefulWidget {
     this.isRequired = false,
     this.enabled = true,
     this.maxLength,
+    this.showCounter = false,
     this.maxLines = 1,
     this.keyboardType,
     this.inputFormatters,
     this.onChanged,
     this.semanticHint,
     super.key,
-  });
+  }) : assert(!showCounter || maxLength != null);
 
   final String label;
   final TextEditingController? controller;
@@ -31,6 +32,7 @@ class AppTextField extends StatefulWidget {
   final bool isRequired;
   final bool enabled;
   final int? maxLength;
+  final bool showCounter;
   final int maxLines;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
@@ -43,11 +45,23 @@ class AppTextField extends StatefulWidget {
 
 class _AppTextFieldState extends State<AppTextField> {
   late final FocusNode _focusNode;
+  late int _currentLength;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode()..addListener(_handleFocusChanged);
+    _currentLength = widget.controller?.text.characters.length ?? 0;
+    widget.controller?.addListener(_handleControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant AppTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller == widget.controller) return;
+    oldWidget.controller?.removeListener(_handleControllerChanged);
+    widget.controller?.addListener(_handleControllerChanged);
+    _currentLength = widget.controller?.text.characters.length ?? 0;
   }
 
   @override
@@ -55,10 +69,23 @@ class _AppTextFieldState extends State<AppTextField> {
     _focusNode
       ..removeListener(_handleFocusChanged)
       ..dispose();
+    widget.controller?.removeListener(_handleControllerChanged);
     super.dispose();
   }
 
   void _handleFocusChanged() => setState(() {});
+
+  void _handleControllerChanged() {
+    final length = widget.controller?.text.characters.length ?? 0;
+    if (length != _currentLength) setState(() => _currentLength = length);
+  }
+
+  void _handleChanged(String value) {
+    if (widget.controller == null) {
+      setState(() => _currentLength = value.characters.length);
+    }
+    widget.onChanged?.call(value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +149,7 @@ class _AppTextFieldState extends State<AppTextField> {
                     maxLines: widget.maxLines,
                     keyboardType: widget.keyboardType,
                     inputFormatters: widget.inputFormatters,
-                    onChanged: widget.onChanged,
+                    onChanged: _handleChanged,
                     style: AppTypography.bodyRegular.copyWith(
                       color: AppColors.textComponentPrimary,
                     ),
@@ -139,13 +166,32 @@ class _AppTextFieldState extends State<AppTextField> {
               ],
             ),
           ),
-          if (widget.errorText != null) ...[
+          if (widget.errorText != null || widget.showCounter) ...[
             const SizedBox(height: AppSpacing.x1),
-            Text(
-              widget.errorText!,
-              style: AppTypography.captionRegular.copyWith(
-                color: AppColors.textDanger,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: widget.errorText == null
+                      ? const SizedBox.shrink()
+                      : Text(
+                          widget.errorText!,
+                          style: AppTypography.captionRegular.copyWith(
+                            color: AppColors.textDanger,
+                          ),
+                        ),
+                ),
+                if (widget.showCounter)
+                  Semantics(
+                    label: '$_currentLength자 / 최대 ${widget.maxLength}자',
+                    child: Text(
+                      '$_currentLength/${widget.maxLength}',
+                      style: AppTypography.captionRegular.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ],
