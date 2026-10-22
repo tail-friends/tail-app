@@ -1,24 +1,37 @@
 name: Flutter CI
 
+# 모든 PR에서 체크가 생기도록 워크플로는 항상 실행하고,
+# Android 관련 파일이 바뀌지 않았으면 verify 잡만 건너뛴다. (건너뛴 잡은 필수 체크에서 통과로 취급된다)
 on:
   pull_request:
     branches: [develop, main]
-    paths:
-      - "android-app/**"
-      - ".fvmrc"
-      - ".github/workflows/flutter-ci.yml"
   push:
     branches: [develop, main]
-    paths:
-      - "android-app/**"
-      - ".fvmrc"
-      - ".github/workflows/flutter-ci.yml"
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            android:
+              - "android-app/**"
+              - "shared/**"
+              - ".fvmrc"
+              - ".github/workflows/flutter-ci.yml"
+
   verify:
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
