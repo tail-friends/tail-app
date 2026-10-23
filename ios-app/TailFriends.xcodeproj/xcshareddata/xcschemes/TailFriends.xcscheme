@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "2700"
+   version = "1.7">
+   <BuildAction parallelizeBuildables = "YES" buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
+            <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "A50000000000000000000001" BuildableName = "TailFriends.app" BlueprintName = "TailFriends" ReferencedContainer = "container:TailFriends.xcodeproj"/>
+         </BuildActionEntry>
+         <BuildActionEntry buildForTesting = "YES" buildForRunning = "NO" buildForProfiling = "NO" buildForArchiving = "NO" buildForAnalyzing = "NO">
+            <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "A50000000000000000000002" BuildableName = "TailFriendsTests.xctest" BlueprintName = "TailFriendsTests" ReferencedContainer = "container:TailFriends.xcodeproj"/>
+         </BuildActionEntry>
+         <BuildActionEntry buildForTesting = "YES" buildForRunning = "NO" buildForProfiling = "NO" buildForArchiving = "NO" buildForAnalyzing = "NO">
+            <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "A50000000000000000000003" BuildableName = "TailFriendsUITests.xctest" BlueprintName = "TailFriendsUITests" ReferencedContainer = "container:TailFriends.xcodeproj"/>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction buildConfiguration = "Debug" selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger" selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher" shouldUseLaunchSchemeArgsEnv = "YES" codeCoverageEnabled = "NO" shouldAutocreateTestPlan = "YES">
+      <Testables>
+         <TestableReference skipped = "NO" parallelizable = "NO">
+            <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "A50000000000000000000002" BuildableName = "TailFriendsTests.xctest" BlueprintName = "TailFriendsTests" ReferencedContainer = "container:TailFriends.xcodeproj"/>
+         </TestableReference>
+         <TestableReference skipped = "NO" parallelizable = "NO">
+            <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "A50000000000000000000003" BuildableName = "TailFriendsUITests.xctest" BlueprintName = "TailFriendsUITests" ReferencedContainer = "container:TailFriends.xcodeproj"/>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+   <LaunchAction buildConfiguration = "Debug" selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger" selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher" launchStyle = "0" useCustomWorkingDirectory = "NO" ignoresPersistentStateOnLaunch = "NO" debugDocumentVersioning = "YES" debugServiceExtension = "internal" allowLocationSimulation = "YES">
+      <BuildableProductRunnable runnableDebuggingMode = "0">
+         <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "A50000000000000000000001" BuildableName = "TailFriends.app" BlueprintName = "TailFriends" ReferencedContainer = "container:TailFriends.xcodeproj"/>
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction buildConfiguration = "Release" shouldUseLaunchSchemeArgsEnv = "YES" savedToolIdentifier = "" useCustomWorkingDirectory = "NO" debugDocumentVersioning = "YES">
+      <BuildableProductRunnable runnableDebuggingMode = "0">
+         <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "A50000000000000000000001" BuildableName = "TailFriends.app" BlueprintName = "TailFriends" ReferencedContainer = "container:TailFriends.xcodeproj"/>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction buildConfiguration = "Debug"/>
+   <ArchiveAction buildConfiguration = "Release" revealArchiveInOrganizer = "YES"/>
+</Scheme>
