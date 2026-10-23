@@ -1,0 +1,171 @@
+name: Discord 알림
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, review_requested, closed]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-opened:
+    name: Notify PR opened
+    if: >-
+      github.event_name == 'pull_request'
+      && (github.event.action == 'opened' || github.event.action == 'ready_for_review')
+      && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted notification script
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Check trusted script
+        id: trusted-script
+        run: |
+          if [[ -f .github/scripts/discord-notify.sh ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Trusted base branch does not contain the notification script yet; skipping."
+          fi
+
+      - name: Find requested reviewers
+        if: steps.trusted-script.outputs.available == 'true'
+        id: reviewers
+        run: |
+          reviewers=$(jq -r '[.pull_request.requested_reviewers[].login] | join(" ")' "$GITHUB_EVENT_PATH")
+          echo "logins=$reviewers" >> "$GITHUB_OUTPUT"
+
+      - name: Send PR notification
+        if: steps.trusted-script.outputs.available == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_USER_MAP: ${{ vars.DISCORD_USER_MAP }}
+          DISCORD_APP_MENTIONS: ${{ vars.DISCORD_APP_MENTIONS }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_REVIEWERS: ${{ steps.reviewers.outputs.logins }}
+        run: .github/scripts/discord-notify.sh pr-opened
+
+  review-requested:
+    name: Notify reviewer requested
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.action == 'review_requested'
+      && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted notification script
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Check trusted script
+        id: trusted-script
+        run: |
+          if [[ -f .github/scripts/discord-notify.sh ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Trusted base branch does not contain the notification script yet; skipping."
+          fi
+
+      - name: Send reviewer notification
+        if: steps.trusted-script.outputs.available == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_USER_MAP: ${{ vars.DISCORD_USER_MAP }}
+          DISCORD_APP_MENTIONS: ${{ vars.DISCORD_APP_MENTIONS }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_REVIEWERS: ${{ github.event.requested_reviewer.login }}
+        run: .github/scripts/discord-notify.sh review-requested
+
+  merged:
+    name: Notify merged
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.action == 'closed'
+      && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted notification script
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Check trusted script
+        id: trusted-script
+        run: |
+          if [[ -f .github/scripts/discord-notify.sh ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Trusted base branch does not contain the notification script yet; skipping."
+          fi
+
+      - name: Send merged PR notification
+        if: steps.trusted-script.outputs.available == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+        run: .github/scripts/discord-notify.sh pr-merged
+
+  review:
+    name: Notify review
+    if: github.event_name == 'pull_request_review'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted notification script
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Check trusted script
+        id: trusted-script
+        run: |
+          if [[ -f .github/scripts/discord-notify.sh ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Trusted base branch does not contain the notification script yet; skipping."
+          fi
+
+      - name: Send review result notification
+        if: steps.trusted-script.outputs.available == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_USER_MAP: ${{ vars.DISCORD_USER_MAP }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          REVIEW_AUTHOR: ${{ github.event.review.user.login }}
+          REVIEW_BODY: ${{ github.event.review.body }}
+          REVIEW_URL: ${{ github.event.review.html_url }}
+        run: .github/scripts/discord-notify.sh review
