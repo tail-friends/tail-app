@@ -72,11 +72,18 @@
 			);
 			sourceTree = "<group>";
 		};
-		A80000000000000000000002 /* TailFriends */ = {isa = PBXGroup; path = TailFriends; sourceTree = "<group>"; children = (A20000000000000000000001 /* TailFriendsApp.swift */, A20000000000000000000002 /* PlaceholderView.swift */,); };
+		A80000000000000000000002 /* TailFriends */ = {isa = PBXGroup; path = TailFriends; sourceTree = "<group>"; children = (A80000000000000000000007 /* App */, A80000000000000000000008 /* Core */, A80000000000000000000009 /* Features */, A80000000000000000000010 /* Resources */,); };
 		A80000000000000000000003 /* TailFriendsTests */ = {isa = PBXGroup; path = TailFriendsTests; sourceTree = "<group>"; children = (A20000000000000000000003 /* PlaceholderContentTests.swift */,); };
 		A80000000000000000000004 /* TailFriendsUITests */ = {isa = PBXGroup; path = TailFriendsUITests; sourceTree = "<group>"; children = (A20000000000000000000004 /* TailFriendsUITests.swift */,); };
 		A80000000000000000000005 /* Frameworks */ = {isa = PBXGroup; children = (A20000000000000000000005 /* XCTest.framework */,); name = Frameworks; sourceTree = "<group>"; };
 		A80000000000000000000006 /* Products */ = {isa = PBXGroup; name = Products; sourceTree = "<group>"; children = (A20000000000000000000006 /* TailFriends.app */, A20000000000000000000007 /* TailFriendsTests.xctest */, A20000000000000000000008 /* TailFriendsUITests.xctest */,); };
+		A80000000000000000000007 /* App */ = {isa = PBXGroup; path = App; sourceTree = "<group>"; children = (A20000000000000000000001 /* TailFriendsApp.swift */,); };
+		A80000000000000000000008 /* Core */ = {isa = PBXGroup; path = Core; sourceTree = "<group>"; children = (A80000000000000000000011 /* Navigation */, A80000000000000000000012 /* Network */, A80000000000000000000013 /* Storage */,); };
+		A80000000000000000000009 /* Features */ = {isa = PBXGroup; path = Features; sourceTree = "<group>"; children = (A20000000000000000000002 /* PlaceholderView.swift */,); };
+		A80000000000000000000010 /* Resources */ = {isa = PBXGroup; path = Resources; sourceTree = "<group>"; };
+		A80000000000000000000011 /* Navigation */ = {isa = PBXGroup; path = Navigation; sourceTree = "<group>"; };
+		A80000000000000000000012 /* Network */ = {isa = PBXGroup; path = Network; sourceTree = "<group>"; };
+		A80000000000000000000013 /* Storage */ = {isa = PBXGroup; path = Storage; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
