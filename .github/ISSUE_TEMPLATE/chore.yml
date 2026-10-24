@@ -1,0 +1,40 @@
+name: 환경·유지보수 작업
+description: 개발 환경, 의존성, CI 또는 저장소 유지보수 작업입니다.
+title: "[Chore] "
+labels: ["chore"]
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 작업 목적
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 플랫폼
+      multiple: true
+      options: [Android, iOS, 공통, CI/CD]
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 작업 범위
+      description: 변경 대상과 제외 대상을 작성해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 조건
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: 테스트 항목
+      value: "- [ ] "
+    validations:
+      required: true

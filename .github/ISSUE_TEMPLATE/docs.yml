@@ -1,0 +1,42 @@
+name: 문서 작업
+description: 기획, 설계 또는 개발 문서를 추가·수정합니다.
+title: "[Docs] "
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 작업 목적
+      description: 독자와 문서가 해결할 문제를 작성해 주세요.
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 플랫폼
+      multiple: true
+      options: [Android, iOS, 공통, 운영]
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 작업 범위
+      description: 추가·수정할 문서와 제외 범위를 작성해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 조건
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: 테스트 항목
+      description: 링크, 예제 명령, 맞춤법 등 검토 항목을 작성해 주세요.
+      value: "- [ ] 링크와 예제 명령 확인"
+    validations:
+      required: true
