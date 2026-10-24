@@ -14,6 +14,8 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.isLoading = false,
     this.expand = true,
+    this.backgroundColor,
+    this.textStyle,
     super.key,
   });
 
@@ -22,6 +24,8 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
   final bool isLoading;
   final bool expand;
+  final Color? backgroundColor;
+  final TextStyle? textStyle;
 
   bool get _enabled => onPressed != null && !isLoading;
 
@@ -46,7 +50,9 @@ class AppButton extends StatelessWidget {
             : Text(
                 label,
                 textAlign: TextAlign.center,
-                style: AppTypography.titleMedium.copyWith(color: foreground),
+                style: (textStyle ?? AppTypography.titleMedium).copyWith(
+                  color: foreground,
+                ),
               ),
       ),
     );
@@ -54,7 +60,8 @@ class AppButton extends StatelessWidget {
     final decorated = switch (variant) {
       AppButtonVariant.primary => DecoratedBox(
         decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
+          color: backgroundColor,
+          gradient: backgroundColor == null ? AppColors.primaryGradient : null,
           borderRadius: radius,
           boxShadow: const [
             BoxShadow(

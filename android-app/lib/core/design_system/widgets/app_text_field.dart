@@ -18,10 +18,19 @@ class AppTextField extends StatefulWidget {
     this.maxLength,
     this.showCounter = false,
     this.maxLines = 1,
+    this.minHeight,
     this.keyboardType,
+    this.textInputAction,
     this.inputFormatters,
     this.onChanged,
     this.semanticHint,
+    this.textStyle,
+    this.labelStyle,
+    this.requiredStyle,
+    this.counterStyle,
+    this.contentPadding,
+    this.suffixText,
+    this.suffixStyle,
     super.key,
   }) : assert(!showCounter || maxLength != null);
 
@@ -34,10 +43,19 @@ class AppTextField extends StatefulWidget {
   final int? maxLength;
   final bool showCounter;
   final int maxLines;
+  final double? minHeight;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
   final String? semanticHint;
+  final TextStyle? textStyle;
+  final TextStyle? labelStyle;
+  final TextStyle? requiredStyle;
+  final TextStyle? counterStyle;
+  final EdgeInsetsGeometry? contentPadding;
+  final String? suffixText;
+  final TextStyle? suffixStyle;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -109,17 +127,21 @@ class _AppTextFieldState extends State<AppTextField> {
             children: [
               Text(
                 widget.label,
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style:
+                    widget.labelStyle ??
+                    AppTypography.labelMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
               ),
               if (widget.isRequired) ...[
                 const SizedBox(width: 3),
                 Text(
                   '필수',
-                  style: AppTypography.captionRegular.copyWith(
-                    color: AppColors.textDanger,
-                  ),
+                  style:
+                      widget.requiredStyle ??
+                      AppTypography.captionRegular.copyWith(
+                        color: AppColors.textDanger,
+                      ),
                 ),
               ],
             ],
@@ -139,7 +161,8 @@ class _AppTextFieldState extends State<AppTextField> {
                 ),
                 ConstrainedBox(
                   constraints: BoxConstraints(
-                    minHeight: widget.maxLines > 1 ? 84 : 48,
+                    minHeight:
+                        widget.minHeight ?? (widget.maxLines > 1 ? 84 : 48),
                   ),
                   child: TextFormField(
                     controller: widget.controller,
@@ -148,18 +171,25 @@ class _AppTextFieldState extends State<AppTextField> {
                     maxLength: widget.maxLength,
                     maxLines: widget.maxLines,
                     keyboardType: widget.keyboardType,
+                    textInputAction: widget.textInputAction,
                     inputFormatters: widget.inputFormatters,
                     onChanged: _handleChanged,
-                    style: AppTypography.bodyRegular.copyWith(
-                      color: AppColors.textComponentPrimary,
-                    ),
+                    style:
+                        widget.textStyle ??
+                        AppTypography.bodyRegular.copyWith(
+                          color: AppColors.textComponentPrimary,
+                        ),
                     decoration: InputDecoration(
                       hintText: widget.hintText,
                       counterText: '',
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: AppSpacing.x4,
-                        vertical: widget.maxLines > 1 ? 14 : 12,
-                      ),
+                      contentPadding:
+                          widget.contentPadding ??
+                          EdgeInsets.symmetric(
+                            horizontal: AppSpacing.x4,
+                            vertical: widget.maxLines > 1 ? 14 : 12,
+                          ),
+                      suffixText: widget.suffixText,
+                      suffixStyle: widget.suffixStyle,
                     ),
                   ),
                 ),
@@ -186,9 +216,11 @@ class _AppTextFieldState extends State<AppTextField> {
                     label: '$_currentLength자 / 최대 ${widget.maxLength}자',
                     child: Text(
                       '$_currentLength/${widget.maxLength}',
-                      style: AppTypography.captionRegular.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
+                      style:
+                          widget.counterStyle ??
+                          AppTypography.captionRegular.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
                     ),
                   ),
               ],
