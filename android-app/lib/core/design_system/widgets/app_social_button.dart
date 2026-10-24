@@ -12,11 +12,15 @@ class AppSocialButton extends StatelessWidget {
   const AppSocialButton({
     required this.provider,
     required this.onPressed,
+    this.backgroundColor,
+    this.textStyle,
     super.key,
   });
 
   final AppSocialProvider provider;
   final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final TextStyle? textStyle;
 
   String get _label => switch (provider) {
     AppSocialProvider.apple => 'Apple로 계속하기',
@@ -31,6 +35,7 @@ class AppSocialButton extends StatelessWidget {
   };
 
   Color get _background => switch (provider) {
+    _ when backgroundColor != null => backgroundColor!,
     AppSocialProvider.apple => AppColors.socialApple,
     AppSocialProvider.kakao => AppColors.socialKakao,
     AppSocialProvider.google => AppColors.socialGoogle,
@@ -65,24 +70,35 @@ class AppSocialButton extends StatelessWidget {
               constraints: const BoxConstraints(minHeight: 50),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.x4,
+                  horizontal: 22,
                   vertical: AppSpacing.x3,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    ExcludeSemantics(
-                      child: SvgPicture.asset(_asset, width: 18, height: 18),
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: ExcludeSemantics(
+                          child: SvgPicture.asset(
+                            _asset,
+                            width: 18,
+                            height: 18,
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: AppSpacing.x2),
-                    Flexible(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.x8,
+                      ),
                       child: Text(
                         _label,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.titleMedium.copyWith(
-                          color: _foreground,
-                        ),
+                        textAlign: TextAlign.center,
+                        style: (textStyle ?? AppTypography.titleMedium)
+                            .copyWith(color: _foreground),
                       ),
                     ),
                   ],
