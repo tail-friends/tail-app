@@ -60,12 +60,17 @@ flutter:
 
   assets:
     - assets/icons/
+    - assets/images/
     - assets/licenses/GowunDodum-OFL.txt
+    - assets/licenses/Jua-OFL.txt
 
   fonts:
     - family: Gowun Dodum
       fonts:
         - asset: assets/fonts/GowunDodum-Regular.ttf
+    - family: Jua
+      fonts:
+        - asset: assets/fonts/Jua-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
