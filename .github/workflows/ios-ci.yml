@@ -1,0 +1,29 @@
+name: iOS CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - "ios-app/**"
+      - ".github/workflows/ios-ci.yml"
+  push:
+    branches: [develop, main]
+    paths:
+      - "ios-app/**"
+      - ".github/workflows/ios-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build iOS Simulator app
+        run: xcodebuild -project ios-app/TailFriends.xcodeproj -scheme TailFriends -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+      - name: Run unit and UI tests
+        run: xcodebuild -project ios-app/TailFriends.xcodeproj -scheme TailFriends -destination 'platform=iOS Simulator,name=iPhone 16' CODE_SIGNING_ALLOWED=NO test
