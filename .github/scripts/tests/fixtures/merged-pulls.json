@@ -1,0 +1,24 @@
+{
+  "pull_requests": [
+    {
+      "number": 33,
+      "title": "Android 기록 추가 UI",
+      "body": "Closes #31\n<!-- tail-status\nfigma_numbers: 04\nwork_type: UI\nplatforms: Android\ncompleted_scope: 기록 추가 기본 화면\ncompleted: true\napi_work_ids:\ndesign_version:\ndesign_review:\n-->",
+      "html_url": "https://github.com/tail-friends/tail-app/pull/33",
+      "merged_at": "2026-10-26T10:00:00Z",
+      "base": {
+        "ref": "develop"
+      }
+    },
+    {
+      "number": 34,
+      "title": "메타데이터 누락 예시",
+      "body": "Closes #32",
+      "html_url": "https://github.com/tail-friends/tail-app/pull/34",
+      "merged_at": "2026-10-26T11:00:00Z",
+      "base": {
+        "ref": "develop"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "catalog_status": "preparing",
+  "source": null,
+  "task_schema": {
+    "required_fields": [
+      "id",
+      "method",
+      "path",
+      "figma_numbers",
+      "integration.android",
+      "integration.ios"
+    ],
+    "integration_statuses": ["not_started", "partial", "complete"]
+  },
+  "tasks": []
+}
