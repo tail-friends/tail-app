@@ -6,9 +6,10 @@ import '../tokens/app_typography.dart';
 import 'app_glass_surface.dart';
 
 class AppSpeechBubble extends StatelessWidget {
-  const AppSpeechBubble({required this.message, super.key});
+  const AppSpeechBubble({required this.message, this.textStyle, super.key});
 
   final String message;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class AppSpeechBubble extends StatelessWidget {
         ],
         child: Text(
           message,
-          style: AppTypography.labelMedium.copyWith(
+          style: (textStyle ?? AppTypography.labelMedium).copyWith(
             color: AppColors.textComponentPrimary,
           ),
         ),
