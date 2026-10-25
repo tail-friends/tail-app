@@ -12,11 +12,13 @@ class AppBottomNavigation extends StatelessWidget {
   const AppBottomNavigation({
     required this.currentTab,
     required this.onTabSelected,
+    this.labelStyle,
     super.key,
   });
 
   final AppTab currentTab;
   final ValueChanged<AppTab> onTabSelected;
+  final TextStyle? labelStyle;
 
   static const _items = <AppTab, ({String label, String assetName})>{
     AppTab.habitat: (label: '사육장', assetName: 'home'),
@@ -51,6 +53,7 @@ class AppBottomNavigation extends StatelessWidget {
                   assetName: _items[tab]!.assetName,
                   selected: currentTab == tab,
                   onTap: () => onTabSelected(tab),
+                  labelStyle: labelStyle,
                 ),
               ),
             ],
@@ -68,6 +71,7 @@ class _NavigationItem extends StatelessWidget {
     required this.assetName,
     required this.selected,
     required this.onTap,
+    required this.labelStyle,
   });
 
   final AppTab tab;
@@ -75,6 +79,7 @@ class _NavigationItem extends StatelessWidget {
   final String assetName;
   final bool selected;
   final VoidCallback onTap;
+  final TextStyle? labelStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -127,13 +132,14 @@ class _NavigationItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.fade,
                       softWrap: false,
-                      style: AppTypography.captionRegular.copyWith(
-                        fontSize: 10,
-                        height: 13 / 10,
-                        color: selected
-                            ? AppColors.textComponentPrimary
-                            : AppColors.textTertiary,
-                      ),
+                      style: (labelStyle ?? AppTypography.captionRegular)
+                          .copyWith(
+                            fontSize: 10,
+                            height: 13 / 10,
+                            color: selected
+                                ? AppColors.textComponentPrimary
+                                : AppColors.textTertiary,
+                          ),
                     ),
                   ],
                 ),

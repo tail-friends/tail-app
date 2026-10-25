@@ -14,6 +14,9 @@ class AppRecordRow extends StatelessWidget {
     required this.trailing,
     this.icon,
     this.onTap,
+    this.titleStyle,
+    this.metaStyle,
+    this.trailingStyle,
     super.key,
   });
 
@@ -22,6 +25,9 @@ class AppRecordRow extends StatelessWidget {
   final String trailing;
   final Widget? icon;
   final VoidCallback? onTap;
+  final TextStyle? titleStyle;
+  final TextStyle? metaStyle;
+  final TextStyle? trailingStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +64,7 @@ class AppRecordRow extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.bodyRegular.copyWith(
+                    style: (titleStyle ?? AppTypography.bodyRegular).copyWith(
                       color: AppColors.textComponentPrimary,
                     ),
                   ),
@@ -67,7 +73,7 @@ class AppRecordRow extends StatelessWidget {
                     meta,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.captionRegular.copyWith(
+                    style: (metaStyle ?? AppTypography.captionRegular).copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -77,7 +83,7 @@ class AppRecordRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.x3),
             Text(
               trailing,
-              style: AppTypography.labelMedium.copyWith(
+              style: (trailingStyle ?? AppTypography.labelMedium).copyWith(
                 color: AppColors.textTertiary,
               ),
             ),

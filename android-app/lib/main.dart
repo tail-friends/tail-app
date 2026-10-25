@@ -5,6 +5,7 @@ import 'core/design_system/design_system.dart';
 import 'core/design_system/font_license.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/design_system_preview/design_system_preview_screen.dart';
+import 'features/home/presentation/home_screen.dart';
 import 'features/pets/presentation/pet_registration_screen.dart';
 
 void main() {
@@ -27,6 +28,7 @@ class TailFriendsApp extends StatelessWidget {
           '/design-system-preview': (_) => const DesignSystemPreviewScreen(),
         if (kDebugMode)
           '/pet-registration-preview': (_) => const PetRegistrationScreen(),
+        if (kDebugMode) '/home-preview': (_) => const HomeScreen.preview(),
       },
     );
   }
