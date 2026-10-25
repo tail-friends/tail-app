@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tail_friends/core/design_system/design_system.dart';
 import 'package:tail_friends/features/pets/presentation/pet_registration_screen.dart';
+import 'package:tail_friends/features/pets/presentation/pet_species_picker_sheet.dart';
 
 void _setViewSize(WidgetTester tester, Size size) {
   tester.view.physicalSize = size;
@@ -31,11 +32,34 @@ Widget _host(
   );
 }
 
+Widget _pickerHost({double textScale = 1, double bottomInset = 0}) {
+  return MaterialApp(
+    theme: AppTheme.mist,
+    home: Builder(
+      builder: (context) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: TextScaler.linear(textScale),
+          viewInsets: EdgeInsets.only(bottom: bottomInset),
+        ),
+        child: const Scaffold(body: PetSpeciesPickerSheet()),
+      ),
+    ),
+  );
+}
+
 Finder _textField(String key) {
   return find.descendant(
     of: find.byKey(ValueKey(key)),
     matching: find.byType(TextFormField),
   );
+}
+
+Future<void> _openSpeciesPicker(WidgetTester tester) async {
+  final speciesField = find.byKey(const ValueKey('pet_species_field'));
+  await tester.tap(
+    find.descendant(of: speciesField, matching: find.byType(InkWell)),
+  );
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -159,16 +183,138 @@ void main() {
     expect(find.text('일'), findsOneWidget);
   });
 
-  testWidgets('종 선택과 저장은 준비 중 안내를 표시하고 필수 입력을 안내한다', (tester) async {
+  testWidgets('종 필드에서 Figma 종 선택 시트를 열고 닫을 수 있다', (tester) async {
     _setViewSize(tester, const Size(390, 974));
     await tester.pumpWidget(_host(const PetRegistrationScreen()));
 
-    final speciesField = find.byKey(const ValueKey('pet_species_field'));
-    await tester.tap(
-      find.descendant(of: speciesField, matching: find.byType(InkWell)),
+    await _openSpeciesPicker(tester);
+
+    expect(find.text('종 선택'), findsOneWidget);
+    expect(find.text('목록에 없으면 직접 입력할 수 있어요'), findsOneWidget);
+    expect(find.text('종 이름 검색'), findsOneWidget);
+    expect(find.text('도마뱀'), findsOneWidget);
+    expect(find.text('뱀'), findsOneWidget);
+    expect(find.text('거북'), findsOneWidget);
+    expect(find.text('기타'), findsOneWidget);
+    expect(find.text('레오파드 게코'), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('pet_species_picker_close'))),
+      const Size(44, 44),
     );
-    await tester.pump();
-    expect(find.text('종 선택 기능은 준비 중입니다.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('pet_species_picker_close')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('pet_species_picker_sheet')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('종 선택 휠의 값을 확인하면 등록 화면에 반영된다', (tester) async {
+    _setViewSize(tester, const Size(390, 974));
+    await tester.pumpWidget(_host(const PetRegistrationScreen()));
+
+    await _openSpeciesPicker(tester);
+    await tester.drag(
+      find.byKey(const ValueKey('pet_species_picker_wheel')),
+      const Offset(0, -50),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pet_species_confirm_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('비어디드 드래곤'), findsOneWidget);
+  });
+
+  testWidgets('종 검색과 직접 입력을 지원한다', (tester) async {
+    _setViewSize(tester, const Size(390, 974));
+    await tester.pumpWidget(_host(const PetRegistrationScreen()));
+
+    await _openSpeciesPicker(tester);
+    final searchField = find.byKey(const ValueKey('pet_species_search_field'));
+    await tester.enterText(searchField, '크레스티드');
+    await tester.pumpAndSettle();
+    expect(find.text('크레스티드 게코'), findsOneWidget);
+
+    await tester.enterText(searchField, '이구아나');
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('pet_species_option_이구아나')),
+      findsOneWidget,
+    );
+    expect(find.text('직접 입력'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('pet_species_confirm_button')));
+    await tester.pumpAndSettle();
+    expect(find.text('이구아나'), findsOneWidget);
+  });
+
+  testWidgets('카테고리를 변경하고 목록 미확정 상태를 안내한다', (tester) async {
+    _setViewSize(tester, const Size(390, 974));
+    await tester.pumpWidget(_host(const PetRegistrationScreen()));
+
+    await _openSpeciesPicker(tester);
+    final snakeCategory = find.byKey(
+      const ValueKey('pet_species_category_snake'),
+    );
+    await tester.tap(snakeCategory);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(snakeCategory).flagsCollection.isSelected,
+      ui.Tristate.isTrue,
+    );
+    expect(find.textContaining('공식 종 목록은 준비 중이에요'), findsOneWidget);
+  });
+
+  testWidgets('시트를 취소하면 기존 종과 다른 폼 입력값을 유지한다', (tester) async {
+    _setViewSize(tester, const Size(390, 974));
+    await tester.pumpWidget(_host(const PetRegistrationScreen()));
+
+    await tester.enterText(_textField('pet_name_field'), '꾸미');
+    await tester.enterText(_textField('pet_memo_field'), '입력 중인 메모');
+    await _openSpeciesPicker(tester);
+    await tester.enterText(
+      find.byKey(const ValueKey('pet_species_search_field')),
+      '이구아나',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pet_species_confirm_button')));
+    await tester.pumpAndSettle();
+
+    await _openSpeciesPicker(tester);
+    await tester.enterText(
+      find.byKey(const ValueKey('pet_species_search_field')),
+      '카멜레온',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pet_species_picker_close')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('이구아나'), findsOneWidget);
+    expect(
+      tester
+          .widget<TextFormField>(_textField('pet_name_field'))
+          .controller!
+          .text,
+      '꾸미',
+    );
+    expect(
+      tester
+          .widget<TextFormField>(_textField('pet_memo_field'))
+          .controller!
+          .text,
+      '입력 중인 메모',
+    );
+  });
+
+  testWidgets('종을 선택하면 필수 입력 오류에서 제외된다', (tester) async {
+    _setViewSize(tester, const Size(390, 974));
+    await tester.pumpWidget(_host(const PetRegistrationScreen()));
+
+    await _openSpeciesPicker(tester);
+    await tester.tap(find.byKey(const ValueKey('pet_species_confirm_button')));
+    await tester.pumpAndSettle();
 
     final saveButton = find.byKey(
       const ValueKey('pet_registration_save_button'),
@@ -178,9 +324,27 @@ void main() {
     await tester.pump();
 
     expect(find.text('이름을 입력해 주세요.'), findsOneWidget);
-    expect(find.text('종을 선택해 주세요.'), findsOneWidget);
+    expect(find.text('종을 선택해 주세요.'), findsNothing);
     expect(find.text('급여 주기를 입력해 주세요.'), findsOneWidget);
     expect(find.text('저장 기능은 준비 중입니다.'), findsOneWidget);
+  });
+
+  testWidgets('작은 화면과 키보드 및 200% 텍스트에서 종 선택 시트가 overflow되지 않는다', (
+    tester,
+  ) async {
+    _setViewSize(tester, const Size(320, 640));
+    await tester.pumpWidget(_pickerHost(textScale: 2, bottomInset: 240));
+    await tester.enterText(
+      find.byKey(const ValueKey('pet_species_search_field')),
+      '이구아나',
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('pet_species_confirm_button')),
+    );
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('저장을 시도해도 입력 중인 내용을 삭제하지 않는다', (tester) async {
