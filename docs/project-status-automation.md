@@ -101,6 +101,12 @@ GitHub의 `schedule`, `workflow_dispatch`, `repository_dispatch`, `pull_request_
 5. Pages 배포 URL과 Discord DRY_RUN 또는 테스트 채널 결과를 확인한 뒤에만
    `PROJECT_STATUS_ENABLED=true`를 설정한다.
 
+`workflow_dispatch`는 최초 Pages 배포를 검증할 수 있도록 Variable 없이 실행된다.
+반면 `schedule`, Figma의 `repository_dispatch`, develop Merge의
+`pull_request_target` 자동 실행은 `PROJECT_STATUS_ENABLED=true`일 때만 수행된다.
+따라서 초기 설정 중에는 예약 배포, Figma 이벤트 배포, 진행률 Discord 알림이
+임의로 활성화되지 않는다.
+
 `main`에 직접 Push하거나 PR #33에서 `main`을 수정하지 않는다. `develop` → `main`
 전체 릴리스가 아직 준비되지 않았다면 자동화 활성화를 보류하고 기존 Discord 알림을
 계속 사용한다. 일부 파일만 임의로 복사하면 워크플로와 스크립트 버전이 어긋날 수 있으므로
