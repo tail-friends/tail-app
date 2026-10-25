@@ -22,6 +22,10 @@ API 진행률의 분모는 `api-tasks.json`에 명세 근거와 함께 등록된
 목록이 비어 있는 현재는 `0%`가 아니라 `집계 준비 중`으로 표시한다. Backend 구현과
 Android/iOS 연동 상태는 `integration.android`, `integration.ios`로 분리한다.
 
+초기 Android 완료 이력은 실제 develop Merge로 확인된 PR #20(01 로그인),
+PR #24(02 홈), PR #22(03 개체 등록), PR #29(03-4 종 선택)이다. PR #29의 Merge
+커밋은 `5a894d7`이며 Issue #28과 Merge 시각을 03-4 레지스트리에 기록한다.
+
 ## PR 메타데이터
 
 PR 템플릿의 `tail-status` 주석 블록을 사용한다.
@@ -76,6 +80,31 @@ Figma의 `FILE_VERSION_UPDATE`는 사용자가 파일 히스토리에 이름 붙
 변경됐다고 처리하지 않는다.
 
 ## GitHub Pages 관리자 설정
+
+### 기본 브랜치 `main` 반영 절차
+
+GitHub의 `schedule`, `workflow_dispatch`, `repository_dispatch`, `pull_request_target`는
+워크플로 파일이 기본 브랜치에 있어야 안정적으로 등록된다. 이 저장소의 기본 브랜치는
+`main`이므로 PR #33을 `develop`에 Merge하는 것만으로 자동화를 활성화할 수 없다.
+
+안전한 활성화 순서는 다음과 같다.
+
+1. PR #33을 검토해 `develop`에 Merge한다. 이 단계에서는
+   `PROJECT_STATUS_ENABLED`를 설정하지 않아 기존 Discord Merge 알림을 유지한다.
+2. 팀의 정식 릴리스 절차로 `develop` → `main` PR을 생성한다. PR에서
+   `.github/workflows/project-status.yml`, 검증 CI, 신뢰된 스크립트와 정적 현황표가
+   함께 반영되는지 확인하고, 다른 미승인 변경이 섞였다면 Merge하지 않는다.
+3. 승인받은 릴리스 PR을 Merge한 뒤 Actions 목록에 `개발 현황 갱신`과
+   `Project Status CI`가 등록됐는지 확인한다.
+4. Pages Source를 GitHub Actions로 설정하고 첫 `workflow_dispatch`를 실행한다.
+   Figma 기준 버전을 승인할 때만 `accept_figma_baseline`을 선택한다.
+5. Pages 배포 URL과 Discord DRY_RUN 또는 테스트 채널 결과를 확인한 뒤에만
+   `PROJECT_STATUS_ENABLED=true`를 설정한다.
+
+`main`에 직접 Push하거나 PR #33에서 `main`을 수정하지 않는다. `develop` → `main`
+전체 릴리스가 아직 준비되지 않았다면 자동화 활성화를 보류하고 기존 Discord 알림을
+계속 사용한다. 일부 파일만 임의로 복사하면 워크플로와 스크립트 버전이 어긋날 수 있으므로
+별도 승인된 hotfix 절차가 없는 한 사용하지 않는다.
 
 1. Repository Settings → Pages → Build and deployment의 Source를 `GitHub Actions`로 설정한다.
 2. `github-pages` Environment에 필요한 승인 규칙이 있다면 팀 정책에 맞게 설정한다.

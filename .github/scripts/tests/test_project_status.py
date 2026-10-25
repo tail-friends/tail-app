@@ -61,17 +61,19 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual("complete", by_number["03"]["ui"]["android"]["status"])
         self.assertEqual("partial", by_number["03-0"]["ui"]["android"]["status"])
         self.assertEqual("partial", by_number["03-5"]["ui"]["android"]["status"])
-        self.assertEqual(
-            "needs_confirmation", by_number["03-4"]["ui"]["android"]["status"]
-        )
+        species_picker = by_number["03-4"]["ui"]["android"]
+        self.assertEqual("complete", species_picker["status"])
+        self.assertEqual([28], species_picker["related_issues"])
+        self.assertEqual([29], species_picker["related_prs"])
+        self.assertEqual("2026-10-25T15:18:04Z", species_picker["merge_date"])
 
     def test_initial_progress_counts_only_confirmed_completion(self):
         progress = project_status.calculate_progress(
             load_registry(), {"catalog_status": "preparing", "tasks": []}
         )
-        self.assertEqual(3, progress["ui"]["android"]["complete"])
+        self.assertEqual(4, progress["ui"]["android"]["complete"])
         self.assertEqual(89, progress["ui"]["android"]["total"])
-        self.assertEqual(3.4, progress["ui"]["android"]["percent"])
+        self.assertEqual(4.5, progress["ui"]["android"]["percent"])
         self.assertEqual(0, progress["ui"]["ios"]["complete"])
         self.assertEqual("preparing", progress["api"]["android"]["state"])
         self.assertIsNone(progress["api"]["android"]["percent"])
@@ -106,6 +108,28 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual("not_started", registration["api"]["ios"])
         login = next(item for item in designs if item["figma_number"] == "01")
         self.assertEqual("not_registered", login["api"]["android"])
+
+    def test_api_progress_is_independent_from_ui_progress(self):
+        designs = load_registry()
+        catalog = {
+            "catalog_status": "ready",
+            "tasks": [
+                {
+                    "id": "API-PET-001",
+                    "figma_numbers": ["03"],
+                    "integration": {
+                        "android": {"status": "complete"},
+                        "ios": {"status": "not_started"},
+                    },
+                }
+            ],
+        }
+        progress = project_status.calculate_progress(designs, catalog)
+        self.assertEqual(4, progress["ui"]["android"]["complete"])
+        self.assertEqual(1, progress["api"]["android"]["complete"])
+        self.assertEqual(100.0, progress["api"]["android"]["percent"])
+        self.assertEqual(0, progress["api"]["ios"]["complete"])
+        self.assertEqual(0.0, progress["api"]["ios"]["percent"])
 
 
 class PullRequestMetadataTests(unittest.TestCase):
@@ -192,6 +216,66 @@ class FigmaTests(unittest.TestCase):
         self.assertEqual("complete", target["ui"]["android"]["status"])
         self.assertEqual(original_api, target["api"])
         self.assertEqual("version-1", state["baseline_version"]["id"])
+        progress = project_status.calculate_progress(
+            designs, {"catalog_status": "preparing", "tasks": []}
+        )
+        self.assertEqual(3, progress["ui"]["android"]["complete"])
+        self.assertEqual(3.4, progress["ui"]["android"]["percent"])
+
+    def test_review_completion_restores_progress_and_promotes_node_baseline(self):
+        designs = load_registry()
+        target = next(item for item in designs if item["figma_number"] == "01")
+        node_id = target["node_id"]
+        previous = {
+            "baseline_version": {"id": "version-1"},
+            "current_version": {"id": "version-1"},
+            "node_hashes": {item["node_id"]: "same" for item in designs},
+            "current_node_hashes": {item["node_id"]: "same" for item in designs},
+        }
+        changed_hashes = {item["node_id"]: "same" for item in designs}
+        changed_hashes[node_id] = "changed"
+        with mock.patch.object(
+            project_status,
+            "_select_figma_version",
+            return_value={"id": "version-2", "label": "MVP v2", "created_at": "now"},
+        ), mock.patch.object(
+            project_status, "_fetch_figma_hashes", return_value=changed_hashes
+        ):
+            figma, _ = project_status.sync_figma(
+                designs, previous, "token", None, False
+            )
+
+        review_body = """Closes #51
+<!-- tail-status
+figma_numbers: 01
+work_type: UI
+platforms: Android
+completed_scope: Figma MVP v2 변경 검토 완료
+completed: true
+api_work_ids:
+design_version: version-2
+design_review: no_changes_needed
+-->
+"""
+        review_items, _, applied = project_status.apply_merged_prs(
+            designs,
+            {"tasks": []},
+            [merged_pr(50, review_body)],
+            "2026-10-26T00:00:00+09:00",
+        )
+        project_status.promote_reviewed_figma_nodes(designs, figma)
+        progress = project_status.calculate_progress(
+            designs, {"catalog_status": "preparing", "tasks": []}
+        )
+
+        self.assertEqual([], review_items)
+        self.assertIn(50, applied)
+        self.assertFalse(target["review_required"])
+        self.assertEqual([20, 50], target["ui"]["android"]["related_prs"])
+        self.assertEqual("changed", figma["node_hashes"][node_id])
+        self.assertEqual("version-2", figma["baseline_version"]["id"])
+        self.assertEqual(4, progress["ui"]["android"]["complete"])
+        self.assertEqual(4.5, progress["ui"]["android"]["percent"])
 
     def test_next_sync_reports_only_nodes_changed_since_last_checked_version(self):
         designs = load_registry()

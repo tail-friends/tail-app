@@ -47,7 +47,7 @@ function matchesStatus(value, reviewRequired, filter) {
   if (filter === "all") return true;
   if (filter === "complete") return value === "complete" && !reviewRequired;
   if (filter === "review") return reviewRequired || value === "needs_confirmation";
-  return value !== "complete";
+  return value !== "complete" || reviewRequired;
 }
 
 function links(values, kind) {
@@ -152,7 +152,13 @@ async function start() {
   );
 }
 
-start().catch((error) => {
-  document.querySelector("#generated-at").textContent = error.message;
-  document.querySelector("#generated-at").style.color = "#a34f42";
-});
+if (typeof document !== "undefined") {
+  start().catch((error) => {
+    document.querySelector("#generated-at").textContent = error.message;
+    document.querySelector("#generated-at").style.color = "#a34f42";
+  });
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { matchesStatus };
+}
