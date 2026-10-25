@@ -1,0 +1,15 @@
+name = "tail-friends-figma-webhook"
+main = "worker.js"
+compatibility_date = "2026-10-26"
+
+[vars]
+FIGMA_FILE_KEY = "FpS23pMGjJtXRj0AYVMSDK"
+GITHUB_REPOSITORY = "tail-friends/tail-app"
+
+[[kv_namespaces]]
+binding = "EVENTS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# 다음 값은 파일에 기록하지 않고 `wrangler secret put`으로 설정합니다.
+# FIGMA_WEBHOOK_PASSCODE
+# GITHUB_DISPATCH_TOKEN
