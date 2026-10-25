@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "repository": "tail-friends/tail-app",
+  "tracked_base_branch": "develop",
+  "tracking_started_at": "2026-10-26T00:00:00+09:00",
+  "figma": {
+    "file_key": "FpS23pMGjJtXRj0AYVMSDK",
+    "page_id": "2:2",
+    "page_name": "App · MVP",
+    "tracked_design_count": 89
+  },
+  "status_page_url": null
+}

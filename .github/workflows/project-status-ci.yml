@@ -1,0 +1,69 @@
+name: Project Status CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - ".github/pull_request_template.md"
+      - ".github/scripts/discord-notify.sh"
+      - ".github/scripts/project_status.py"
+      - ".github/scripts/tests/**"
+      - ".github/workflows/discord-notify.yml"
+      - ".github/workflows/project-status*.yml"
+      - "docs/project-status-automation.md"
+      - "integrations/figma-webhook/**"
+      - "project-status/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Run Python unit tests
+        run: python -m unittest discover -s .github/scripts/tests -p "test_*.py" -v
+
+      - name: Validate Python syntax
+        run: python -m py_compile .github/scripts/project_status.py
+
+      - name: Validate JSON files
+        shell: bash
+        run: >-
+          python -c "import json, pathlib;
+          files = list(pathlib.Path('project-status').rglob('*.json')) +
+          list(pathlib.Path('.github/scripts/tests/fixtures').rglob('*.json'));
+          [json.loads(path.read_text(encoding='utf-8-sig')) for path in files];
+          print(f'{len(files)} JSON files OK')"
+
+      - name: Validate JavaScript syntax and status rules
+        run: |
+          node --check project-status/site/app.js
+          node --check integrations/figma-webhook/worker.js
+          node .github/scripts/tests/test_status_rules.js
+
+      - name: Validate Bash syntax
+        run: bash -n .github/scripts/discord-notify.sh
+
+      - name: Check whitespace errors
+        run: git diff --check origin/${{ github.base_ref }}...HEAD

@@ -1,0 +1,211 @@
+name: 개발 현황 갱신
+
+# schedule, workflow_dispatch, repository_dispatch, pull_request_target 등록을 위해
+# 이 파일은 승인된 develop → main 릴리스 PR로 기본 브랜치에도 반영되어야 합니다.
+
+on:
+  pull_request_target:
+    branches: [develop]
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      sync_figma:
+        description: Figma 이름 붙인 버전을 조회합니다.
+        required: false
+        type: boolean
+        default: false
+      accept_figma_baseline:
+        description: 첫 Figma 동기화 결과를 기준 버전으로 승인합니다.
+        required: false
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [figma-version-update]
+  schedule:
+    - cron: "17 20 * * *"
+
+concurrency:
+  group: project-status-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+  pages: read
+
+jobs:
+  build:
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (vars.PROJECT_STATUS_ENABLED == 'true'
+          && (github.event_name != 'pull_request_target'
+              || github.event.pull_request.merged == true))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      notification-kind: ${{ steps.result.outputs.notification-kind }}
+    steps:
+      - name: Checkout trusted develop branch
+        uses: actions/checkout@v7
+        with:
+          ref: refs/heads/develop
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Download previous status when available
+        id: previous
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          mkdir -p build/project-status-state
+          run_id=$(gh run list \
+            --repo "$REPOSITORY" \
+            --workflow project-status.yml \
+            --status success \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId' 2>/dev/null || true)
+          if [[ -n "$run_id" ]] && gh run download "$run_id" \
+            --repo "$REPOSITORY" \
+            --name project-status-state \
+            --dir build/project-status-state 2>/dev/null; then
+            echo "path=build/project-status-state/status.json" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          page_url=$(gh api "repos/$REPOSITORY/pages" --jq '.html_url' 2>/dev/null || true)
+          if [[ -n "$page_url" ]]; then
+            status_url="${page_url%/}/data/status.json"
+            if curl --fail --silent --show-error --location \
+              "$status_url" \
+              --output build/project-status-state/previous-status.json; then
+              echo "path=build/project-status-state/previous-status.json" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Build dashboard data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          PREVIOUS_STATUS: ${{ steps.previous.outputs.path }}
+          DISPATCH_VERSION_ID: ${{ github.event.client_payload.version_id }}
+          INPUT_SYNC_FIGMA: ${{ inputs.sync_figma }}
+          INPUT_ACCEPT_BASELINE: ${{ inputs.accept_figma_baseline }}
+        shell: bash
+        run: |
+          args=(
+            build
+            --repository "$GITHUB_REPOSITORY"
+            --output build/project-status-site
+            --event-name "$EVENT_NAME"
+            --event-path "$GITHUB_EVENT_PATH"
+          )
+          if [[ -n "$PREVIOUS_STATUS" ]]; then
+            args+=(--previous-status "$PREVIOUS_STATUS")
+          fi
+
+          sync_requested=false
+          if [[ "$EVENT_NAME" == "repository_dispatch" || "$EVENT_NAME" == "schedule" || "$INPUT_SYNC_FIGMA" == "true" ]]; then
+            sync_requested=true
+          fi
+          if [[ "$sync_requested" == "true" && -n "$FIGMA_ACCESS_TOKEN" ]]; then
+            args+=(--sync-figma)
+            if [[ -n "$DISPATCH_VERSION_ID" ]]; then
+              args+=(--figma-version-id "$DISPATCH_VERSION_ID")
+            fi
+          elif [[ "$sync_requested" == "true" ]]; then
+            echo "::warning::FIGMA_ACCESS_TOKEN이 없어 Figma 동기화를 건너뜁니다."
+          fi
+          if [[ "$INPUT_ACCEPT_BASELINE" == "true" ]]; then
+            args+=(--accept-figma-baseline)
+          fi
+
+          python .github/scripts/project_status.py "${args[@]}"
+
+      - name: Read notification result
+        id: result
+        shell: bash
+        run: |
+          kind=$(jq -r '.kind' build/project-status-site/data/notification.json)
+          echo "notification-kind=$kind" >> "$GITHUB_OUTPUT"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/project-status-site
+
+      - name: Upload notification data
+        uses: actions/upload-artifact@v6
+        with:
+          name: project-status-notification-${{ github.run_id }}
+          path: |
+            build/project-status-site/data/status.json
+            build/project-status-site/data/notification.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Preserve status for the next run
+        uses: actions/upload-artifact@v6
+        with:
+          name: project-status-state
+          path: build/project-status-site/data/status.json
+          if-no-files-found: error
+          retention-days: 90
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page-url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  notify:
+    needs: [build, deploy]
+    if: needs.build.outputs.notification-kind != 'none'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout trusted notification script
+        uses: actions/checkout@v7
+        with:
+          ref: refs/heads/develop
+          persist-credentials: false
+
+      - name: Download notification data
+        uses: actions/download-artifact@v6
+        with:
+          name: project-status-notification-${{ github.run_id }}
+          path: build/project-status-notification
+
+      - name: Send project status notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS_PAGE_URL: ${{ needs.deploy.outputs.page-url }}
+          STATUS_NOTIFICATION_PATH: build/project-status-notification/notification.json
+          STATUS_DATA_PATH: build/project-status-notification/status.json
+        shell: bash
+        run: .github/scripts/discord-notify.sh project-status

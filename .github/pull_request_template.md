@@ -1,3 +1,29 @@
+## 개발 현황 메타데이터
+
+<!--
+자동 집계 대상 PR은 아래 블록을 삭제하지 말고 값을 작성해 주세요.
+Figma 번호는 project-status/data/designs.json, API 작업 ID는
+project-status/data/api-tasks.json에 등록된 값만 사용할 수 있습니다.
+-->
+
+<!-- tail-status
+figma_numbers:
+work_type: OTHER
+platforms:
+completed_scope:
+completed: false
+api_work_ids:
+design_version:
+design_review:
+-->
+
+- Figma 번호(여러 개 가능):
+- 작업 종류: UI / API / 기타
+- 플랫폼: Android / iOS
+- 완료 범위:
+- 완료 여부:
+- API 작업 ID(해당 시):
+
 ## 작업 개요
 
 <!-- 무엇을 왜 변경했는지 작성해 주세요. -->
