@@ -96,6 +96,7 @@ class _PetSpeciesPickerSheetState extends State<PetSpeciesPickerSheet> {
   String _query = '';
   String? _draftSelection;
   int _selectedIndex = 0;
+  bool _acceptWheelChanges = false;
 
   List<String> get _filteredOptions {
     final query = _query.trim();
@@ -130,10 +131,12 @@ class _PetSpeciesPickerSheetState extends State<PetSpeciesPickerSheet> {
       }
     } else {
       _selectedIndex = lizardOptions.indexOf('레오파드 게코');
-      _draftSelection = lizardOptions[_selectedIndex];
     }
     _searchController = TextEditingController(text: _query);
     _wheelController = FixedExtentScrollController(initialItem: _selectedIndex);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _acceptWheelChanges = true;
+    });
   }
 
   @override
@@ -145,9 +148,11 @@ class _PetSpeciesPickerSheetState extends State<PetSpeciesPickerSheet> {
 
   void _replaceWheelController() {
     final previousController = _wheelController;
+    _acceptWheelChanges = false;
     _wheelController = FixedExtentScrollController(initialItem: _selectedIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       previousController.dispose();
+      if (mounted) _acceptWheelChanges = true;
     });
   }
 
@@ -157,9 +162,8 @@ class _PetSpeciesPickerSheetState extends State<PetSpeciesPickerSheet> {
       _category = category;
       _query = '';
       _searchController.clear();
-      final options = _exampleSpecies[category]!;
       _selectedIndex = 0;
-      _draftSelection = options.isEmpty ? null : options.first;
+      _draftSelection = null;
       _replaceWheelController();
     });
   }
@@ -169,9 +173,23 @@ class _PetSpeciesPickerSheetState extends State<PetSpeciesPickerSheet> {
       _query = value;
       _selectedIndex = 0;
       final options = _filteredOptions;
-      _draftSelection = options.isEmpty ? null : options.first;
+      _draftSelection = value.trim().isEmpty || options.isEmpty
+          ? null
+          : options.first;
       _replaceWheelController();
     });
+  }
+
+  void _selectWheelOption(List<String> options, int index) {
+    setState(() {
+      _selectedIndex = index;
+      _draftSelection = options[index];
+    });
+    _wheelController.animateToItem(
+      index,
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+    );
   }
 
   void _confirmSelection() {
@@ -468,6 +486,7 @@ class _PetSpeciesPickerSheetState extends State<PetSpeciesPickerSheet> {
               perspective: 0.001,
               physics: const FixedExtentScrollPhysics(),
               onSelectedItemChanged: (index) {
+                if (!_acceptWheelChanges) return;
                 setState(() {
                   _selectedIndex = index;
                   _draftSelection = options[index];
@@ -490,33 +509,39 @@ class _PetSpeciesPickerSheetState extends State<PetSpeciesPickerSheet> {
                     },
                     child: Semantics(
                       button: true,
-                      selected: index == _selectedIndex,
+                      selected: options[index] == _draftSelection,
                       label: options[index],
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                options[index],
-                                key: ValueKey(
-                                  'pet_species_option_${options[index]}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _selectWheelOption(options, index),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    options[index],
+                                    key: ValueKey(
+                                      'pet_species_option_${options[index]}',
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    style: _bodyStyle.copyWith(
+                                      color: index == _selectedIndex
+                                          ? _primaryTextColor
+                                          : _secondaryTextColor,
+                                    ),
+                                  ),
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                                style: _bodyStyle.copyWith(
-                                  color: index == _selectedIndex
-                                      ? _primaryTextColor
-                                      : _secondaryTextColor,
-                                ),
-                              ),
+                                if (_isDirectEntry &&
+                                    options[index] == _draftSelection) ...[
+                                  const SizedBox(width: 6),
+                                  Text('직접 입력', style: _captionStyle),
+                                ],
+                              ],
                             ),
-                            if (_isDirectEntry &&
-                                options[index] == _draftSelection) ...[
-                              const SizedBox(width: 6),
-                              Text('직접 입력', style: _captionStyle),
-                            ],
-                          ],
+                          ),
                         ),
                       ),
                     ),

@@ -201,6 +201,11 @@ void main() {
       tester.getSize(find.byKey(const ValueKey('pet_species_picker_close'))),
       const Size(44, 44),
     );
+    final confirmTapTarget = find.descendant(
+      of: find.byKey(const ValueKey('pet_species_confirm_button')),
+      matching: find.byType(InkWell),
+    );
+    expect(tester.widget<InkWell>(confirmTapTarget).onTap, isNull);
 
     await tester.tap(find.byKey(const ValueKey('pet_species_picker_close')));
     await tester.pumpAndSettle();
@@ -313,6 +318,8 @@ void main() {
     await tester.pumpWidget(_host(const PetRegistrationScreen()));
 
     await _openSpeciesPicker(tester);
+    await tester.tap(find.byKey(const ValueKey('pet_species_option_레오파드 게코')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pet_species_confirm_button')));
     await tester.pumpAndSettle();
 
