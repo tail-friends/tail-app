@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
+import 'pet_species_picker_sheet.dart';
 
 enum PetGender { male, female, unspecified }
 
@@ -75,6 +76,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
 
   PetGender _gender = PetGender.unspecified;
   DateTime? _hatchingDate;
+  String? _species;
   String? _nameError;
   String? _speciesError;
   String? _feedingCycleError;
@@ -117,10 +119,22 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
     setState(() => _hatchingDate = DateUtils.dateOnly(selected));
   }
 
+  Future<void> _pickSpecies() async {
+    final selected = await showPetSpeciesPicker(
+      context: context,
+      initialValue: _species,
+    );
+    if (!mounted || selected == null) return;
+    setState(() {
+      _species = selected;
+      _speciesError = null;
+    });
+  }
+
   void _handleSave() {
     setState(() {
       _nameError = _nameController.text.trim().isEmpty ? '이름을 입력해 주세요.' : null;
-      _speciesError = '종을 선택해 주세요.';
+      _speciesError = _species == null ? '종을 선택해 주세요.' : null;
       _feedingCycleError = _feedingCycleController.text.isEmpty
           ? '급여 주기를 입력해 주세요.'
           : null;
@@ -217,11 +231,11 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
                               _LabeledSelectionField(
                                 key: const ValueKey('pet_species_field'),
                                 label: '종',
-                                value: null,
+                                value: _species,
                                 hintText: '종을 선택해 주세요',
                                 isRequired: true,
                                 errorText: _speciesError,
-                                onTap: () => _showMessage('종 선택 기능은 준비 중입니다.'),
+                                onTap: _pickSpecies,
                               ),
                               const SizedBox(height: 16),
                               AppTextField(
