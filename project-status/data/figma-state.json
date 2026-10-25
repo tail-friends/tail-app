@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "baseline_version": null,
+  "current_version": null,
+  "node_hashes": {},
+  "last_checked_at": null,
+  "sync_status": "not_configured",
+  "changed_designs": [],
+  "message": "Figma API 토큰으로 첫 수동 동기화를 실행하고 기준 버전을 승인해야 합니다."
+}

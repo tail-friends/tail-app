@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Tail Friends 개발 현황</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">TAIL FRIENDS · PROJECT STATUS</p>
+        <h1>디자인·API 개발 현황</h1>
+        <p id="generated-at" class="muted">현황 데이터를 불러오는 중입니다.</p>
+      </div>
+      <a class="download" href="./tail-friends-status.xlsx" download>
+        Excel(.xlsx) 다운로드
+      </a>
+    </header>
+
+    <main>
+      <section aria-labelledby="progress-heading">
+        <h2 id="progress-heading">진행률</h2>
+        <div id="progress-cards" class="progress-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="status-heading">
+        <div class="panel-heading">
+          <div>
+            <h2 id="status-heading">번호별 현황</h2>
+            <p class="muted">완료 상태는 develop Merge와 유효한 PR 메타데이터를 기준으로 합니다.</p>
+          </div>
+          <div class="filters" aria-label="현황 필터">
+            <label>
+              구분
+              <select id="kind-filter">
+                <option value="ui">UI</option>
+                <option value="api">API</option>
+              </select>
+            </label>
+            <label>
+              플랫폼
+              <select id="platform-filter">
+                <option value="android">Android</option>
+                <option value="ios">iOS</option>
+              </select>
+            </label>
+            <label>
+              상태
+              <select id="status-filter">
+                <option value="all">전체</option>
+                <option value="complete">완료</option>
+                <option value="incomplete">미완료</option>
+                <option value="review">재검토 필요</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div id="status-message" class="notice" hidden></div>
+        <div class="table-wrap">
+          <table>
+            <thead id="status-head"></thead>
+            <tbody id="status-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="split-grid">
+        <article class="panel" aria-labelledby="review-heading">
+          <h2 id="review-heading">확인 필요</h2>
+          <div id="review-items" class="timeline"></div>
+        </article>
+        <article class="panel" aria-labelledby="history-heading">
+          <h2 id="history-heading">최근 Merge 및 변경</h2>
+          <div id="history" class="timeline"></div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <p>API 명세가 등록되기 전에는 API 진행률을 퍼센트로 계산하지 않습니다.</p>
+    </footer>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

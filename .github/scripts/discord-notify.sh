@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tail Friends 앱 저장소의 GitHub 이벤트를 Discord 웹훅으로 알린다.
 #
-# 사용법: discord-notify.sh <pr-opened | review-requested | pr-merged | review>
+# 사용법: discord-notify.sh <pr-opened | review-requested | pr-merged | review | project-status>
 #
 # 공통 환경 변수
 #   DISCORD_WEBHOOK_URL  Discord 채널 웹훅 주소 (Actions Secret)
@@ -19,7 +19,7 @@
 #   REVIEW_STATE, REVIEW_AUTHOR, REVIEW_BODY, REVIEW_URL
 set -euo pipefail
 
-kind=${1:?'알림 종류가 필요합니다: pr-opened | review-requested | pr-merged | review'}
+kind=${1:?'알림 종류가 필요합니다: pr-opened | review-requested | pr-merged | review | project-status'}
 
 webhook_url=$(printf '%s' "${DISCORD_WEBHOOK_URL:-}" | tr -d '[:space:]')
 if [[ "${DRY_RUN:-}" != "1" ]]; then
@@ -270,11 +270,103 @@ review() {
       '[$author, $reviewer, $base]')")"
 }
 
+project_status() {
+  local notification status page_url event_kind title url description color fields
+  notification=${STATUS_NOTIFICATION_JSON:-}
+  status=${STATUS_DATA_JSON:-}
+  page_url=${STATUS_PAGE_URL:-}
+
+  if [[ -n "${STATUS_NOTIFICATION_PATH:-}" && -f "$STATUS_NOTIFICATION_PATH" ]]; then
+    notification=$(<"$STATUS_NOTIFICATION_PATH")
+  fi
+  if [[ -n "${STATUS_DATA_PATH:-}" && -f "$STATUS_DATA_PATH" ]]; then
+    status=$(<"$STATUS_DATA_PATH")
+  fi
+
+  if ! printf '%s' "$notification" | jq -e 'type == "object"' >/dev/null 2>&1 || \
+    ! printf '%s' "$status" | jq -e 'type == "object"' >/dev/null 2>&1; then
+    echo "::error::개발 현황 알림 JSON 형식이 올바르지 않습니다."
+    exit 1
+  fi
+  if [[ "$page_url" != https://* ]]; then
+    echo "::error::실제 GitHub Pages 배포 URL을 확인할 수 없습니다."
+    exit 1
+  fi
+
+  event_kind=$(printf '%s' "$notification" | jq -r '.kind')
+  case "$event_kind" in
+    merge)
+      title=$(printf '%s' "$notification" | jq -r '"#\(.pr_number) \(.title)"')
+      url=$(printf '%s' "$notification" | jq -r '.url')
+      description=$(printf '%s' "$notification" | jq -r '
+        "완료 범위: " + (.scope // "확인 필요") +
+        if (.figma_numbers | length) > 0 then "\nFigma: " + (.figma_numbers | join(", ")) else "" end +
+        if (.api_work_ids | length) > 0 then "\nAPI: " + (.api_work_ids | join(", ")) else "" end
+      ')
+      color=10181046
+      ;;
+    figma-change)
+      title=$(printf '%s' "$notification" | jq -r '
+        "Figma 버전 변경 · " + (.version.label // .version.id)
+      ')
+      url=$(printf '%s' "$notification" | jq -r '.figma_url')
+      description=$(printf '%s' "$notification" | jq -r '
+        "재검토 필요:\n" + (.details | join("\n"))
+      ')
+      color=15844367
+      ;;
+    metadata-review)
+      title=$(printf '%s' "$notification" | jq -r '"#\(.pr_number) 현황 메타데이터 확인 필요"')
+      url=$(printf '%s' "$notification" | jq -r '.url')
+      description=$(printf '%s' "$notification" | jq -r '.reasons | join("\n")')
+      color=15548997
+      ;;
+    none)
+      echo "개발 현황 변경이 없어 Discord 알림을 건너뜁니다."
+      return
+      ;;
+    *)
+      echo "::error::알 수 없는 개발 현황 이벤트: $event_kind"
+      exit 1
+      ;;
+  esac
+
+  progress_field() {
+    local kind=$1 platform=$2 label=$3 value
+    value=$(printf '%s' "$status" | jq -r --arg kind "$kind" --arg platform "$platform" '
+      .progress[$kind][$platform] |
+      if .state == "ready" then
+        "\(.percent)% 완료 · \(.remaining_percent)% 남음"
+      else
+        "집계 준비 중"
+      end
+    ')
+    field "$label" "$value"
+  }
+
+  fields=$(jq -n \
+    --argjson android_ui "$(progress_field ui android 'Android UI')" \
+    --argjson ios_ui "$(progress_field ui ios 'iOS UI')" \
+    --argjson android_api "$(progress_field api android 'Android API')" \
+    --argjson ios_api "$(progress_field api ios 'iOS API')" \
+    --argjson dashboard "$(field '전체 현황표' "[GitHub Pages에서 열기]($page_url)")" \
+    '[$android_ui, $ios_ui, $android_api, $ios_api, $dashboard]')
+
+  send_payload "$(message \
+    "📊 Tail Friends 개발 현황이 갱신됐어요." \
+    "$title" \
+    "$url" \
+    "$description" \
+    "$color" \
+    "$fields")"
+}
+
 case "$kind" in
   pr-opened) pr_opened ;;
   review-requested) review_requested ;;
   pr-merged) pr_merged ;;
   review) review ;;
+  project-status) project_status ;;
   *)
     echo "::error::알 수 없는 알림 종류: $kind"
     exit 1

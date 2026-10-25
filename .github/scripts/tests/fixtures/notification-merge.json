@@ -1,0 +1,9 @@
+{
+  "kind": "merge",
+  "pr_number": 33,
+  "title": "Android 기록 추가 UI",
+  "url": "https://github.com/tail-friends/tail-app/pull/33",
+  "scope": "기록 추가 기본 화면",
+  "figma_numbers": ["04"],
+  "api_work_ids": []
+}

@@ -1,0 +1,3263 @@
+{
+  "schema_version": 1,
+  "figma_file_key": "FpS23pMGjJtXRj0AYVMSDK",
+  "figma_page_id": "2:2",
+  "tracked_design_count": 89,
+  "excluded_sections": [
+    "✅ 이번 개발 — 공통 · 오류 화면"
+  ],
+  "designs": [
+    {
+      "figma_number": "01",
+      "name": "로그인",
+      "full_name": "01 로그인",
+      "node_id": "15:320",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=15-320",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "complete",
+          "related_issues": [
+            19
+          ],
+          "related_prs": [
+            20
+          ],
+          "merge_date": "2026-10-24T13:41:57Z",
+          "implemented_version": null,
+          "notes": [
+            "로그인 UI Merge 확인"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [
+            30
+          ],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": [
+            "iOS 로그인 Issue는 열려 있으며 Merge 완료로 집계하지 않음"
+          ]
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "02",
+      "name": "홈",
+      "full_name": "02 홈",
+      "node_id": "15:410",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=15-410",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "complete",
+          "related_issues": [
+            23
+          ],
+          "related_prs": [
+            24
+          ],
+          "merge_date": "2026-10-25T13:40:56Z",
+          "implemented_version": null,
+          "notes": [
+            "홈 UI Merge 확인"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03",
+      "name": "개체 등록",
+      "full_name": "03 개체 등록",
+      "node_id": "31:2984",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=31-2984",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "complete",
+          "related_issues": [
+            21
+          ],
+          "related_prs": [
+            22
+          ],
+          "merge_date": "2026-10-24T15:04:51Z",
+          "implemented_version": null,
+          "notes": [
+            "개체 등록 기본 화면 UI Merge 확인"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "04",
+      "name": "기록 추가",
+      "full_name": "04 기록 추가",
+      "node_id": "17:305",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=17-305",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05",
+      "name": "개체 상세",
+      "full_name": "05 개체 상세",
+      "node_id": "32:2898",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=32-2898",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "06",
+      "name": "개체 목록 · 휠 보기",
+      "full_name": "06 개체 목록 · 휠 보기",
+      "node_id": "18:495",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=18-495",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "07",
+      "name": "케어 다이얼",
+      "full_name": "07 케어 다이얼",
+      "node_id": "18:819",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=18-819",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "06-0",
+      "name": "개체 목록",
+      "full_name": "06-0 개체 목록",
+      "node_id": "33:3415",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-3415",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "04-4",
+      "name": "기록 추가 · 안 먹음",
+      "full_name": "04-4 기록 추가 · 안 먹음",
+      "node_id": "226:3112",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=226-3112",
+      "section": "✅ 이번 개발 — 메인 화면",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "01-1",
+      "name": "개인정보 동의",
+      "full_name": "01-1 개인정보 동의",
+      "node_id": "33:4032",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-4032",
+      "section": "✅ 이번 개발 — A. 로그인 · 온보딩 · 알림",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "02-0",
+      "name": "홈 · 첫 방문",
+      "full_name": "02-0 홈 · 첫 방문",
+      "node_id": "21:970",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=21-970",
+      "section": "✅ 이번 개발 — A. 로그인 · 온보딩 · 알림",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [
+            25
+          ],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": [
+            "Issue #25는 Merge 완료로 집계하지 않음"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "02-1",
+      "name": "알림",
+      "full_name": "02-1 알림",
+      "node_id": "21:1093",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=21-1093",
+      "section": "✅ 이번 개발 — A. 로그인 · 온보딩 · 알림",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "01-2",
+      "name": "이용약관",
+      "full_name": "01-2 이용약관",
+      "node_id": "21:1174",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=21-1174",
+      "section": "✅ 이번 개발 — A. 로그인 · 온보딩 · 알림",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-1",
+      "name": "사진 추가",
+      "full_name": "03-1 사진 추가",
+      "node_id": "22:1026",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=22-1026",
+      "section": "✅ 이번 개발 — B. 개체 등록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-2",
+      "name": "캐릭터 생성 중",
+      "full_name": "03-2 캐릭터 생성 중",
+      "node_id": "22:1123",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=22-1123",
+      "section": "✅ 이번 개발 — B. 개체 등록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-3",
+      "name": "캐릭터 만들기 · AI 결과",
+      "full_name": "03-3 캐릭터 만들기 · AI 결과",
+      "node_id": "33:4099",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-4099",
+      "section": "✅ 이번 개발 — B. 개체 등록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-4",
+      "name": "종 선택",
+      "full_name": "03-4 종 선택",
+      "node_id": "22:1326",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=22-1326",
+      "section": "✅ 이번 개발 — B. 개체 등록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "needs_confirmation",
+          "related_issues": [
+            28
+          ],
+          "related_prs": [
+            29
+          ],
+          "merge_date": "2026-10-25T15:18:04Z",
+          "implemented_version": null,
+          "notes": [
+            "새 현황 메타데이터 도입 전 Merge되어 자동 완료 처리하지 않음"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-5",
+      "name": "날짜 선택",
+      "full_name": "03-5 날짜 선택",
+      "node_id": "22:1428",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=22-1428",
+      "section": "✅ 이번 개발 — B. 개체 등록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "partial",
+          "related_issues": [
+            21
+          ],
+          "related_prs": [
+            22
+          ],
+          "merge_date": "2026-10-24T15:04:51Z",
+          "implemented_version": null,
+          "notes": [
+            "날짜 선택 동작은 있으나 Figma 03-5 상태 전체 구현 완료로 집계하지 않음"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-6",
+      "name": "등록 완료",
+      "full_name": "03-6 등록 완료",
+      "node_id": "22:1547",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=22-1547",
+      "section": "✅ 이번 개발 — B. 개체 등록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "04-1",
+      "name": "기록 추가 · 탈피",
+      "full_name": "04-1 기록 추가 · 탈피",
+      "node_id": "24:1288",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=24-1288",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "04-2",
+      "name": "기록 추가 · 체중",
+      "full_name": "04-2 기록 추가 · 체중",
+      "node_id": "24:1564",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=24-1564",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "04-3",
+      "name": "저장 완료",
+      "full_name": "04-3 저장 완료",
+      "node_id": "24:1844",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=24-1844",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "08",
+      "name": "기록 전체",
+      "full_name": "08 기록 전체",
+      "node_id": "24:2023",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=24-2023",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [
+            26
+          ],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": [
+            "Issue #26은 Merge 완료로 집계하지 않음"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "08-1",
+      "name": "기록 수정",
+      "full_name": "08-1 기록 수정",
+      "node_id": "33:4293",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-4293",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "07-1",
+      "name": "케어 · 주간",
+      "full_name": "07-1 케어 · 주간",
+      "node_id": "25:1934",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=25-1934",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "07-2",
+      "name": "캘린더",
+      "full_name": "07-2 캘린더",
+      "node_id": "25:2140",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=25-2140",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "08-3",
+      "name": "친구 선택",
+      "full_name": "08-3 친구 선택",
+      "node_id": "29:2515",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=29-2515",
+      "section": "✅ 이번 개발 — C. 기록 흐름",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-1",
+      "name": "개체 수정",
+      "full_name": "05-1 개체 수정",
+      "node_id": "31:3164",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=31-3164",
+      "section": "✅ 이번 개발 — D. 개체 관리",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-2",
+      "name": "개체 삭제 확인",
+      "full_name": "05-2 개체 삭제 확인",
+      "node_id": "31:3308",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=31-3308",
+      "section": "✅ 이번 개발 — D. 개체 관리",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-3",
+      "name": "체중 추이",
+      "full_name": "05-3 체중 추이",
+      "node_id": "27:2143",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=27-2143",
+      "section": "✅ 이번 개발 — D. 개체 관리",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-4",
+      "name": "탈피 기록",
+      "full_name": "05-4 탈피 기록",
+      "node_id": "27:2216",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=27-2216",
+      "section": "✅ 이번 개발 — D. 개체 관리",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-5",
+      "name": "급여 주기 설정",
+      "full_name": "05-5 급여 주기 설정",
+      "node_id": "27:2301",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=27-2301",
+      "section": "✅ 이번 개발 — D. 개체 관리",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09",
+      "name": "마이",
+      "full_name": "09 마이",
+      "node_id": "28:2215",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2215",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-1",
+      "name": "알림 설정",
+      "full_name": "09-1 알림 설정",
+      "node_id": "28:2336",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2336",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-2",
+      "name": "사육장 테마",
+      "full_name": "09-2 사육장 테마",
+      "node_id": "28:2405",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2405",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-3",
+      "name": "계정 관리",
+      "full_name": "09-3 계정 관리",
+      "node_id": "28:2504",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2504",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-4",
+      "name": "로그아웃 확인",
+      "full_name": "09-4 로그아웃 확인",
+      "node_id": "28:2546",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2546",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-5",
+      "name": "회원 탈퇴",
+      "full_name": "09-5 회원 탈퇴",
+      "node_id": "28:2583",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2583",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-6",
+      "name": "탈퇴 최종 확인",
+      "full_name": "09-6 탈퇴 최종 확인",
+      "node_id": "28:2696",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2696",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-7",
+      "name": "공지사항",
+      "full_name": "09-7 공지사항",
+      "node_id": "28:2762",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2762",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-8",
+      "name": "문의하기",
+      "full_name": "09-8 문의하기",
+      "node_id": "28:2811",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2811",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-9",
+      "name": "개인정보 처리방침",
+      "full_name": "09-9 개인정보 처리방침",
+      "node_id": "28:2861",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=28-2861",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-10",
+      "name": "프로필 편집",
+      "full_name": "09-10 프로필 편집",
+      "node_id": "29:3135",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=29-3135",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-12",
+      "name": "알림 시간",
+      "full_name": "09-12 알림 시간",
+      "node_id": "29:3318",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=29-3318",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-13",
+      "name": "공지 상세",
+      "full_name": "09-13 공지 상세",
+      "node_id": "29:3446",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=29-3446",
+      "section": "✅ 이번 개발 — E. 마이 · 설정 · 계정",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-a",
+      "name": "상세 · 급여 폼 펼침",
+      "full_name": "05-a 상세 · 급여 폼 펼침",
+      "node_id": "32:3180",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=32-3180",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-b",
+      "name": "상세 · 기록 삭제",
+      "full_name": "05-b 상세 · 기록 삭제",
+      "node_id": "32:3500",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=32-3500",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-c",
+      "name": "상세 · 기록 없음",
+      "full_name": "05-c 상세 · 기록 없음",
+      "node_id": "32:3781",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=32-3781",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-d",
+      "name": "상세 · 건강 경고",
+      "full_name": "05-d 상세 · 건강 경고",
+      "node_id": "32:3924",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=32-3924",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "06-0a",
+      "name": "개체 목록 · 빈 상태",
+      "full_name": "06-0a 개체 목록 · 빈 상태",
+      "node_id": "33:3741",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-3741",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "06-0b",
+      "name": "개체 목록 · 로딩",
+      "full_name": "06-0b 개체 목록 · 로딩",
+      "node_id": "33:3843",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-3843",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "06-0c",
+      "name": "개체 목록 · 오류",
+      "full_name": "06-0c 개체 목록 · 오류",
+      "node_id": "33:3922",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-3922",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-0",
+      "name": "등록 · 입력 오류",
+      "full_name": "03-0 등록 · 입력 오류",
+      "node_id": "31:3074",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=31-3074",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "partial",
+          "related_issues": [
+            21
+          ],
+          "related_prs": [
+            22
+          ],
+          "merge_date": "2026-10-24T15:04:51Z",
+          "implemented_version": null,
+          "notes": [
+            "필수 입력 안내 일부 구현; Figma 상태 화면 전체 일치 여부는 별도 확인 필요"
+          ]
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "03-7",
+      "name": "캐릭터 · 파충류 못 찾음",
+      "full_name": "03-7 캐릭터 · 파충류 못 찾음",
+      "node_id": "33:4212",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=33-4212",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-a2",
+      "name": "상세 · 급여 폼 · 안 먹음",
+      "full_name": "05-a2 상세 · 급여 폼 · 안 먹음",
+      "node_id": "236:2787",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=236-2787",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "11",
+      "name": "건강 관리",
+      "full_name": "11 건강 관리",
+      "node_id": "34:5921",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-5921",
+      "section": "✅ 이번 개발 — F. 명세서 MVP 보완 (상태 화면)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "07-3",
+      "name": "급여 기록 · 다이얼",
+      "full_name": "07-3 급여 기록 · 다이얼",
+      "node_id": "85:6008",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=85-6008",
+      "section": "✅ 이번 개발 — H. 다이얼 입력 · 보완",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "07-4",
+      "name": "체중 기록 · 다이얼",
+      "full_name": "07-4 체중 기록 · 다이얼",
+      "node_id": "85:6103",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=85-6103",
+      "section": "✅ 이번 개발 — H. 다이얼 입력 · 보완",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "07-5",
+      "name": "케어 다이얼 · 급여 완료",
+      "full_name": "07-5 케어 다이얼 · 급여 완료",
+      "node_id": "85:6214",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=85-6214",
+      "section": "✅ 이번 개발 — H. 다이얼 입력 · 보완",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-1a",
+      "name": "알림 설정 · 권한 꺼짐",
+      "full_name": "09-1a 알림 설정 · 권한 꺼짐",
+      "node_id": "88:6757",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=88-6757",
+      "section": "✅ 이번 개발 — H. 다이얼 입력 · 보완",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "07-3a",
+      "name": "급여 기록 · 안 먹음",
+      "full_name": "07-3a 급여 기록 · 안 먹음",
+      "node_id": "236:2999",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=236-2999",
+      "section": "✅ 이번 개발 — H. 다이얼 입력 · 보완",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "10",
+      "name": "오늘 할 일",
+      "full_name": "10 오늘 할 일",
+      "node_id": "34:3760",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-3760",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "10-1",
+      "name": "오늘 할 일 · 다 챙김",
+      "full_name": "10-1 오늘 할 일 · 다 챙김",
+      "node_id": "34:4154",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-4154",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "10-2",
+      "name": "일괄 기록 · 선택",
+      "full_name": "10-2 일괄 기록 · 선택",
+      "node_id": "34:4615",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-4615",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "10-3",
+      "name": "일괄 기록 · 확인",
+      "full_name": "10-3 일괄 기록 · 확인",
+      "node_id": "34:4766",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-4766",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-e",
+      "name": "기록 · 청소·배변",
+      "full_name": "05-e 기록 · 청소·배변",
+      "node_id": "34:4980",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-4980",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-f",
+      "name": "기록 · 온습도",
+      "full_name": "05-f 기록 · 온습도",
+      "node_id": "34:5263",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-5263",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "11-1",
+      "name": "사진 건강 체크",
+      "full_name": "11-1 사진 건강 체크",
+      "node_id": "34:6128",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-6128",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "12",
+      "name": "사육장 꾸미기",
+      "full_name": "12 사육장 꾸미기",
+      "node_id": "35:5382",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-5382",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "12-1",
+      "name": "사진으로 테마 만들기",
+      "full_name": "12-1 사진으로 테마 만들기",
+      "node_id": "35:5517",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-5517",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "12-2",
+      "name": "펫과 놀기",
+      "full_name": "12-2 펫과 놀기",
+      "node_id": "35:5574",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-5574",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "14",
+      "name": "일정 · 재고",
+      "full_name": "14 일정 · 재고",
+      "node_id": "35:5914",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-5914",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-14",
+      "name": "경고 기준 · 단위",
+      "full_name": "09-14 경고 기준 · 단위",
+      "node_id": "35:6071",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-6071",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-15",
+      "name": "데이터 · 사진",
+      "full_name": "09-15 데이터 · 사진",
+      "node_id": "35:6139",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-6139",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "10-4",
+      "name": "일괄 기록 · 청소",
+      "full_name": "10-4 일괄 기록 · 청소",
+      "node_id": "85:6498",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=85-6498",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "11-0",
+      "name": "건강 관리 · 사진 체크",
+      "full_name": "11-0 건강 관리 · 사진 체크",
+      "node_id": "85:6708",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=85-6708",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "11-4",
+      "name": "건강 관리 · 온습도",
+      "full_name": "11-4 건강 관리 · 온습도",
+      "node_id": "88:6285",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=88-6285",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "12-4",
+      "name": "아이템 구매",
+      "full_name": "12-4 아이템 구매",
+      "node_id": "88:6360",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=88-6360",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "14-1",
+      "name": "일정 추가",
+      "full_name": "14-1 일정 추가",
+      "node_id": "88:6529",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=88-6529",
+      "section": "⏸ 2차 업데이트 (명세서 우선순위: 확장)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "05-g",
+      "name": "쿨링(휴면) 모드",
+      "full_name": "05-g 쿨링(휴면) 모드",
+      "node_id": "34:5592",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-5592",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "11-2",
+      "name": "진료 기록",
+      "full_name": "11-2 진료 기록",
+      "node_id": "34:6240",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=34-6240",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "13",
+      "name": "성장 앨범",
+      "full_name": "13 성장 앨범",
+      "node_id": "35:5667",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-5667",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "15",
+      "name": "사육 가이드 · 레오파드 게코",
+      "full_name": "15 사육 가이드 · 레오파드 게코",
+      "node_id": "35:5985",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-5985",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "16",
+      "name": "번식 기록",
+      "full_name": "16 번식 기록",
+      "node_id": "35:6197",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-6197",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "12-3",
+      "name": "합사 보기",
+      "full_name": "12-3 합사 보기",
+      "node_id": "35:6249",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-6249",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "17",
+      "name": "위젯 · 잠금 화면",
+      "full_name": "17 위젯 · 잠금 화면",
+      "node_id": "35:6428",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=35-6428",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "11-3",
+      "name": "건강 관리 · 진료",
+      "full_name": "11-3 건강 관리 · 진료",
+      "node_id": "85:6774",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=85-6774",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-16",
+      "name": "CSV 내보내기",
+      "full_name": "09-16 CSV 내보내기",
+      "node_id": "88:6603",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=88-6603",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    },
+    {
+      "figma_number": "09-17",
+      "name": "수의사용 PDF 리포트",
+      "full_name": "09-17 수의사용 PDF 리포트",
+      "node_id": "88:6708",
+      "figma_url": "https://www.figma.com/design/FpS23pMGjJtXRj0AYVMSDK/?node-id=88-6708",
+      "section": "⏸ 3차 업데이트 (명세서 우선순위: 이후)",
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "ui": {
+        "android": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        },
+        "ios": {
+          "status": "not_started",
+          "related_issues": [],
+          "related_prs": [],
+          "merge_date": null,
+          "implemented_version": null,
+          "notes": []
+        }
+      },
+      "api": {
+        "android": "not_registered",
+        "ios": "not_registered"
+      },
+      "current_design_version": null,
+      "review_required": false
+    }
+  ]
+}
