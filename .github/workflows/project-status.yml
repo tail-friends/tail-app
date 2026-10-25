@@ -1,5 +1,8 @@
 name: 개발 현황 갱신
 
+# schedule, workflow_dispatch, repository_dispatch, pull_request_target 등록을 위해
+# 이 파일은 승인된 develop → main 릴리스 PR로 기본 브랜치에도 반영되어야 합니다.
+
 on:
   pull_request_target:
     branches: [develop]

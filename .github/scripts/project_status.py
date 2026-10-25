@@ -322,7 +322,10 @@ def calculate_progress(
     total = len(designs)
     for platform in PLATFORM_NAMES:
         complete = sum(
-            1 for item in designs if item["ui"][platform]["status"] == "complete"
+            1
+            for item in designs
+            if item["ui"][platform]["status"] == "complete"
+            and not item["review_required"]
         )
         partial = sum(
             1 for item in designs if item["ui"][platform]["status"] == "partial"
@@ -890,7 +893,7 @@ def build(args: argparse.Namespace) -> None:
         for platform in PLATFORM_NAMES:
             state = design["ui"][platform]
             for number in state.get("related_prs", []):
-                if number in {20, 22, 24}:
+                if number in {20, 22, 24, 29}:
                     seeded_history.append(
                         {
                             "kind": "merge",

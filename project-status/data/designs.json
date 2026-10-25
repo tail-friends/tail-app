@@ -622,7 +622,7 @@
       ],
       "ui": {
         "android": {
-          "status": "needs_confirmation",
+          "status": "complete",
           "related_issues": [
             28
           ],
@@ -632,7 +632,7 @@
           "merge_date": "2026-10-25T15:18:04Z",
           "implemented_version": null,
           "notes": [
-            "새 현황 메타데이터 도입 전 Merge되어 자동 완료 처리하지 않음"
+            "PR #29에서 Figma 03-4 종 선택 Android UI 구현 및 검증 완료"
           ]
         },
         "ios": {
