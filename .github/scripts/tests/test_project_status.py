@@ -133,14 +133,15 @@ class RegistryTests(unittest.TestCase):
 
 
 class PullRequestMetadataTests(unittest.TestCase):
-    def test_repository_template_contains_a_parseable_safe_default(self):
+    def test_repository_template_delegates_metadata_to_automation(self):
         template = (ROOT / ".github" / "pull_request_template.md").read_text(
             encoding="utf-8"
         )
         metadata, errors = project_status.parse_pr_metadata(template)
-        self.assertEqual([], errors)
-        self.assertEqual("OTHER", metadata["work_type"])
-        self.assertFalse(metadata["completed"])
+        self.assertIsNone(metadata)
+        self.assertEqual(["tail-status 메타데이터 블록이 없습니다."], errors)
+        self.assertIn("완료 여부: 확인 필요", template)
+        self.assertIn("완료 검증 커밋:", template)
 
     def test_valid_metadata_is_parsed_without_title_inference(self):
         metadata, errors = project_status.parse_pr_metadata(VALID_UI_BODY)

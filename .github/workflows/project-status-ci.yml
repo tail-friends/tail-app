@@ -7,10 +7,12 @@ on:
       - ".github/pull_request_template.md"
       - ".github/scripts/discord-notify.sh"
       - ".github/scripts/project_status.py"
+      - ".github/scripts/pr_metadata.py"
       - ".github/scripts/tests/**"
       - ".github/workflows/discord-notify.yml"
       - ".github/workflows/project-status*.yml"
       - "docs/project-status-automation.md"
+      - "AGENTS.md"
       - "integrations/figma-webhook/**"
       - "project-status/**"
 
@@ -45,7 +47,7 @@ jobs:
         run: python -m unittest discover -s .github/scripts/tests -p "test_*.py" -v
 
       - name: Validate Python syntax
-        run: python -m py_compile .github/scripts/project_status.py
+        run: python -m py_compile .github/scripts/project_status.py .github/scripts/pr_metadata.py
 
       - name: Validate JSON files
         shell: bash

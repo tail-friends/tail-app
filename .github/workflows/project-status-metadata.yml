@@ -1,0 +1,65 @@
+name: PR 개발 현황 메타데이터
+
+# 기본 브랜치 main에 승인된 배포가 필요하다. PR head의 코드는 실행하지 않는다.
+on:
+  pull_request_target:
+    branches: [develop, main]
+    types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 확인할 PR 번호
+        required: true
+        type: string
+      apply:
+        description: PR 본문 갱신 (기본값은 읽기 전용)
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: pr-metadata-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: false
+
+jobs:
+  metadata:
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || contains(fromJSON('["develop", "main"]'), github.event.pull_request.base.ref)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+    steps:
+      - name: Checkout trusted default branch
+        uses: actions/checkout@v7
+        with:
+          ref: refs/heads/${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts
+            project-status/data
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Generate or preserve tracking metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+          APPLY: ${{ github.event_name == 'pull_request_target' || inputs.apply }}
+        shell: bash
+        run: |
+          args=(--repository "$GITHUB_REPOSITORY" --pr-number "$PR_NUMBER")
+          if [[ "$APPLY" == "true" ]]; then
+            args+=(--apply)
+          else
+            args+=(--dry-run)
+          fi
+          python .github/scripts/pr_metadata.py "${args[@]}"

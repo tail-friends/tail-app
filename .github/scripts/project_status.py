@@ -73,10 +73,22 @@ def parse_list(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def active_metadata_blocks(body: str | None) -> list[re.Match[str]]:
+    # Keep original offsets so automation can replace only the actual block.
+    scanned = re.sub(
+        r"```.*?```|~~~.*?~~~", lambda match: " " * len(match.group()),
+        body or "", flags=re.DOTALL,
+    )
+    return list(METADATA_PATTERN.finditer(scanned))
+
+
 def parse_pr_metadata(body: str | None) -> tuple[dict[str, Any] | None, list[str]]:
-    match = METADATA_PATTERN.search(body or "")
-    if not match:
+    matches = active_metadata_blocks(body)
+    if not matches:
         return None, ["tail-status 메타데이터 블록이 없습니다."]
+    if len(matches) != 1:
+        return None, ["tail-status 메타데이터 블록이 중복되어 있습니다."]
+    match = matches[0]
 
     raw: dict[str, str] = {}
     errors: list[str] = []
@@ -92,6 +104,8 @@ def parse_pr_metadata(body: str | None) -> tuple[dict[str, Any] | None, list[str
         if key not in ALLOWED_METADATA_KEYS:
             errors.append(f"지원하지 않는 메타데이터 키입니다: {key}")
             continue
+        if key in raw:
+            errors.append(f"메타데이터 키가 중복되어 있습니다: {key}")
         raw[key] = value.strip()
 
     work_type = raw.get("work_type", "").upper()

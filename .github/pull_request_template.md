@@ -1,28 +1,17 @@
 ## 개발 현황 메타데이터
 
-<!--
-자동 집계 대상 PR은 아래 블록을 삭제하지 말고 값을 작성해 주세요.
-Figma 번호는 project-status/data/designs.json, API 작업 ID는
-project-status/data/api-tasks.json에 등록된 값만 사용할 수 있습니다.
--->
+<!-- 개발 현황 tail-status 코드는 Actions가 생성합니다. 확인 가능한 사실만 아래에 적어 주세요.
+Figma 번호·API 작업 ID는 등록된 값만 사용합니다. 모르면 비워 두세요.
+자동 completed:true는 완료 범위·완료 근거·현재 HEAD 전체 SHA가 모두 명시된 경우에만 허용합니다.
+UI/API 혼합 PR은 집계하려는 한 종류와 범위를 지정하거나 PR을 분리해 주세요. -->
 
-<!-- tail-status
-figma_numbers:
-work_type: OTHER
-platforms:
-completed_scope:
-completed: false
-api_work_ids:
-design_version:
-design_review:
--->
-
-- Figma 번호(여러 개 가능):
-- 작업 종류: UI / API / 기타
-- 플랫폼: Android / iOS
+- Figma 번호:
+- 작업 종류:
 - 완료 범위:
-- 완료 여부:
-- API 작업 ID(해당 시):
+- 완료 여부: 확인 필요
+- 완료 근거:
+- 완료 검증 커밋:
+- API 작업 ID:
 
 ## 작업 개요
 

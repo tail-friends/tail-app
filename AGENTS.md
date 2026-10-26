@@ -32,6 +32,25 @@ Android 작업자는 iOS 프로젝트를 생성하거나 수정하지 않는다.
 - 건강 경고는 수의학적 진단이 아닌 참고용 기록 경고로 표현한다.
 - 캐릭터 데이터, 행동 로직, 렌더러는 교체 가능하도록 분리한다.
 
+## PR 개발 현황 메타데이터
+
+- PR 생성·수정 시 `.github/scripts/pr_metadata.py`의 공통 규칙을 사용한다.
+  `tail-status` 코드를 개발자에게 직접 작성하도록 요구하지 않는다.
+- 연결된 Issue, Figma 링크/번호와 실제 변경 파일을 확인한다. 번호와 API ID는
+  `project-status/data/designs.json`, `api-tasks.json`에 등록된 값만 사용한다.
+- Codex 등 에이전트가 PR을 만들 때도 제목·본문·base/head·변경 파일·연결 Issue를
+  포함한 fixture JSON을 로컬에 만들고 아래 명령으로 본문을 생성한 뒤 결과의
+  `body`를 사용한다. GitHub 자동 갱신을 기다릴 때도 같은 정책을 따른다.
+  `python .github/scripts/pr_metadata.py --fixture <파일> --output <결과>`
+- 정확한 기존 수동 블록은 보존한다. UI/API 혼합, 대상 번호 불명, 검증 미완료,
+  Draft는 완료로 추정하지 않는다. CI 성공·Merge·Issue의 목표 문구만으로
+  `completed: true`를 쓰지 않는다.
+- 자동 완료 표시는 PR의 `완료 여부: 완료`, 실제 `완료 범위`, `완료 근거`,
+  검증한 현재 HEAD 전체 SHA를 적은 `완료 검증 커밋`이 모두 확인될 때만 허용한다.
+  사용자 확인이 없는 검증·디자인 버전 승인은 만들지 않는다.
+- PR 생성·Push·Merge 권한은 별도 사용자 지시를 따른다. 자동 메타데이터 생성이
+  이러한 작업이나 기존 PR의 내용 수정 권한을 부여하지 않는다.
+
 ## 완료 보고 형식
 
 1. 작업 요약
