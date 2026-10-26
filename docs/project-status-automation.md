@@ -129,6 +129,23 @@ PR head checkout, 패키지 설치, PR 코드 실행, 캐시, PR artifact 실행
 사용자 승인 후 자동화 파일만 main에 반영하는 별도 PR에서 새 워크플로, `pr_metadata.py`,
 공통 파서 `project_status.py` 및 두 레지스트리의 호환성을 함께 확인한다. 앱 기능 전체를
 main으로 Merge할 필요는 없다. 승인 없이 main이나 Actions 설정을 변경하지 않는다.
+워크플로만 먼저 반영되거나 기존 공통 파서가 남아 있어도 실패를 반복하지 않도록,
+checkout 후 토큰을 메타데이터 스크립트에 전달하기 전에 자체 준비 검사를 수행한다.
+별도 검사 스크립트가 없어도 동작하는 워크플로 내장 검사이며 다음을 확인한다.
+
+- `pr_metadata.py`, `project_status.py`, 두 레지스트리 파일 존재 여부
+- 모듈 import와 공통 파서 호환성
+- JSON 로드 및 외부 API를 호출하지 않는 빈 입력 분류 검사
+
+파일 누락·호환성 미충족·손상된 JSON이면 `ready=false`로 기록하고 본문 갱신 단계를
+건너뛴다. 작업은 배포 대기 상태로 성공 종료하며 Actions 요약에 필요한 파일의 동시
+배포를 안내한다. PR 본문은 수정하지 않고 Discord 등 외부 알림도 보내지 않는다.
+파일이 정상적으로 갖춰지면 다음 이벤트 또는 수동 실행에서 자동으로 진행한다.
+PR head나 develop의 스크립트로 대체 실행하지 않는다.
+
+기본 브랜치에 워크플로 자체가 없으면 `pull_request_target` 자동 실행도 아직 등록되지
+않은 상태다. 준비 검사는 워크플로가 배포되었지만 의존 파일이 준비되지 않은 공백을
+보호하는 장치이며 main 배포를 대신하지 않는다.
 저장소/조직의 Actions 이벤트 정책이 `pull_request_target`을 허용하는지도 관리자가 확인한다.
 관련 정책은 [GitHub 보안 안내](https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target)를 참고한다.
 

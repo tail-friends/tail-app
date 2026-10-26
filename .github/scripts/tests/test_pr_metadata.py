@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import copy
 import json
+import os
+import shutil
+import subprocess
 import sys
+import tempfile
+import textwrap
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -396,6 +401,78 @@ class TransportTests(unittest.TestCase):
         self.assertNotIn("repository_dispatch:", workflow)
         self.assertNotIn("edited", discord.split("permissions:", 1)[0])
         self.assertIn("types: [closed]", status.split("workflow_dispatch:", 1)[0])
+
+
+class DeploymentReadinessTests(unittest.TestCase):
+    def run_guard(self, *, missing=None, old_parser=False, broken_json=False, broken_module=False):
+        workflow = (ROOT / ".github/workflows/project-status-metadata.yml").read_text(encoding="utf-8")
+        step = workflow.split("      - name: Check trusted metadata deployment\n", 1)[1].split("\n      - name:", 1)[0]
+        code = textwrap.dedent(step.split("          python - <<'PY'\n", 1)[1].rsplit("          PY", 1)[0])
+        required = [
+            ".github/scripts/pr_metadata.py", ".github/scripts/project_status.py",
+            "project-status/data/designs.json", "project-status/data/api-tasks.json",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for path in required:
+                target = root / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / path, target)
+            if missing:
+                (root / missing).unlink()
+            if old_parser:
+                parser = root / ".github/scripts/project_status.py"
+                parser.write_text(parser.read_text(encoding="utf-8").replace(
+                    "def active_metadata_blocks(", "def _not_yet_deployed("), encoding="utf-8")
+            if broken_json:
+                (root / "project-status/data/designs.json").write_text("{", encoding="utf-8")
+            if broken_module:
+                (root / ".github/scripts/pr_metadata.py").write_text("invalid Python !!!", encoding="utf-8")
+            output = root / "outputs.txt"
+            summary = root / "summary.md"
+            env = {**os.environ, "GITHUB_OUTPUT": str(output),
+                   "GITHUB_STEP_SUMMARY": str(summary), "PYTHONDONTWRITEBYTECODE": "1"}
+            env.pop("GH_TOKEN", None)
+            env.pop("GITHUB_TOKEN", None)
+            result = subprocess.run([sys.executable, "-c", code], cwd=root, env=env,
+                                    capture_output=True, text=True, encoding="utf-8", timeout=15)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual("", result.stderr)
+            return output.read_text(encoding="utf-8"), summary.read_text(encoding="utf-8") if summary.exists() else ""
+
+    def test_each_missing_dependency_skips_safely_without_a_token(self):
+        for path in [".github/scripts/pr_metadata.py", ".github/scripts/project_status.py",
+                     "project-status/data/designs.json", "project-status/data/api-tasks.json"]:
+            with self.subTest(path=path):
+                output, summary = self.run_guard(missing=path)
+                self.assertEqual("ready=false\n", output)
+                self.assertIn("skipping PR body updates", summary)
+
+    def test_older_shared_parser_is_a_deployment_wait_not_an_import_failure(self):
+        output, summary = self.run_guard(old_parser=True)
+        self.assertEqual("ready=false\n", output)
+        self.assertIn("Deploy the workflow, scripts and registries together", summary)
+
+    def test_invalid_registry_json_skips_safely(self):
+        output, _ = self.run_guard(broken_json=True)
+        self.assertEqual("ready=false\n", output)
+
+    def test_incompatible_module_skips_without_printing_exception_contents(self):
+        output, summary = self.run_guard(broken_module=True)
+        self.assertEqual("ready=false\n", output)
+        self.assertNotIn("invalid Python", summary)
+
+    def test_complete_deployment_is_ready_without_an_api_call_or_token(self):
+        output, summary = self.run_guard()
+        self.assertEqual("ready=true\n", output)
+        self.assertEqual("", summary)
+
+    def test_only_ready_deployment_can_run_the_token_bearing_step(self):
+        workflow = (ROOT / ".github/workflows/project-status-metadata.yml").read_text(encoding="utf-8")
+        guard, execution = workflow.split("      - name: Generate or preserve tracking metadata", 1)
+        self.assertNotIn("GH_TOKEN:", guard)
+        self.assertIn("if: steps.deployment.outputs.ready == 'true'", execution)
+        self.assertIn("GH_TOKEN: ${{ github.token }}", execution)
 
 
 if __name__ == "__main__":
