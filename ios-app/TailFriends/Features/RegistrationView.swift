@@ -1,6 +1,22 @@
 import SwiftUI
 
 struct RegistrationView: View {
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var focusedInput: RegistrationInput?
+
+    @State private var name = "욱이"
+    @State private var species = "레오파드 게코"
+    @State private var morph = "탠저린 · 꼬리 재생"
+    @State private var sex: RegistrationSex = .male
+    @State private var hatchDate = Calendar.current.date(
+        from: DateComponents(year: 2024, month: 7, day: 12)
+    ) ?? .now
+    @State private var feedingInterval = "4"
+    @State private var memo = "온순함, 손을 좋아함"
+    @State private var hasEditedMemo = false
+    @State private var isDatePickerPresented = false
+    @State private var isSaveMessagePresented = false
+
     private let contentWidth: CGFloat = 342
 
     var body: some View {
@@ -32,9 +48,6 @@ struct RegistrationView: View {
                             .padding(.bottom, 22)
 
                         memoSection
-                            .padding(.bottom, 20)
-
-                        photoSection
                     }
                     .frame(maxWidth: contentWidth)
                     .padding(.horizontal, 24)
@@ -42,11 +55,12 @@ struct RegistrationView: View {
                     .padding(.bottom, 24)
                     .frame(maxWidth: .infinity)
                 }
+                .scrollDismissesKeyboard(.interactively)
                 .accessibilityIdentifier("registration.scroll")
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            saveActionPreview
+            saveAction
                 .frame(maxWidth: contentWidth)
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
@@ -55,8 +69,8 @@ struct RegistrationView: View {
                 .background {
                     LinearGradient(
                         colors: [
-                            RegistrationPalette.backgroundTop.opacity(0.94),
-                            RegistrationPalette.backgroundBottom.opacity(0.98)
+                            RegistrationPalette.backgroundTop,
+                            RegistrationPalette.backgroundBottom
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -64,16 +78,41 @@ struct RegistrationView: View {
                     .ignoresSafeArea(edges: .bottom)
                 }
         }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("완료") {
+                    focusedInput = nil
+                }
+                .accessibilityIdentifier("registration.keyboard.done")
+            }
+        }
+        .sheet(isPresented: $isDatePickerPresented) {
+            hatchDatePicker
+        }
+        .alert("저장 미리보기", isPresented: $isSaveMessagePresented) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text("입력한 정보는 이 미리보기에서만 유지되며 실제로 저장되지 않습니다.")
+        }
         .preferredColorScheme(.light)
     }
 
     private var navigationHeader: some View {
         HStack(spacing: 0) {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(RegistrationPalette.primary)
-                .frame(width: 44, height: 44)
-                .accessibilityHidden(true)
+            Button {
+                focusedInput = nil
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(RegistrationPalette.primary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("뒤로")
+            .accessibilityIdentifier("registration.back")
 
             Spacer(minLength: 0)
         }
@@ -87,7 +126,6 @@ struct RegistrationView: View {
         .padding(.horizontal, 24)
         .padding(.top, 2)
         .frame(maxWidth: .infinity, minHeight: 48)
-        .accessibilityElement(children: .combine)
         .accessibilityIdentifier("registration.header")
     }
 
@@ -95,19 +133,33 @@ struct RegistrationView: View {
         VStack(alignment: .leading, spacing: 8) {
             sectionLabel("이름", required: true)
 
-            FormFieldSurface(value: "욱이")
+            EditableFormField(
+                title: "이름",
+                placeholder: "이름을 입력해 주세요",
+                text: $name,
+                accessibilityIdentifier: "registration.name",
+                characterLimit: 30,
+                focusedInput: $focusedInput,
+                focusValue: .name
+            )
 
-            characterCount("2/30")
+            characterCount(name, limit: 30, identifier: "registration.name.count")
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("이름, 필수, 욱이, 2/30, 미리보기")
     }
 
     private var speciesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionLabel("종", required: true)
 
-            FormFieldSurface(value: "레오파드 게코", trailingSymbol: "chevron.right")
+            EditableFormField(
+                title: "종",
+                placeholder: "종을 입력해 주세요",
+                text: $species,
+                accessibilityIdentifier: "registration.species",
+                trailingSymbol: "chevron.right",
+                focusedInput: $focusedInput,
+                focusValue: .species
+            )
 
             HStack(spacing: 6) {
                 Image(systemName: "sparkles")
@@ -125,20 +177,24 @@ struct RegistrationView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.top, 2)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("종, 필수, 레오파드 게코, 종별 사육 계획 안내, 미리보기")
     }
 
     private var morphSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionLabel("모프 / 특징")
 
-            FormFieldSurface(value: "탠저린 · 꼬리 재생")
+            EditableFormField(
+                title: "모프 및 특징",
+                placeholder: "모프나 특징을 입력해 주세요",
+                text: $morph,
+                accessibilityIdentifier: "registration.morph",
+                characterLimit: 40,
+                focusedInput: $focusedInput,
+                focusValue: .morph
+            )
 
-            characterCount("9/40")
+            characterCount(morph, limit: 40, identifier: "registration.morph.count")
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("모프 및 특징, 탠저린 · 꼬리 재생, 9/40, 미리보기")
     }
 
     private var sexSection: some View {
@@ -146,14 +202,12 @@ struct RegistrationView: View {
             sectionLabel("성별")
 
             HStack(spacing: 4) {
-                sexOption("수컷", selected: true)
-                sexOption("암컷", selected: false)
-                sexOption("미구분", selected: false)
+                ForEach(RegistrationSex.allCases) { option in
+                    sexOption(option)
+                }
             }
             .padding(4)
             .background(RegistrationPalette.controlTrack, in: Capsule())
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("성별, 수컷 선택, 암컷, 미구분, 미리보기")
         }
     }
 
@@ -161,22 +215,41 @@ struct RegistrationView: View {
         VStack(alignment: .leading, spacing: 8) {
             sectionLabel("해칭일")
 
-            FormFieldSurface(value: "2024.07.12", trailingSymbol: "chevron.right")
+            Button {
+                focusedInput = nil
+                isDatePickerPresented = true
+            } label: {
+                FormFieldSurface(
+                    value: formattedHatchDate,
+                    trailingSymbol: "chevron.right"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("해칭일, \(formattedHatchDate)")
+            .accessibilityIdentifier("registration.hatchDate")
 
-            Text("생후 2년 3개월")
+            Text(hatchAgeDescription)
                 .font(.custom("Jua", size: 11, relativeTo: .caption))
                 .foregroundStyle(RegistrationPalette.secondary)
                 .padding(.top, 1)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("해칭일, 2024년 7월 12일, 생후 2년 3개월, 미리보기")
     }
 
     private var feedingIntervalSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionLabel("급여 주기", required: true)
 
-            FormFieldSurface(value: "4", trailingText: "일")
+            EditableFormField(
+                title: "급여 주기",
+                placeholder: "일수 입력",
+                text: $feedingInterval,
+                accessibilityIdentifier: "registration.feedingInterval",
+                trailingText: "일",
+                usesNumberPad: true,
+                keepsDigitsOnly: true,
+                focusedInput: $focusedInput,
+                focusValue: .feedingInterval
+            )
 
             Text("성체 기준이에요. 해칭 개체나 번식기라면 바꿔 주세요")
                 .font(.custom("Jua", size: 10, relativeTo: .caption))
@@ -184,74 +257,124 @@ struct RegistrationView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 1)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("급여 주기, 필수, 4일, 성체 기준 안내, 미리보기")
     }
 
     private var memoSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionLabel("메모")
 
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(RegistrationPalette.field)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(RegistrationPalette.fieldBorder, lineWidth: 1)
+            ZStack(alignment: .topLeading) {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(RegistrationPalette.field)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(RegistrationPalette.fieldBorder, lineWidth: 1)
+                    }
+
+                if memo.isEmpty {
+                    Text("메모를 입력해 주세요")
+                        .font(.custom("Jua", size: 12, relativeTo: .body))
+                        .foregroundStyle(RegistrationPalette.secondary.opacity(0.72))
+                        .padding(.horizontal, 20)
+                        .padding(.top, 14)
+                        .accessibilityHidden(true)
                 }
-                .frame(minHeight: 92)
-                .accessibilityHidden(true)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("메모 입력 영역, 미리보기")
-    }
 
-    private var photoSection: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "camera")
-                .font(.system(size: 16, weight: .regular))
-                .foregroundStyle(RegistrationPalette.secondary)
-                .frame(width: 40, height: 40)
-                .background(RegistrationPalette.note, in: Circle())
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text("사진 추가")
-                    .font(.custom("Jua", size: 12, relativeTo: .subheadline))
+                TextEditor(text: $memo)
+                    .font(.custom("Jua", size: 12, relativeTo: .body))
                     .foregroundStyle(RegistrationPalette.primary)
-
-                Text("저장하면 사진으로 캐릭터를 만들 수 있어요")
-                    .font(.custom("Jua", size: 10, relativeTo: .caption))
-                    .foregroundStyle(RegistrationPalette.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .scrollContentBackground(.hidden)
+                    .focused($focusedInput, equals: .memo)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .accessibilityLabel("메모")
+                    .accessibilityIdentifier("registration.memo")
+            }
+            .frame(minHeight: 92)
+            .onChange(of: memo) { _, newValue in
+                hasEditedMemo = true
+                if newValue.count > 300 {
+                    memo = String(newValue.prefix(300))
+                }
             }
 
-            Spacer(minLength: 0)
-
-            Image(systemName: "plus")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(RegistrationPalette.secondary)
-                .accessibilityHidden(true)
+            characterCount(
+                memo,
+                limit: 300,
+                identifier: "registration.memo.count",
+                displayCount: hasEditedMemo ? memo.count : 13
+            )
         }
-        .padding(.horizontal, 14)
-        .frame(minHeight: 68)
-        .background(RegistrationPalette.field, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(RegistrationPalette.fieldBorder, lineWidth: 1)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("사진 추가, 저장하면 사진으로 캐릭터를 만들 수 있어요, 미리보기")
     }
 
-    private var saveActionPreview: some View {
-        Text("저장")
-            .font(.custom("Jua", size: 14, relativeTo: .body))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity, minHeight: 50)
-            .background(RegistrationPalette.action, in: Capsule())
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("저장, 미리보기이며 동작하지 않습니다")
-            .accessibilityIdentifier("registration.save.preview")
+    private var saveAction: some View {
+        VStack(spacing: 6) {
+            Text("저장하면 사진으로 캐릭터를 만들 수 있어요")
+                .font(.custom("Jua", size: 10, relativeTo: .caption))
+                .foregroundStyle(RegistrationPalette.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.center)
+                .accessibilityIdentifier("registration.save.guidance")
+
+            Button {
+                focusedInput = nil
+                isSaveMessagePresented = true
+            } label: {
+                Text("저장")
+                    .font(.custom("Jua", size: 14, relativeTo: .body))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .background(RegistrationPalette.action, in: Capsule())
+                    .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("registration.save")
+        }
+    }
+
+    private var hatchDatePicker: some View {
+        NavigationStack {
+            DatePicker(
+                "해칭일",
+                selection: $hatchDate,
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .padding(.horizontal, 12)
+            .accessibilityIdentifier("registration.hatchDate.picker")
+            .navigationTitle("해칭일 선택")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("취소") {
+                        isDatePickerPresented = false
+                    }
+                    .accessibilityIdentifier("registration.hatchDate.cancel")
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("완료") {
+                        isDatePickerPresented = false
+                    }
+                    .accessibilityIdentifier("registration.hatchDate.done")
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private var formattedHatchDate: String {
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: hatchDate)
+        guard let year = parts.year, let month = parts.month, let day = parts.day else {
+            return ""
+        }
+        return String(format: "%04d.%02d.%02d", year, month, day)
+    }
+
+    private var hatchAgeDescription: String {
+        guard hatchDate <= Date() else { return "해칭 예정" }
+        let age = Calendar.current.dateComponents([.year, .month], from: hatchDate, to: Date())
+        return "생후 \(age.year ?? 0)년 \(age.month ?? 0)개월"
     }
 
     private func sectionLabel(_ title: String, required: Bool = false) -> some View {
@@ -269,42 +392,91 @@ struct RegistrationView: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    private func characterCount(_ value: String) -> some View {
-        Text(value)
+    private func characterCount(
+        _ value: String,
+        limit: Int,
+        identifier: String,
+        displayCount: Int? = nil
+    ) -> some View {
+        Text("\(displayCount ?? value.count)/\(limit)")
             .font(.custom("Jua", size: 10, relativeTo: .caption))
             .foregroundStyle(RegistrationPalette.secondary)
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(.top, -2)
+            .accessibilityIdentifier(identifier)
     }
 
-    private func sexOption(_ title: String, selected: Bool) -> some View {
-        Text(title)
-            .font(.custom("Jua", size: 12, relativeTo: .subheadline))
-            .foregroundStyle(selected ? RegistrationPalette.primary : RegistrationPalette.secondary)
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .background {
-                if selected {
-                    Capsule()
-                        .fill(RegistrationPalette.selected)
-                        .shadow(color: RegistrationPalette.shadow, radius: 3, x: 0, y: 2)
+    private func sexOption(_ option: RegistrationSex) -> some View {
+        let isSelected = sex == option
+
+        return Button {
+            sex = option
+        } label: {
+            Text(option.title)
+                .font(.custom("Jua", size: 12, relativeTo: .subheadline))
+                .foregroundStyle(isSelected ? RegistrationPalette.primary : RegistrationPalette.secondary)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background {
+                    if isSelected {
+                        Capsule()
+                            .fill(RegistrationPalette.selected)
+                            .shadow(color: RegistrationPalette.shadow, radius: 3, x: 0, y: 2)
+                    }
                 }
-            }
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("성별 \(option.title)")
+        .accessibilityValue(isSelected ? "선택됨" : "선택 안 됨")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("registration.sex.\(option.id)")
     }
 }
 
-private struct FormFieldSurface: View {
-    let value: String
+private struct EditableFormField: View {
+    let title: String
+    let placeholder: String
+    @Binding var text: String
+    let accessibilityIdentifier: String
+    var characterLimit: Int? = nil
     var trailingSymbol: String? = nil
     var trailingText: String? = nil
+    var usesNumberPad = false
+    var keepsDigitsOnly = false
+    @FocusState.Binding var focusedInput: RegistrationInput?
+    let focusValue: RegistrationInput
+
+    private var isFocused: Bool {
+        focusedInput == focusValue
+    }
 
     var body: some View {
         HStack(spacing: 10) {
-            Text(value)
+            TextField(title, text: $text, prompt: Text(placeholder))
                 .font(.custom("Jua", size: 13, relativeTo: .body))
                 .foregroundStyle(RegistrationPalette.primary)
-                .fixedSize(horizontal: false, vertical: true)
+                .textInputAutocapitalization(.never)
+                .keyboardType(usesNumberPad ? .numberPad : .default)
+                .submitLabel(.done)
+                .focused($focusedInput, equals: focusValue)
+                .onSubmit { focusedInput = nil }
+                .accessibilityLabel(title)
+                .accessibilityIdentifier(accessibilityIdentifier)
 
-            Spacer(minLength: 0)
+            if isFocused && !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundStyle(RegistrationPalette.secondary.opacity(0.72))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(title) 지우기")
+                .accessibilityIdentifier("\(accessibilityIdentifier).clear")
+            }
 
             if let trailingText {
                 Text(trailingText)
@@ -325,6 +497,75 @@ private struct FormFieldSurface: View {
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .strokeBorder(RegistrationPalette.fieldBorder, lineWidth: 1)
+        }
+        .onChange(of: text) { _, newValue in
+            var updatedValue = newValue
+
+            if keepsDigitsOnly {
+                updatedValue = updatedValue.filter(\.isNumber)
+            }
+
+            if let characterLimit, updatedValue.count > characterLimit {
+                updatedValue = String(updatedValue.prefix(characterLimit))
+            }
+
+            if updatedValue != newValue {
+                text = updatedValue
+            }
+        }
+    }
+}
+
+private struct FormFieldSurface: View {
+    let value: String
+    var trailingSymbol: String? = nil
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text(value)
+                .font(.custom("Jua", size: 13, relativeTo: .body))
+                .foregroundStyle(RegistrationPalette.primary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
+
+            if let trailingSymbol {
+                Image(systemName: trailingSymbol)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(RegistrationPalette.secondary)
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, minHeight: 50)
+        .background(RegistrationPalette.field, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(RegistrationPalette.fieldBorder, lineWidth: 1)
+        }
+    }
+}
+
+private enum RegistrationInput: Hashable {
+    case name
+    case species
+    case morph
+    case feedingInterval
+    case memo
+}
+
+private enum RegistrationSex: String, CaseIterable, Identifiable {
+    case male
+    case female
+    case unspecified
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .male: return "수컷"
+        case .female: return "암컷"
+        case .unspecified: return "미구분"
         }
     }
 }
