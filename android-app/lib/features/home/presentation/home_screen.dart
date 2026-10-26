@@ -1,19 +1,35 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
+import '../../pets/presentation/pet_registration_screen.dart';
+
+part 'home_first_visit_content.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({this.now, super.key}) : _data = null;
+  const HomeScreen({this.now, super.key})
+    : _data = null,
+      _firstVisitPreview = false;
 
-  const HomeScreen.preview({super.key}) : now = null, _data = _previewData;
+  const HomeScreen.preview({super.key})
+    : now = null,
+      _data = _previewData,
+      _firstVisitPreview = false;
+
+  /// Figma sample name/date are used only in Debug, never as account data.
+  const HomeScreen.firstVisitPreview({super.key})
+    : now = null,
+      _data = null,
+      _firstVisitPreview = true;
 
   final DateTime? now;
   final _HomeDisplayData? _data;
+  final bool _firstVisitPreview;
 
   static const _backgroundColor = Color(0xFFFAF7F0);
   static const _forestColor = Color(0xFF2F6B57);
@@ -141,7 +157,9 @@ class HomeScreen extends StatelessWidget {
               child: IgnorePointer(
                 child: ExcludeSemantics(
                   child: Image.asset(
-                    'assets/images/home_background.png',
+                    _hasData
+                        ? 'assets/images/home_background.png'
+                        : 'assets/images/home_first_visit_background.png',
                     key: const ValueKey('home_background'),
                     fit: BoxFit.fill,
                     filterQuality: FilterQuality.high,
@@ -155,30 +173,53 @@ class HomeScreen extends StatelessWidget {
                   Positioned.fill(
                     child: SingleChildScrollView(
                       key: const ValueKey('home_scroll_view'),
-                      padding: const EdgeInsets.fromLTRB(
+                      padding: EdgeInsets.fromLTRB(
                         AppSpacing.x6,
-                        4,
+                        _hasData
+                            ? 4
+                            : math.max(
+                                0,
+                                54 - MediaQuery.paddingOf(context).top,
+                              ),
                         AppSpacing.x6,
                         104,
                       ),
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 342),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildHeader(context),
-                              const SizedBox(height: 25),
-                              _buildHero(heroHeight),
-                              const SizedBox(height: 33),
-                              _buildFeedingCallToAction(context),
-                              const SizedBox(height: 40),
-                              _buildMetrics(context, metricHeight),
-                              const SizedBox(height: 12),
-                              _buildRecentHeader(context),
-                              _buildRecentRecords(context),
-                            ],
-                          ),
+                          child: !_hasData
+                              ? _FirstVisitContent(
+                                  dateLabel: kDebugMode && _firstVisitPreview
+                                      ? '10월 20일 화요일'
+                                      : _formatDate(now ?? DateTime.now()),
+                                  greeting: kDebugMode && _firstVisitPreview
+                                      ? '반가워요, 민준님'
+                                      : '반가워요, 어서 오세요',
+                                  onNotification: () =>
+                                      _showComingSoon(context),
+                                  onRegister: () => Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          const PetRegistrationScreen(),
+                                    ),
+                                  ),
+                                )
+                              : Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    _buildHeader(context),
+                                    const SizedBox(height: 25),
+                                    _buildHero(heroHeight),
+                                    const SizedBox(height: 33),
+                                    _buildFeedingCallToAction(context),
+                                    const SizedBox(height: 40),
+                                    _buildMetrics(context, metricHeight),
+                                    const SizedBox(height: 12),
+                                    _buildRecentHeader(context),
+                                    _buildRecentRecords(context),
+                                  ],
+                                ),
                         ),
                       ),
                     ),
@@ -186,10 +227,31 @@ class HomeScreen extends StatelessWidget {
                   Positioned(
                     left: AppSpacing.x6,
                     right: AppSpacing.x6,
-                    bottom: 4,
+                    bottom: _hasData ? 4 : 0,
                     child: AppBottomNavigation(
                       key: const ValueKey('home_bottom_navigation'),
                       currentTab: AppTab.habitat,
+                      selectedLabelColor: _hasData
+                          ? AppColors.textComponentPrimary
+                          : _primaryTextColor,
+                      unselectedLabelColor: _hasData
+                          ? AppColors.textTertiary
+                          : _secondaryTextColor,
+                      selectedBackgroundColor: _hasData
+                          ? AppColors.surface
+                          : Colors.white,
+                      iconAssets: _hasData
+                          ? const {}
+                          : const {
+                              AppTab.habitat:
+                                  'assets/icons/home_first_visit_nav_home.svg',
+                              AppTab.records:
+                                  'assets/icons/home_first_visit_nav_record.svg',
+                              AppTab.pets:
+                                  'assets/icons/home_first_visit_nav_pets.svg',
+                              AppTab.profile:
+                                  'assets/icons/home_first_visit_nav_profile.svg',
+                            },
                       labelStyle: _dateStyle.copyWith(
                         fontSize: 10,
                         height: 13 / 10,
@@ -487,6 +549,7 @@ class _RoundIconButton extends StatelessWidget {
     required this.asset,
     required this.iconSize,
     required this.onTap,
+    this.alignment = Alignment.center,
     super.key,
   });
 
@@ -494,6 +557,7 @@ class _RoundIconButton extends StatelessWidget {
   final String asset;
   final double iconSize;
   final VoidCallback onTap;
+  final Alignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -508,7 +572,8 @@ class _RoundIconButton extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(AppRadius.full),
             onTap: onTap,
-            child: Center(
+            child: Align(
+              alignment: alignment,
               child: IgnorePointer(
                 child: AppGlassSurface(
                   borderRadius: BorderRadius.circular(AppRadius.full),
