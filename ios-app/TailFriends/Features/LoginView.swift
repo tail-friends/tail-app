@@ -157,30 +157,23 @@ private struct LoginProviderButton: View {
     private var icon: some View {
         switch provider {
         case .apple:
-            Image(systemName: "apple.logo")
-                .font(.system(size: 18))
-                .foregroundStyle(.white)
+            Image("social_apple")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .accessibilityHidden(true)
         case .kakao:
-            Image(systemName: "bubble.left.fill")
-                .font(.system(size: 18))
-                .foregroundStyle(Color(hex: 0x3B3631))
+            Image("social_kakao")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .accessibilityHidden(true)
         case .google:
-            Text("G")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundStyle(
-                    AngularGradient(
-                        colors: [
-                            Color(hex: 0x4285F4),
-                            Color(hex: 0x34A853),
-                            Color(hex: 0xFBBC05),
-                            Color(hex: 0xEA4335),
-                            Color(hex: 0x4285F4)
-                        ],
-                        center: .center,
-                        startAngle: .degrees(-90),
-                        endAngle: .degrees(270)
-                    )
-                )
+            Image("social_google")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .accessibilityHidden(true)
         }
     }
 
