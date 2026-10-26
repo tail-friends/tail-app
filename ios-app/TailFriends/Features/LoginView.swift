@@ -6,10 +6,10 @@ struct LoginView: View {
             let topInset = geometry.safeAreaInsets.top
             let bottomShift = max(0, geometry.safeAreaInsets.bottom - 24)
             let isCompactHeight = geometry.size.height < 750
-            let characterTopGap = isCompactHeight ? 72 : max(96, 237 - topInset - bottomShift)
+            let characterTopGap = isCompactHeight ? 72 : max(96, 244 - topInset - bottomShift)
             let characterSlotHeight = isCompactHeight ? 48 : 94.5
             let brandGapHeight = isCompactHeight ? 32 : 72.75
-            let providerGapHeight: CGFloat = isCompactHeight ? 88 : 167
+            let providerGapHeight: CGFloat = isCompactHeight ? 88 : 170
 
             ZStack(alignment: .top) {
                 Color(hex: 0xFAF7F0)
@@ -46,7 +46,7 @@ struct LoginView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: geometry.size.height, alignment: .top)
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 26)
                 }
                 .accessibilityIdentifier("login.scroll")
             }
@@ -157,30 +157,23 @@ private struct LoginProviderButton: View {
     private var icon: some View {
         switch provider {
         case .apple:
-            Image(systemName: "apple.logo")
-                .font(.system(size: 18))
-                .foregroundStyle(.white)
+            Image("social_apple")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .accessibilityHidden(true)
         case .kakao:
-            Image(systemName: "bubble.left.fill")
-                .font(.system(size: 18))
-                .foregroundStyle(Color(hex: 0x3B3631))
+            Image("social_kakao")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .accessibilityHidden(true)
         case .google:
-            Text("G")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundStyle(
-                    AngularGradient(
-                        colors: [
-                            Color(hex: 0x4285F4),
-                            Color(hex: 0x34A853),
-                            Color(hex: 0xFBBC05),
-                            Color(hex: 0xEA4335),
-                            Color(hex: 0x4285F4)
-                        ],
-                        center: .center,
-                        startAngle: .degrees(-90),
-                        endAngle: .degrees(270)
-                    )
-                )
+            Image("social_google")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .accessibilityHidden(true)
         }
     }
 
