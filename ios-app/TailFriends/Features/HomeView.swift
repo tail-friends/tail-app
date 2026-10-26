@@ -23,7 +23,7 @@ struct HomeView: View {
     }
 
     private var scrollBottomPadding: CGFloat {
-        dynamicTypeSize.isAccessibilitySize ? 16 : 24
+        navigationMinimumHeight + 24
     }
 
     var body: some View {
@@ -66,10 +66,10 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .accessibilityIdentifier("home.scroll")
             }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
+            .overlay(alignment: .bottom) {
                 bottomNavigation
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, max(4, geometry.safeAreaInsets.bottom))
                     .frame(maxWidth: .infinity)
             }
         }
@@ -101,20 +101,18 @@ struct HomeView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Button(action: {}) {
-                Image(systemName: "bell")
-                    .font(.system(size: 16))
-                    .foregroundStyle(HomePalette.primary)
-                    .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay {
-                        Circle()
-                            .strokeBorder(.white.opacity(0.8), lineWidth: 1)
-                    }
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("알림")
-            .accessibilityIdentifier("home.notification.button")
+            Image(systemName: "bell")
+                .font(.system(size: 16))
+                .foregroundStyle(HomePalette.primary)
+                .frame(width: 44, height: 44)
+                .background(.ultraThinMaterial, in: Circle())
+                .overlay {
+                    Circle()
+                        .strokeBorder(.white.opacity(0.8), lineWidth: 1)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("알림, 준비 중")
+                .accessibilityIdentifier("home.notification")
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
@@ -170,38 +168,35 @@ struct HomeView: View {
     }
 
     private var feedingCallToAction: some View {
-        Button(action: {}) {
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("급여 기록이 없어요")
-                        .font(.custom("Jua", size: 13, relativeTo: .body))
-                        .foregroundStyle(.white)
-                        .fixedSize(horizontal: false, vertical: true)
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("급여 기록이 없어요")
+                    .font(.custom("Jua", size: 13, relativeTo: .body))
+                    .foregroundStyle(.white)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                    Text("친구를 등록하면 일정을 확인할 수 있어요")
-                        .font(.custom("Jua", size: 11, relativeTo: .caption))
-                        .foregroundStyle(HomePalette.softText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer(minLength: 0)
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(HomePalette.forest)
-                    .frame(width: 34, height: 34)
-                    .background(.white, in: Circle())
-                    .accessibilityHidden(true)
+                Text("친구를 등록하면 일정을 확인할 수 있어요")
+                    .font(.custom("Jua", size: 11, relativeTo: .caption))
+                    .foregroundStyle(HomePalette.softText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, minHeight: 59)
-            .background(HomePalette.forest, in: RoundedRectangle(cornerRadius: 22))
-            .contentShape(RoundedRectangle(cornerRadius: 22))
+
+            Spacer(minLength: 0)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(HomePalette.forest)
+                .frame(width: 34, height: 34)
+                .background(.white, in: Circle())
+                .accessibilityHidden(true)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("급여 기록이 없어요. 친구를 등록하면 일정을 확인할 수 있어요")
-        .accessibilityIdentifier("home.feeding.button")
+        .padding(.horizontal, 18)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, minHeight: 59)
+        .background(HomePalette.forest, in: RoundedRectangle(cornerRadius: 22))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("급여 기록이 없어요. 친구를 등록하면 일정을 확인할 수 있어요. 준비 중")
+        .accessibilityIdentifier("home.feeding.notice")
     }
 
     private var metrics: some View {
@@ -214,39 +209,36 @@ struct HomeView: View {
     }
 
     private func metricCard(title: String, identifier: String) -> some View {
-        Button(action: {}) {
-            HomeGlassCard {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 4) {
-                        Text(title)
-                            .font(.custom("Jua", size: 13, relativeTo: .body))
-                            .foregroundStyle(HomePalette.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+        HomeGlassCard {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 4) {
+                    Text(title)
+                        .font(.custom("Jua", size: 13, relativeTo: .body))
+                        .foregroundStyle(HomePalette.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(HomePalette.tertiary)
-                            .accessibilityHidden(true)
-                    }
-
-                    Spacer(minLength: 4)
-
-                    Text("기록 없음")
-                        .font(.custom("Jua", size: 11, relativeTo: .caption))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(HomePalette.tertiary)
-                        .frame(maxWidth: .infinity)
-                        .multilineTextAlignment(.center)
-
-                    Spacer(minLength: 4)
+                        .accessibilityHidden(true)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+                Spacer(minLength: 4)
+
+                Text("기록 없음")
+                    .font(.custom("Jua", size: 11, relativeTo: .caption))
+                    .foregroundStyle(HomePalette.tertiary)
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+
+                Spacer(minLength: 4)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: metricCardHeight)
-            .contentShape(RoundedRectangle(cornerRadius: 24))
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(title), 기록 없음")
+        .frame(maxWidth: .infinity)
+        .frame(height: metricCardHeight)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title), 기록 없음. 준비 중")
         .accessibilityIdentifier(identifier)
     }
 
@@ -258,16 +250,12 @@ struct HomeView: View {
                     .foregroundStyle(HomePalette.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                Button(action: {}) {
-                    Text("전체")
-                        .font(.custom("Jua", size: 11, relativeTo: .caption))
-                        .foregroundStyle(HomePalette.secondary)
-                        .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("전체 기록 보기")
-                .accessibilityIdentifier("home.records.all")
+                Text("전체")
+                    .font(.custom("Jua", size: 11, relativeTo: .caption))
+                    .foregroundStyle(HomePalette.secondary)
+                    .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
+                    .accessibilityLabel("전체 기록 보기. 준비 중")
+                    .accessibilityIdentifier("home.records.all")
             }
 
             HomeGlassCard {
@@ -287,25 +275,25 @@ struct HomeView: View {
         HStack(spacing: 8) {
             navigationItem(
                 title: "사육장",
-                icon: "house.fill",
+                icon: "icon/home",
                 selected: true,
                 identifier: "habitat"
             )
             navigationItem(
                 title: "기록",
-                icon: "list.bullet.rectangle",
+                icon: "icon/record",
                 selected: false,
                 identifier: "records"
             )
             navigationItem(
                 title: "내 아이들",
-                icon: "pawprint.fill",
+                icon: "icon/egg",
                 selected: false,
                 identifier: "pets"
             )
             navigationItem(
                 title: "마이",
-                icon: "person.fill",
+                icon: "icon/user",
                 selected: false,
                 identifier: "profile"
             )
@@ -345,29 +333,29 @@ struct HomeView: View {
         selected: Bool,
         identifier: String
     ) -> some View {
-        Button(action: {}) {
-            VStack(spacing: 2) {
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .accessibilityHidden(true)
+        VStack(spacing: 2) {
+            Image(icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 16, height: 16)
+                .accessibilityHidden(true)
 
-                Text(title)
-                    .font(.custom("Jua", size: 10, relativeTo: .caption))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .foregroundStyle(selected ? HomePalette.forest : HomePalette.tertiary)
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .background {
-                if selected {
-                    RoundedRectangle(cornerRadius: 22)
-                        .fill(.white.opacity(0.88))
-                        .shadow(color: HomePalette.shadow, radius: 3, x: 1, y: 2)
-                }
-            }
-            .contentShape(RoundedRectangle(cornerRadius: 22))
+            Text(title)
+                .font(.custom("Jua", size: 10, relativeTo: .caption))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .buttonStyle(.plain)
+        .foregroundStyle(selected ? HomePalette.forest : HomePalette.tertiary)
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .background {
+            if selected {
+                RoundedRectangle(cornerRadius: 22)
+                    .fill(.white.opacity(0.88))
+                    .shadow(color: HomePalette.shadow, radius: 3, x: 1, y: 2)
+            }
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 22))
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("home.bottomNavigation.\(identifier)")
