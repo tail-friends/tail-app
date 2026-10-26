@@ -23,7 +23,7 @@ struct HomeView: View {
     }
 
     private var scrollBottomPadding: CGFloat {
-        dynamicTypeSize.isAccessibilitySize ? 200 : 104
+        dynamicTypeSize.isAccessibilitySize ? 16 : 24
     }
 
     var body: some View {
@@ -60,14 +60,17 @@ struct HomeView: View {
                     .frame(maxWidth: 342)
                     .padding(.horizontal, 24)
                     .padding(.top, 4)
-                    .padding(.bottom, max(scrollBottomPadding, navigationMinimumHeight + 50))
+                    .padding(.bottom, scrollBottomPadding)
                     .frame(maxWidth: .infinity)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityIdentifier("home.scroll")
             }
-            .overlay(alignment: .bottom) {
+            .safeAreaInset(edge: .bottom, spacing: 0) {
                 bottomNavigation
                     .padding(.horizontal, 24)
                     .padding(.bottom, 4)
+                    .frame(maxWidth: .infinity)
             }
         }
         .preferredColorScheme(.light)
