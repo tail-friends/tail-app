@@ -14,6 +14,18 @@ struct HomeView: View {
         dynamicTypeSize.isAccessibilitySize ? 260 : 214
     }
 
+    private var metricCardHeight: CGFloat {
+        dynamicTypeSize.isAccessibilitySize ? 172 : 140
+    }
+
+    private var navigationMinimumHeight: CGFloat {
+        dynamicTypeSize.isAccessibilitySize ? 82 : 54
+    }
+
+    private var scrollBottomPadding: CGFloat {
+        dynamicTypeSize.isAccessibilitySize ? 200 : 104
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
@@ -38,13 +50,24 @@ struct HomeView: View {
                             .padding(.bottom, 33)
 
                         feedingCallToAction
+                            .padding(.bottom, 40)
+
+                        metrics
+                            .padding(.bottom, 12)
+
+                        recentRecords
                     }
                     .frame(maxWidth: 342)
                     .padding(.horizontal, 24)
                     .padding(.top, 4)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, max(scrollBottomPadding, navigationMinimumHeight + 50))
                     .frame(maxWidth: .infinity)
                 }
+            }
+            .overlay(alignment: .bottom) {
+                bottomNavigation
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 4)
             }
         }
         .preferredColorScheme(.light)
@@ -176,6 +199,175 @@ struct HomeView: View {
         .buttonStyle(.plain)
         .accessibilityLabel("급여 기록이 없어요. 친구를 등록하면 일정을 확인할 수 있어요")
         .accessibilityIdentifier("home.feeding.button")
+    }
+
+    private var metrics: some View {
+        HStack(alignment: .top, spacing: 8) {
+            metricCard(title: "체중", identifier: "home.weight")
+            metricCard(title: "탈피", identifier: "home.molting")
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("home.metrics")
+    }
+
+    private func metricCard(title: String, identifier: String) -> some View {
+        Button(action: {}) {
+            HomeGlassCard {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 4) {
+                        Text(title)
+                            .font(.custom("Jua", size: 13, relativeTo: .body))
+                            .foregroundStyle(HomePalette.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(HomePalette.tertiary)
+                            .accessibilityHidden(true)
+                    }
+
+                    Spacer(minLength: 4)
+
+                    Text("기록 없음")
+                        .font(.custom("Jua", size: 11, relativeTo: .caption))
+                        .foregroundStyle(HomePalette.tertiary)
+                        .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
+
+                    Spacer(minLength: 4)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: metricCardHeight)
+            .contentShape(RoundedRectangle(cornerRadius: 24))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(title), 기록 없음")
+        .accessibilityIdentifier(identifier)
+    }
+
+    private var recentRecords: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("최근 기록")
+                    .font(.custom("Jua", size: 16, relativeTo: .headline))
+                    .foregroundStyle(HomePalette.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button(action: {}) {
+                    Text("전체")
+                        .font(.custom("Jua", size: 11, relativeTo: .caption))
+                        .foregroundStyle(HomePalette.secondary)
+                        .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("전체 기록 보기")
+                .accessibilityIdentifier("home.records.all")
+            }
+
+            HomeGlassCard {
+                Text("아직 기록이 없어요")
+                    .font(.custom("Jua", size: 11, relativeTo: .caption))
+                    .foregroundStyle(HomePalette.tertiary)
+                    .frame(maxWidth: .infinity, minHeight: 90)
+                    .multilineTextAlignment(.center)
+                    .accessibilityIdentifier("home.records.empty")
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("home.records")
+    }
+
+    private var bottomNavigation: some View {
+        HStack(spacing: 8) {
+            navigationItem(
+                title: "사육장",
+                icon: "house.fill",
+                selected: true,
+                identifier: "habitat"
+            )
+            navigationItem(
+                title: "기록",
+                icon: "list.bullet.rectangle",
+                selected: false,
+                identifier: "records"
+            )
+            navigationItem(
+                title: "내 아이들",
+                icon: "pawprint.fill",
+                selected: false,
+                identifier: "pets"
+            )
+            navigationItem(
+                title: "마이",
+                icon: "person.fill",
+                selected: false,
+                identifier: "profile"
+            )
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .frame(maxWidth: 342, minHeight: navigationMinimumHeight)
+        .background {
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 28)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    .white.opacity(0.76),
+                                    .white.opacity(0.38)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 28)
+                .strokeBorder(.white.opacity(0.86), lineWidth: 1)
+        }
+        .shadow(color: HomePalette.shadow, radius: 16, x: 0, y: 12)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("home.bottomNavigation")
+    }
+
+    private func navigationItem(
+        title: String,
+        icon: String,
+        selected: Bool,
+        identifier: String
+    ) -> some View {
+        Button(action: {}) {
+            VStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                    .accessibilityHidden(true)
+
+                Text(title)
+                    .font(.custom("Jua", size: 10, relativeTo: .caption))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(selected ? HomePalette.forest : HomePalette.tertiary)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .background {
+                if selected {
+                    RoundedRectangle(cornerRadius: 22)
+                        .fill(.white.opacity(0.88))
+                        .shadow(color: HomePalette.shadow, radius: 3, x: 1, y: 2)
+                }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 22))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("home.bottomNavigation.\(identifier)")
     }
 }
 
