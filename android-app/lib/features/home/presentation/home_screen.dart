@@ -195,6 +195,12 @@ class HomeScreen extends StatelessWidget {
                                   greeting: kDebugMode && _firstVisitPreview
                                       ? '반가워요, 민준님'
                                       : '반가워요, 어서 오세요',
+                                  // The Figma promise is design copy, not an
+                                  // available character-generation feature.
+                                  registrationHint:
+                                      kDebugMode && _firstVisitPreview
+                                      ? '사진 한 장이면 우리 아이 캐릭터가 만들어져요'
+                                      : '캐릭터 생성 기능은 준비 중이에요',
                                   onNotification: () =>
                                       _showComingSoon(context),
                                   onRegister: () => Navigator.of(context).push(

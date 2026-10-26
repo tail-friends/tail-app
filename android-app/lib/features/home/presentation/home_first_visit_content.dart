@@ -5,12 +5,14 @@ class _FirstVisitContent extends StatelessWidget {
   const _FirstVisitContent({
     required this.dateLabel,
     required this.greeting,
+    required this.registrationHint,
     required this.onNotification,
     required this.onRegister,
   });
 
   final String dateLabel;
   final String greeting;
+  final String registrationHint;
   final VoidCallback onNotification;
   final VoidCallback onRegister;
 
@@ -100,8 +102,8 @@ class _FirstVisitContent extends StatelessWidget {
                       style: titleStyle,
                     ),
                   ),
-                  const Text(
-                    '사진 한 장이면 우리 아이 캐릭터가 만들어져요',
+                  Text(
+                    registrationHint,
                     textAlign: TextAlign.center,
                     style: HomeScreen._captionStyle,
                   ),

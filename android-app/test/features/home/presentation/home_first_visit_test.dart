@@ -69,7 +69,8 @@ void main() {
     expect(find.text('52'), findsNothing);
     expect(find.text('12'), findsNothing);
     expect(find.text('아직 함께하는 친구가 없어요'), findsOneWidget);
-    expect(find.text('사진 한 장이면 우리 아이 캐릭터가 만들어져요'), findsOneWidget);
+    expect(find.text('캐릭터 생성 기능은 준비 중이에요'), findsOneWidget);
+    expect(find.text('사진 한 장이면 우리 아이 캐릭터가 만들어져요'), findsNothing);
     expect(find.byType(AppRecordRow), findsNothing);
     expect(_key('home_hero_card'), findsNothing);
     final slot = _key('home_first_visit_character_slot');
@@ -83,10 +84,14 @@ void main() {
     );
   });
 
-  testWidgets('Debug 디자인 미리보기만 Figma 예시 이름과 날짜를 사용한다', (tester) async {
+  testWidgets('Debug 디자인 미리보기만 Figma 예시 이름·날짜·캐릭터 생성 시안 문구를 사용한다', (
+    tester,
+  ) async {
     await _open(tester, designPreview: true);
     expect(find.text('반가워요, 민준님'), findsOneWidget);
     expect(find.text('10월 20일 화요일'), findsOneWidget);
+    expect(find.text('사진 한 장이면 우리 아이 캐릭터가 만들어져요'), findsOneWidget);
+    expect(find.text('캐릭터 생성 기능은 준비 중이에요'), findsNothing);
     for (var i = 0; i < 3; i++) {
       expect(find.text(_featureTitles[i]), findsOneWidget);
       expect(find.text(_featureDetails[i]), findsOneWidget);
