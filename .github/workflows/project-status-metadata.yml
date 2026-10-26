@@ -49,7 +49,51 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Check trusted metadata deployment
+        id: deployment
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          root = Path.cwd()
+          required = (
+              '.github/scripts/pr_metadata.py',
+              '.github/scripts/project_status.py',
+              'project-status/data/designs.json',
+              'project-status/data/api-tasks.json',
+          )
+          ready = all((root / path).is_file() for path in required)
+          if ready:
+              try:
+                  sys.path.insert(0, str(root / '.github/scripts'))
+                  import pr_metadata
+                  registry = json.loads((root / required[2]).read_text(encoding='utf-8'))
+                  catalog = json.loads((root / required[3]).read_text(encoding='utf-8'))
+                  result = pr_metadata.plan(
+                      {'title': '', 'body': '', 'base': {'ref': 'develop'}},
+                      [], [], registry, catalog,
+                  )
+                  ready = callable(pr_metadata.synchronize) and result['metadata']['work_type'] == 'OTHER'
+              except Exception:
+                  ready = False
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"ready={str(ready).lower()}\n")
+          if not ready:
+              message = (
+                  'Trusted metadata deployment is not ready on the default branch; '
+                  'skipping PR body updates. Deploy the workflow, scripts and registries together.'
+              )
+              print(message)
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+                  summary.write(message + '\n')
+          PY
+
       - name: Generate or preserve tracking metadata
+        if: steps.deployment.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
