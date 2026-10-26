@@ -28,7 +28,9 @@ PR #24(02 홈), PR #22(03 개체 등록), PR #29(03-4 종 선택)이다. PR #29�
 
 ## PR 메타데이터
 
-PR 템플릿의 `tail-status` 주석 블록을 사용한다.
+PR 생성·수정 시 `PR 개발 현황 메타데이터` 워크플로가 아래 블록을 자동으로
+생성하거나 갱신한다. 개발자가 블록 코드를 작성할 필요는 없다. 기존의 정확한 수동
+블록은 공백·문구까지 그대로 보존한다. 다음 예시는 형식 설명용이다.
 
 ```text
 tail-status
@@ -53,7 +55,109 @@ design_review: implemented
 
 `develop`에 실제 Merge된 PR만 읽는다. 번호가 없거나 레지스트리에 없는 번호가 있으면
 해당 PR 전체를 완료 처리하지 않고 확인 목록에 남긴다. `main` 릴리스 PR은 조회 대상이
-아니므로 중복 집계되지 않는다. PR 제목은 판정에 사용하지 않는다.
+아니므로 중복 집계되지 않는다. Merge 집계기는 PR 제목으로 완료 여부를 판정하지 않는다.
+
+### 자동 입력과 완료 확인
+
+- 공통 규칙: `.github/scripts/pr_metadata.py`. Python 표준 라이브러리만 사용한다.
+- 대상: `develop`, `main`을 향하는 열린 PR. 생성, 본문/제목 수정, 새 커밋,
+  재개방, Draft 전환·해제 시 실행한다.
+- 연결 Issue: GitHub GraphQL `closingIssuesReferences`와 본문의 동일 저장소
+  `Closes/Fixes/Resolves #번호` 또는 Issue URL을 읽는다. 일반 참고용 Issue 번호나
+  다른 저장소 Issue는 자동 연결하지 않는다. Issue 조회 실패 시 본문을 수정하지 않는다.
+- 화면 번호: PR/연결 Issue 제목의 명시적 Figma 번호, PR/Issue의 `Figma 번호:`
+  항목, 해당 Figma 파일의 node URL을 레지스트리와 대조한다. 단순 숫자·화면 크기,
+  코드 예시에서 번호를 추측하지 않는다. 미등록 값은 입력하지 않고 확인 안내를 남긴다.
+  PR의 명시적 `Figma 번호` 항목을 우선하고, 그다음 PR 제목·node URL,
+  마지막으로 연결 Issue를 사용해 참고 화면이나 Issue 전체 범위를 과잉 추가하지 않는다.
+- 플랫폼: 실제 `android-app/`, `ios-app/` 변경 경로가 근거다. Issue 제약 문구에
+  다른 플랫폼이 언급됐다는 이유로 플랫폼을 추가하지 않는다.
+- 종류: presentation/features/View 경로는 UI 후보, data/api/network/repositories/services
+  경로 또는 등록 API ID는 API 후보다. UI/API 혼합이면 `OTHER`로 보류하고
+  PR의 `작업 종류: UI` 또는 `API`와 실제 완료 범위로 집계 범위를 선택할 수 있다.
+  이 분류는 코드 의미를 분석한 증명이 아닌 후보 추론이다.
+- API: `api-tasks.json`에 실제 등록된 ID만 사용한다. 현재 목록이 비어 있으므로
+  API 작업 ID를 만들지 않는다. 화면·API 대상이 불명확하면 `OTHER / false`로
+  두고 누락된 근거만 안내한다.
+- 기존 유효한 수동 블록의 완료 표시는 작성자 선언으로 보존한다. 레지스트리,
+  파일 플랫폼, 확인된 화면과 충돌하는 블록은 다시 생성하고 완료 여부를 재확인한다.
+
+자동 생성 값은 기본적으로 `completed: false`다. 검증한 UI/API 범위를 완료로
+확인하려면 PR의 일반 텍스트 항목을 다음처럼 작성한다. 블록 코드는 수정하지 않는다.
+
+```text
+- Figma 번호: 01-1
+- 작업 종류: UI
+- 완료 범위: 개인정보 동의 바텀시트와 필수 체크 동작
+- 완료 여부: 완료
+- 완료 근거: 해당 범위 Widget 테스트와 에뮬레이터 시각 확인 완료
+- 완료 검증 커밋: 검증한 현재 PR HEAD의 전체 40자리 SHA
+- API 작업 ID:
+```
+
+현재 HEAD SHA, 범위·근거·명시적 완료 선언이 모두 있어야 하며 Draft·미등록 번호·
+혼합 범위 미확정 상태에서는 자동 완료가 되지 않는다. 단순 `CI 성공`, `PR Merge`는
+완료 근거로 인정하지 않는다. 새 커밋이 추가되어 검증 커밋과 달라지면 자동 완료를
+해제한다. 이 근거는 사람의 검증 선언이지 자동화가 기능·법적 정책을 승인한 것은 아니다.
+디자인 버전 및 `design_review` 승인 값은 자동 추정하지 않는다.
+
+### 본문 보존·중복 방지·보안
+
+자동 블록에는 내용 해시를 붙여 수동 블록과 구분한다. 자동 블록을 사람이 유효하게
+수정하면 이후 수동 블록으로 취급한다. 본문 설명은 보존하고 생성 블록과 도구가 소유한
+확인 안내만 갱신한다. 중복 블록·중복 키·닫히지 않은 블록은 파괴하지 않고 Actions
+요약에 정리 필요를 안내한다. 코드 펜스 안의 예시는 자동 입력과 Merge 집계 모두 무시한다.
+
+같은 PR은 concurrency로 직렬화하며, 본문이 같으면 PATCH하지 않는다. 쓰기 직전에
+본문·HEAD·대상 브랜치 등을 다시 읽고 수정됐으면 재계산하며, ETag 조건도 전달한다.
+GitHub API가 원자적 본문 비교·교체를 보장하는 것은 아니므로 확인과 PATCH 사이의
+아주 짧은 동시 편집 경합은 완전히 제거할 수 없다. 최종 본문은 GitHub에서 검토한다.
+
+워크플로는 `pull_request_target`에서 **기본 브랜치의 최신 신뢰된 코드만** checkout한다.
+PR head checkout, 패키지 설치, PR 코드 실행, 캐시, PR artifact 실행은 하지 않는다.
+권한은 `contents: read`, `issues: read`, `pull-requests: write`이며 별도 PAT나 외부 Secret을
+사용하지 않는다. PR 텍스트는 JSON 데이터로만 취급하며 셸 코드에 삽입하지 않는다.
+로그·Actions 요약에는 고정 안내만 기록한다.
+
+본문 갱신은 Discord 알림·Pages 배포·Figma 동기화를 직접 호출하지 않는다. 기존 Discord는
+`edited` 이벤트를 구독하지 않고 현황 집계는 `closed`만 구독하므로 알림을 중복 전송하지
+않는다. `GITHUB_TOKEN`의 이벤트 재귀 제한에만 의존하지 않고 자체 멱등성도 유지한다.
+
+### 설치 및 읽기 전용 검증
+
+이 저장소는 기본 브랜치가 `main`이다. develop에만 파일을 넣은 상태는 배포 완료가 아니다.
+사용자 승인 후 자동화 파일만 main에 반영하는 별도 PR에서 새 워크플로, `pr_metadata.py`,
+공통 파서 `project_status.py` 및 두 레지스트리의 호환성을 함께 확인한다. 앱 기능 전체를
+main으로 Merge할 필요는 없다. 승인 없이 main이나 Actions 설정을 변경하지 않는다.
+저장소/조직의 Actions 이벤트 정책이 `pull_request_target`을 허용하는지도 관리자가 확인한다.
+관련 정책은 [GitHub 보안 안내](https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target)를 참고한다.
+
+설치 후 Actions → `PR 개발 현황 메타데이터` → Run workflow에서 PR 번호를 입력한다.
+`apply`의 기본값은 false로, 읽기 전용 확인이다. true 선택은 실제 본문 갱신이므로
+기존 PR #42·#38 검증에는 false만 사용한다. 별도 Discord Secret, Pages/Figma 활성화,
+`PROJECT_STATUS_ENABLED` 설정은 필요 없다.
+
+로컬에서는 다음처럼 기본 읽기 전용 CLI를 사용한다. 토큰은 채팅·코드에 적지 않고
+환경에 안전하게 설정한 `GH_TOKEN`만 사용한다. `--apply`가 없으면 PATCH하지 않는다.
+
+```bash
+python .github/scripts/pr_metadata.py --repository tail-friends/tail-app --pr-number 42 --dry-run
+python .github/scripts/pr_metadata.py --repository tail-friends/tail-app --pr-number 38 --dry-run
+```
+
+Codex 등의 PR 작성 도구도 동일 스크립트의 fixture 모드로 본문을 준비할 수 있다.
+fixture는 `pull`(REST 형식의 title/body/base.ref/head.sha/draft/state), `files`(경로 배열),
+`issues`(연결 Issue의 number/title/body 배열)를 포함한다. API 모델을 새로 정의하는 파일은 아니다.
+
+```bash
+python .github/scripts/pr_metadata.py --fixture .github/scripts/tests/fixtures/metadata-pr-42.json --output build/pr-metadata-42.json
+python .github/scripts/pr_metadata.py --fixture .github/scripts/tests/fixtures/metadata-pr-38.json --output build/pr-metadata-38.json
+python -m unittest discover -s .github/scripts/tests -p "test_*.py" -v
+```
+
+두 fixture는 실제 PR과 연결 Issue·파일 목록을 읽기 전용 조회한 스냅샷이다. 원본 수동
+블록 보존과 블록을 제외한 자동 추론을 모두 테스트한다. 라이브 API PATCH와 실제 Actions
+트리거 검증은 승인된 배포 이후에 별도로 수행해야 한다.
 
 ## Figma 버전 감지
 
