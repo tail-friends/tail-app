@@ -6,10 +6,10 @@ struct LoginView: View {
             let topInset = geometry.safeAreaInsets.top
             let bottomShift = max(0, geometry.safeAreaInsets.bottom - 24)
             let isCompactHeight = geometry.size.height < 750
-            let characterTopGap = isCompactHeight ? 72 : max(96, 237 - topInset - bottomShift)
+            let characterTopGap = isCompactHeight ? 72 : max(96, 244 - topInset - bottomShift)
             let characterSlotHeight = isCompactHeight ? 48 : 94.5
             let brandGapHeight = isCompactHeight ? 32 : 72.75
-            let providerGapHeight: CGFloat = isCompactHeight ? 88 : 167
+            let providerGapHeight: CGFloat = isCompactHeight ? 88 : 170
 
             ZStack(alignment: .top) {
                 Color(hex: 0xFAF7F0)
@@ -46,7 +46,7 @@ struct LoginView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: geometry.size.height, alignment: .top)
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 26)
                 }
                 .accessibilityIdentifier("login.scroll")
             }
