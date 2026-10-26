@@ -46,7 +46,7 @@ def visible(body: str) -> str:
 
 
 def field(body: str, label: str) -> str:
-    pattern = rf"^\s*(?:-\s*)?{re.escape(label)}\s*[:：]\s*(.*?)\s*$"
+    pattern = rf"^[ \t]*(?:-[ \t]*)?{re.escape(label)}[ \t]*[:：][ \t]*([^\r\n]*)\r?$"
     match = re.search(pattern, visible(body), re.M | re.I)
     return match.group(1).strip().strip("` ") if match else ""
 

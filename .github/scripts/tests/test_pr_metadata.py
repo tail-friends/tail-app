@@ -35,6 +35,20 @@ class MetadataCase(unittest.TestCase):
 
 
 class MetadataTests(MetadataCase):
+    def test_empty_fields_do_not_consume_the_next_line(self):
+        for newline in ["\n", "\r\n"]:
+            body = newline.join(["- Figma 번호:", "- 작업 종류: OTHER", "- API 작업 ID:", "## 작업 개요"])
+            self.assertEqual("", metadata.field(body, "Figma 번호"))
+            self.assertEqual("", metadata.field(body, "API 작업 ID"))
+            self.assertEqual("OTHER", metadata.field(body, "작업 종류"))
+
+    def test_empty_api_field_in_template_does_not_report_an_unknown_api(self):
+        self.fixture["pull"].update(title="자동화 개선", body=(ROOT / ".github/pull_request_template.md").read_text(encoding="utf-8"))
+        self.fixture.update(files=[".github/scripts/pr_metadata.py"], issues=[])
+        result = self.plan()
+        self.assertEqual("OTHER", result["metadata"]["work_type"])
+        self.assertEqual([], result["reasons"])
+
     def test_live_pr42_manual_android_consent_metadata_is_preserved_byte_for_byte(self):
         result = self.plan()
         self.assertEqual("preserve", result["action"])
