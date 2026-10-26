@@ -209,4 +209,36 @@ final class TailFriendsUITests: XCTestCase {
         save.tap()
         XCTAssertTrue(app.alerts["저장 미리보기"].waitForExistence(timeout: 3))
     }
+
+    func testFeedingRecordSheetCanBeDismissedByDraggingHandle() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let sheetTitle = app.staticTexts["기록 추가"]
+        XCTAssertTrue(sheetTitle.waitForExistence(timeout: 5))
+
+        let handle = app.descendants(matching: .any)
+            .matching(identifier: "feeding.sheet.handle")
+            .firstMatch
+        XCTAssertTrue(handle.waitForExistence(timeout: 3))
+
+        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+        start.press(forDuration: 0.1, thenDragTo: end)
+
+        XCTAssertTrue(sheetTitle.waitForNonExistence(timeout: 3))
+    }
+
+    func testFeedingRecordSheetCanBeDismissedByCloseButton() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let sheetTitle = app.staticTexts["기록 추가"]
+        XCTAssertTrue(sheetTitle.waitForExistence(timeout: 5))
+        app.buttons["feeding.close"].tap()
+
+        XCTAssertTrue(sheetTitle.waitForNonExistence(timeout: 3))
+    }
 }

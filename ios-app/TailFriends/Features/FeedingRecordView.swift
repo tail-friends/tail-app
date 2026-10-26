@@ -10,6 +10,9 @@ struct FeedingRecordView: View {
     @State private var didNotEat = false
     @State private var memo = "잘 받아먹음"
     @State private var isSavePreviewPresented = false
+    @State private var sheetDragOffset: CGFloat = 0
+    @State private var isSheetPresented = true
+    @State private var isSheetClosing = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -21,9 +24,12 @@ struct FeedingRecordView: View {
             ZStack(alignment: .bottom) {
                 homeBackdrop(topInset: topInset, size: CGSize(width: geometry.size.width, height: fullHeight))
 
-                sheet(bottomInset: bottomInset)
-                    .frame(height: sheetHeight)
-                    .frame(maxWidth: .infinity)
+                if isSheetPresented {
+                    sheet(bottomInset: bottomInset, dismissalDistance: fullHeight)
+                        .frame(height: sheetHeight)
+                        .frame(maxWidth: .infinity)
+                        .offset(y: sheetDragOffset)
+                }
             }
             .frame(width: geometry.size.width, height: fullHeight)
             .offset(y: -topInset)
@@ -124,15 +130,13 @@ struct FeedingRecordView: View {
         .accessibilityHidden(true)
     }
 
-    private func sheet(bottomInset: CGFloat) -> some View {
+    private func sheet(bottomInset: CGFloat, dismissalDistance: CGFloat) -> some View {
         VStack(spacing: 0) {
-            Capsule()
-                .fill(FeedingPalette.handle)
-                .frame(width: 50, height: 5)
-                .padding(.top, 10)
-                .accessibilityHidden(true)
+            dragHandle(dismissalDistance: dismissalDistance)
 
-            sheetHeader
+            sheetHeader {
+                dismissSheet(distance: dismissalDistance)
+            }
                 .padding(.top, 12)
                 .padding(.bottom, 16)
 
@@ -166,7 +170,54 @@ struct FeedingRecordView: View {
         }
     }
 
-    private var sheetHeader: some View {
+    private func dragHandle(dismissalDistance: CGFloat) -> some View {
+        Capsule()
+            .fill(FeedingPalette.handle)
+            .frame(width: 50, height: 5)
+            .padding(.top, 10)
+            .frame(maxWidth: .infinity)
+            .frame(height: 15, alignment: .top)
+            .overlay(alignment: .top) {
+                Color.clear
+                    .frame(width: 120, height: 44)
+                    .contentShape(Rectangle())
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("기록 추가 화면 핸들")
+                    .accessibilityIdentifier("feeding.sheet.handle")
+                    .gesture(
+                        DragGesture(minimumDistance: 8)
+                            .onChanged { value in
+                                sheetDragOffset = max(0, value.translation.height)
+                            }
+                            .onEnded { value in
+                                if value.translation.height >= 110 {
+                                    dismissSheet(distance: dismissalDistance)
+                                } else {
+                                    withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.86)) {
+                                        sheetDragOffset = 0
+                                    }
+                                }
+                            }
+                    )
+            }
+    }
+
+    private func dismissSheet(distance: CGFloat) {
+        guard isSheetPresented, !isSheetClosing else { return }
+        isSheetClosing = true
+        isMemoFocused = false
+
+        withAnimation(.easeInOut(duration: 0.28)) {
+            sheetDragOffset = distance
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isSheetPresented = false
+            dismiss()
+        }
+    }
+
+    private func sheetHeader(onClose: @escaping () -> Void) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 1) {
                 Text("기록 추가")
@@ -182,8 +233,7 @@ struct FeedingRecordView: View {
             Spacer(minLength: 0)
 
             Button {
-                isMemoFocused = false
-                dismiss()
+                onClose()
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 14, weight: .semibold))
@@ -373,38 +423,39 @@ struct FeedingRecordView: View {
                 .foregroundStyle(FeedingPalette.secondary)
                 .accessibilityAddTraits(.isHeader)
 
-            HStack(spacing: 8) {
-                TextField("메모를 입력해 주세요", text: $memo)
-                    .font(.custom("Jua", size: 14, relativeTo: .body))
-                    .foregroundStyle(FeedingPalette.primary)
-                    .textInputAutocapitalization(.never)
-                    .submitLabel(.done)
-                    .focused($isMemoFocused)
-                    .onSubmit { isMemoFocused = false }
-                    .accessibilityLabel("메모")
-                    .accessibilityIdentifier("feeding.memo")
-                    .onChange(of: memo) { _, newValue in
-                        if newValue.count > 300 {
-                            memo = String(newValue.prefix(300))
-                        }
+            TextField("메모를 입력해 주세요", text: $memo)
+                .font(.custom("Jua", size: 14, relativeTo: .body))
+                .foregroundStyle(FeedingPalette.primary)
+                .textInputAutocapitalization(.never)
+                .submitLabel(.done)
+                .focused($isMemoFocused)
+                .onSubmit { isMemoFocused = false }
+                .accessibilityLabel("메모")
+                .accessibilityIdentifier("feeding.memo")
+                .onChange(of: memo) { _, newValue in
+                    if newValue.count > 300 {
+                        memo = String(newValue.prefix(300))
                     }
-
-                if isMemoFocused && !memo.isEmpty {
-                    Button {
-                        memo = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 16))
-                            .foregroundStyle(FeedingPalette.secondary.opacity(0.72))
-                            .frame(width: 44, height: 44)
-                    }
-                    .buttonStyle(.plain)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
-                    .accessibilityLabel("메모 지우기")
-                    .accessibilityIdentifier("feeding.memo.clear")
                 }
-            }
+                .padding(.trailing, isMemoFocused && !memo.isEmpty ? 44 : 0)
+                .frame(maxWidth: .infinity, minHeight: 54)
+                .overlay(alignment: .trailing) {
+                    if isMemoFocused && !memo.isEmpty {
+                        Button {
+                            memo = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundStyle(FeedingPalette.secondary.opacity(0.72))
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("메모 지우기")
+                        .accessibilityIdentifier("feeding.memo.clear")
+                        .zIndex(1)
+                    }
+                }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 54)
             .background(.white.opacity(0.94), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
