@@ -1,24 +1,20 @@
 import XCTest
 
 final class TailFriendsUITests: XCTestCase {
-    func testLaunchShowsLoginScreen() {
+    func testLaunchShowsHomeScreen() {
         let app = XCUIApplication()
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["login.brand"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["login.tagline"].exists)
-        XCTAssertTrue(app.buttons["login.apple.button"].exists)
-        XCTAssertTrue(app.buttons["login.kakao.button"].exists)
-        XCTAssertTrue(app.buttons["login.google.button"].exists)
+        let header = app.descendants(matching: .any)
+            .matching(identifier: "home.header")
+            .firstMatch
+        XCTAssertTrue(header.waitForExistence(timeout: 5))
 
-        let scrollView = app.scrollViews["login.scroll"]
-        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
-        let terms = app.staticTexts["login.terms"]
-        for _ in 0..<3 where !terms.isHittable {
-            scrollView.swipeUp()
-        }
-
-        XCTAssertTrue(app.buttons["login.google.button"].isHittable)
-        XCTAssertTrue(terms.isHittable)
+        let hero = app.descendants(matching: .any)
+            .matching(identifier: "home.hero")
+            .firstMatch
+        XCTAssertTrue(hero.exists)
+        XCTAssertTrue(app.buttons["home.feeding.button"].exists)
+        XCTAssertTrue(app.buttons["home.bottomNavigation.habitat"].exists)
     }
 }
