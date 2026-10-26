@@ -153,4 +153,60 @@ final class TailFriendsUITests: XCTestCase {
         save.tap()
         XCTAssertTrue(app.alerts["저장 미리보기"].waitForExistence(timeout: 3))
     }
+
+    func testFeedingRecordPreviewSupportsSelectionAndEditing() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let scrollView = app.scrollViews["feeding.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["기록 추가"].exists)
+
+        let cricket = app.buttons["feeding.food.cricket"]
+        let mealworm = app.buttons["feeding.food.mealworm"]
+        XCTAssertTrue(cricket.waitForExistence(timeout: 3))
+        XCTAssertEqual(cricket.value as? String, "선택됨")
+        mealworm.tap()
+        XCTAssertEqual(mealworm.value as? String, "선택됨")
+        cricket.tap()
+
+        let quantity = app.staticTexts["feeding.quantity.value"]
+        XCTAssertEqual(quantity.label, "5")
+        app.buttons["feeding.quantity.decrease"].tap()
+        XCTAssertEqual(quantity.label, "4")
+        app.buttons["feeding.quantity.increase"].tap()
+        XCTAssertEqual(quantity.label, "5")
+
+        let notEaten = app.buttons["feeding.notEaten"]
+        XCTAssertEqual(notEaten.value as? String, "끔")
+        notEaten.tap()
+        XCTAssertEqual(notEaten.value as? String, "켬")
+        notEaten.tap()
+
+        let memo = app.textFields["feeding.memo"]
+        if !memo.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(memo.waitForExistence(timeout: 3))
+        XCTAssertEqual(memo.value as? String, "잘 받아먹음")
+        memo.tap()
+        let clearMemo = app.buttons["feeding.memo.clear"]
+        XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
+        clearMemo.tap()
+        memo.typeText("잘 먹었어요")
+        XCTAssertEqual(memo.value as? String, "잘 먹었어요")
+
+        let keyboardDone = app.buttons["feeding.memo.done"]
+        if keyboardDone.waitForExistence(timeout: 2) {
+            keyboardDone.tap()
+        }
+
+        let save = app.buttons["feeding.save"]
+        if !save.isHittable {
+            scrollView.swipeUp()
+        }
+        save.tap()
+        XCTAssertTrue(app.alerts["저장 미리보기"].waitForExistence(timeout: 3))
+    }
 }
