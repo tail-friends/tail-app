@@ -153,4 +153,199 @@ final class TailFriendsUITests: XCTestCase {
         save.tap()
         XCTAssertTrue(app.alerts["저장 미리보기"].waitForExistence(timeout: 3))
     }
+
+    func testFeedingRecordPreviewSupportsSelectionAndEditing() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let scrollView = app.scrollViews["feeding.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["기록 추가"].exists)
+
+        let cricket = app.buttons["feeding.food.cricket"]
+        let mealworm = app.buttons["feeding.food.mealworm"]
+        XCTAssertTrue(cricket.waitForExistence(timeout: 3))
+        XCTAssertEqual(cricket.value as? String, "선택됨")
+        let foodChips = [
+            cricket,
+            mealworm,
+            app.buttons["feeding.food.dubia"],
+            app.buttons["feeding.food.superworm"]
+        ]
+        for chip in foodChips {
+            XCTAssertTrue(chip.waitForExistence(timeout: 3))
+            XCTAssertGreaterThanOrEqual(chip.frame.width, 44, "\(chip.identifier) width")
+            XCTAssertGreaterThanOrEqual(chip.frame.height, 44, "\(chip.identifier) height")
+        }
+        mealworm.tap()
+        XCTAssertEqual(mealworm.value as? String, "선택됨")
+        cricket.tap()
+
+        let quantity = app.staticTexts["feeding.quantity.value"]
+        XCTAssertEqual(quantity.label, "5")
+        app.buttons["feeding.quantity.decrease"].tap()
+        XCTAssertEqual(quantity.label, "4")
+        app.buttons["feeding.quantity.increase"].tap()
+        XCTAssertEqual(quantity.label, "5")
+
+        let notEaten = app.buttons["feeding.notEaten"]
+        XCTAssertEqual(notEaten.value as? String, "끔")
+        notEaten.tap()
+        XCTAssertEqual(notEaten.value as? String, "켬")
+        notEaten.tap()
+
+        let memo = app.textFields["feeding.memo"]
+        if !memo.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(memo.waitForExistence(timeout: 3))
+        XCTAssertEqual(memo.value as? String, "잘 받아먹음")
+        memo.tap()
+        XCTAssertTrue(app.buttons["feeding.memo.done"].waitForExistence(timeout: 5))
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        let clearMemo = app.buttons["feeding.memo.clear"]
+        XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
+        let clearMemoIsHittable = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "hittable == true"),
+            object: clearMemo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [clearMemoIsHittable], timeout: 5), .completed)
+        XCTAssertLessThan(clearMemo.frame.maxY, keyboard.frame.minY, "Memo clear control must sit above the keyboard")
+        clearMemo.tap()
+        memo.typeText("잘 먹었어요")
+        XCTAssertEqual(memo.value as? String, "잘 먹었어요")
+
+        let keyboardDone = app.buttons["feeding.memo.done"]
+        if keyboardDone.waitForExistence(timeout: 2) {
+            keyboardDone.tap()
+        }
+
+        let save = app.buttons["feeding.save"]
+        if !save.isHittable {
+            scrollView.swipeUp()
+        }
+        save.tap()
+        XCTAssertTrue(app.alerts["저장 미리보기"].waitForExistence(timeout: 3))
+    }
+
+    func testFeedingRecordUnavailableTypesStayOnFeedingAndShowNotice() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let feeding = app.buttons["feeding.type.feeding"]
+        let molting = app.buttons["feeding.type.molting"]
+        let weight = app.buttons["feeding.type.weight"]
+        XCTAssertTrue(feeding.waitForExistence(timeout: 5))
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+
+        molting.tap()
+        let notice = app.alerts["준비 중"]
+        XCTAssertTrue(notice.waitForExistence(timeout: 3))
+        XCTAssertTrue(notice.staticTexts["탈피 기록은 준비 중이에요."].exists)
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+        XCTAssertEqual(molting.value as? String, "선택 안 됨")
+        notice.buttons["확인"].tap()
+
+        weight.tap()
+        XCTAssertTrue(notice.waitForExistence(timeout: 3))
+        XCTAssertTrue(notice.staticTexts["체중 기록은 준비 중이에요."].exists)
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+        XCTAssertEqual(weight.value as? String, "선택 안 됨")
+    }
+
+    func testFeedingRecordSheetCanBeDismissedByDraggingHandle() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let sheetTitle = app.staticTexts["기록 추가"]
+        XCTAssertTrue(sheetTitle.waitForExistence(timeout: 5))
+
+        let handle = app.descendants(matching: .any)
+            .matching(identifier: "feeding.sheet.handle")
+            .firstMatch
+        XCTAssertTrue(handle.waitForExistence(timeout: 3))
+
+        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+        start.press(forDuration: 0.1, thenDragTo: end)
+
+        XCTAssertTrue(sheetTitle.waitForNonExistence(timeout: 3))
+    }
+
+    func testFeedingRecordSheetCanBeDismissedByCloseButton() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let sheetTitle = app.staticTexts["기록 추가"]
+        XCTAssertTrue(sheetTitle.waitForExistence(timeout: 5))
+        app.buttons["feeding.close"].tap()
+
+        XCTAssertTrue(sheetTitle.waitForNonExistence(timeout: 3))
+    }
+
+    func testFeedingRecordMemoWrapsAcrossMultipleLines() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let scrollView = app.scrollViews["feeding.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+
+        let memo = app.textFields["feeding.memo"]
+        if !memo.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(memo.waitForExistence(timeout: 3))
+        let initialHeight = memo.frame.height
+        let sheetHandle = app.descendants(matching: .any)
+            .matching(identifier: "feeding.sheet.handle")
+            .firstMatch
+        let sheetTitle = app.staticTexts["기록 추가"]
+        let closeButton = app.buttons["feeding.close"]
+        let saveButton = app.buttons["feeding.save"]
+        XCTAssertTrue(sheetHandle.exists)
+        XCTAssertTrue(closeButton.exists)
+        XCTAssertTrue(saveButton.exists)
+        let initialHandleY = sheetHandle.frame.minY
+        let initialTitleY = sheetTitle.frame.minY
+        let initialCloseY = closeButton.frame.minY
+        let initialSaveY = saveButton.frame.minY
+
+        memo.tap()
+        XCTAssertTrue(app.buttons["feeding.memo.done"].waitForExistence(timeout: 3))
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        XCTAssertEqual(sheetHandle.frame.minY, initialHandleY, accuracy: 1)
+        XCTAssertEqual(sheetTitle.frame.minY, initialTitleY, accuracy: 1)
+        XCTAssertEqual(closeButton.frame.minY, initialCloseY, accuracy: 1)
+        XCTAssertEqual(saveButton.frame.minY, initialSaveY, accuracy: 1)
+
+        let clearMemo = app.buttons["feeding.memo.clear"]
+        XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
+        let clearMemoIsHittable = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "hittable == true"),
+            object: clearMemo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [clearMemoIsHittable], timeout: 5), .completed)
+        XCTAssertLessThan(clearMemo.frame.maxY, keyboard.frame.minY, "Memo clear control must sit above the keyboard")
+        clearMemo.tap()
+
+        let attemptedMemo = String(repeating: "a", count: 320)
+        let expectedMemo = String(attemptedMemo.prefix(300))
+        memo.typeText(attemptedMemo)
+
+        let memoCappedExpectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value == %@", expectedMemo),
+            object: memo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [memoCappedExpectation], timeout: 3), .completed)
+        XCTAssertEqual(memo.value as? String, expectedMemo)
+        XCTAssertEqual(expectedMemo.count, 300)
+        XCTAssertGreaterThan(memo.frame.height, initialHeight + 20)
+    }
 }
