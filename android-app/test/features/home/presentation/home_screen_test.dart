@@ -71,14 +71,15 @@ void main() {
     );
   });
 
-  testWidgets('일반 홈은 예시 수치 대신 빈 상태를 표시한다', (tester) async {
+  testWidgets('일반 홈은 예시 수치 대신 첫 방문 빈 상태를 표시한다', (tester) async {
     _setViewSize(tester, const Size(390, 844));
     await tester.pumpWidget(_host(HomeScreen(now: DateTime(2026, 10, 25))));
 
     expect(find.text('10월 25일 일요일'), findsOneWidget);
-    expect(find.text('오늘의 사육장'), findsOneWidget);
-    expect(find.text('등록된 친구가 없어요'), findsOneWidget);
-    expect(find.text('아직 기록이 없어요'), findsOneWidget);
+    expect(find.text('반가워요, 어서 오세요'), findsOneWidget);
+    expect(find.text('아직 함께하는 친구가 없어요'), findsOneWidget);
+    expect(find.text('첫 친구 등록하기'), findsOneWidget);
+    expect(find.text('민준'), findsNothing);
     expect(find.text('욱이'), findsNothing);
     expect(find.text('52'), findsNothing);
     expect(find.text('12'), findsNothing);

@@ -13,12 +13,23 @@ class AppBottomNavigation extends StatelessWidget {
     required this.currentTab,
     required this.onTabSelected,
     this.labelStyle,
+    this.iconAssets = const {},
+    this.selectedLabelColor = AppColors.textComponentPrimary,
+    this.unselectedLabelColor = AppColors.textTertiary,
+    this.selectedBackgroundColor = AppColors.surface,
     super.key,
   });
 
   final AppTab currentTab;
   final ValueChanged<AppTab> onTabSelected;
   final TextStyle? labelStyle;
+
+  /// Exact screen assets, when a Figma frame uses a different icon treatment.
+  /// Omitted entries keep the existing selected/inactive design-system assets.
+  final Map<AppTab, String> iconAssets;
+  final Color selectedLabelColor;
+  final Color unselectedLabelColor;
+  final Color selectedBackgroundColor;
 
   static const _items = <AppTab, ({String label, String assetName})>{
     AppTab.habitat: (label: '사육장', assetName: 'home'),
@@ -54,6 +65,11 @@ class AppBottomNavigation extends StatelessWidget {
                   selected: currentTab == tab,
                   onTap: () => onTabSelected(tab),
                   labelStyle: labelStyle,
+                  iconAsset: iconAssets[tab],
+                  labelColor: currentTab == tab
+                      ? selectedLabelColor
+                      : unselectedLabelColor,
+                  selectedBackgroundColor: selectedBackgroundColor,
                 ),
               ),
             ],
@@ -72,6 +88,9 @@ class _NavigationItem extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.labelStyle,
+    required this.iconAsset,
+    required this.labelColor,
+    required this.selectedBackgroundColor,
   });
 
   final AppTab tab;
@@ -80,6 +99,9 @@ class _NavigationItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final TextStyle? labelStyle;
+  final String? iconAsset;
+  final Color labelColor;
+  final Color selectedBackgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +126,9 @@ class _NavigationItem extends StatelessWidget {
                 constraints: const BoxConstraints(minHeight: 38),
                 padding: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.surface : Colors.transparent,
+                  color: selected
+                      ? selectedBackgroundColor
+                      : Colors.transparent,
                   borderRadius: radius,
                   boxShadow: selected
                       ? const [
@@ -122,7 +146,8 @@ class _NavigationItem extends StatelessWidget {
                   children: [
                     ExcludeSemantics(
                       child: SvgPicture.asset(
-                        'assets/icons/nav_${assetName}_${selected ? 'active' : 'inactive'}.svg',
+                        iconAsset ??
+                            'assets/icons/nav_${assetName}_${selected ? 'active' : 'inactive'}.svg',
                         width: 16,
                         height: 16,
                       ),
@@ -136,9 +161,7 @@ class _NavigationItem extends StatelessWidget {
                           .copyWith(
                             fontSize: 10,
                             height: 13 / 10,
-                            color: selected
-                                ? AppColors.textComponentPrimary
-                                : AppColors.textTertiary,
+                            color: labelColor,
                           ),
                     ),
                   ],
