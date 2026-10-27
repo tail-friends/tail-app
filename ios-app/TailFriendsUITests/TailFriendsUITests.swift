@@ -202,9 +202,14 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertTrue(memo.waitForExistence(timeout: 3))
         XCTAssertEqual(memo.value as? String, "잘 받아먹음")
         memo.tap()
+        XCTAssertTrue(app.buttons["feeding.memo.done"].waitForExistence(timeout: 5))
         let clearMemo = app.buttons["feeding.memo.clear"]
         XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
-        XCTAssertTrue(clearMemo.isHittable)
+        let clearMemoIsHittable = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "hittable == true"),
+            object: clearMemo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [clearMemoIsHittable], timeout: 5), .completed)
         clearMemo.tap()
         memo.typeText("잘 먹었어요")
         XCTAssertEqual(memo.value as? String, "잘 먹었어요")
@@ -317,7 +322,11 @@ final class TailFriendsUITests: XCTestCase {
 
         let clearMemo = app.buttons["feeding.memo.clear"]
         XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
-        XCTAssertTrue(clearMemo.isHittable)
+        let clearMemoIsHittable = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "hittable == true"),
+            object: clearMemo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [clearMemoIsHittable], timeout: 5), .completed)
         clearMemo.tap()
 
         let attemptedMemo = String(repeating: "a", count: 320)
