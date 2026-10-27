@@ -19,7 +19,7 @@ struct FeedingRecordView: View {
     @State private var stableFullHeight: CGFloat?
     @State private var stableTopInset: CGFloat?
     @State private var stableBottomInset: CGFloat?
-    @State private var keyboardOverlapHeight: CGFloat = 0
+    @State private var keyboardFrameInScreen: CGRect?
 
     var body: some View {
         GeometryReader { geometry in
@@ -61,15 +61,10 @@ struct FeedingRecordView: View {
                     return
                 }
 
-                let overlap = max(0, fullHeight - keyboardFrame.minY)
-                withAnimation(.easeOut(duration: 0.2)) {
-                    keyboardOverlapHeight = overlap
-                }
+                keyboardFrameInScreen = keyboardFrame
             }
             .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                withAnimation(.easeOut(duration: 0.2)) {
-                    keyboardOverlapHeight = 0
-                }
+                keyboardFrameInScreen = nil
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -186,32 +181,51 @@ struct FeedingRecordView: View {
                 .padding(.bottom, 16)
 
             ScrollViewReader { scrollProxy in
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        recordTypeControl
-                        foodSection
-                        quantitySection
-                        notEatenSection
-                        memoSection
-                            .id("feeding.memo.focus-target")
+                GeometryReader { scrollGeometry in
+                    let scrollFrame = scrollGeometry.frame(in: .global)
+                    let keyboardInset = keyboardOverlap(with: scrollFrame)
+
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 16) {
+                            recordTypeControl
+                            foodSection
+                            quantitySection
+                            notEatenSection
+                            memoSection
+                                .id("feeding.memo.focus-target")
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, max(12, scrollGeometry.size.height - keyboardInset))
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 12 + keyboardOverlapHeight)
-                }
-                .scrollDismissesKeyboard(.interactively)
-                .accessibilityIdentifier("feeding.scroll")
-                .onChange(of: isMemoFocused) { _, isFocused in
-                    guard isFocused else { return }
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        Color.clear
+                            .frame(height: keyboardInset)
+                            .accessibilityHidden(true)
+                    }
+                    .scrollDismissesKeyboard(.interactively)
+                    .accessibilityIdentifier("feeding.scroll")
+                    .onChange(of: isMemoFocused) { _, isFocused in
+                        guard isFocused else { return }
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
+                        }
+                    }
+                    .onChange(of: keyboardInset) { _, inset in
+                        guard isMemoFocused, inset > 0 else { return }
+                        DispatchQueue.main.async {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
+                            }
+                        }
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
+                        guard isMemoFocused else { return }
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
+                        }
                     }
                 }
-                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
-                    guard isMemoFocused else { return }
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
-                    }
-                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
             saveAction
@@ -247,6 +261,13 @@ struct FeedingRecordView: View {
             }
             .ignoresSafeArea(edges: .bottom)
         }
+    }
+
+    private func keyboardOverlap(with viewFrame: CGRect) -> CGFloat {
+        guard let keyboardFrameInScreen else { return 0 }
+        let intersection = viewFrame.intersection(keyboardFrameInScreen)
+        guard !intersection.isNull, intersection.height.isFinite else { return 0 }
+        return max(0, intersection.height)
     }
 
     private func dragHandle(dismissalDistance: CGFloat) -> some View {
