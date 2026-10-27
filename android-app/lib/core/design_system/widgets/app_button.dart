@@ -15,9 +15,11 @@ class AppButton extends StatelessWidget {
     this.isLoading = false,
     this.expand = true,
     this.backgroundColor,
+    this.foregroundColor,
+    this.minHeight = 50,
     this.textStyle,
     super.key,
-  });
+  }) : assert(minHeight >= 44);
 
   final String label;
   final VoidCallback? onPressed;
@@ -25,6 +27,8 @@ class AppButton extends StatelessWidget {
   final bool isLoading;
   final bool expand;
   final Color? backgroundColor;
+  final Color? foregroundColor;
+  final double minHeight;
   final TextStyle? textStyle;
 
   bool get _enabled => onPressed != null && !isLoading;
@@ -32,12 +36,14 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(AppRadius.full);
-    final foreground = variant == AppButtonVariant.primary
-        ? AppColors.textOnPrimary
-        : AppColors.textComponentPrimary;
+    final foreground =
+        foregroundColor ??
+        (variant == AppButtonVariant.primary
+            ? AppColors.textOnPrimary
+            : AppColors.textComponentPrimary);
 
     final content = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 50),
+      constraints: BoxConstraints(minHeight: minHeight),
       child: Center(
         child: isLoading
             ? SizedBox.square(
