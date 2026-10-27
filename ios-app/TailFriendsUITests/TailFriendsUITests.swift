@@ -361,6 +361,13 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["급여 기록"].exists)
         XCTAssertTrue(app.staticTexts["직전 기록으로 채웠어요"].exists)
 
+        let feedingFormCard = app.descendants(matching: .any)
+            .matching(identifier: "creatureDetail.feedingForm")
+            .firstMatch
+        XCTAssertTrue(feedingFormCard.waitForExistence(timeout: 3))
+        XCTAssertEqual(feedingFormCard.frame.minX, 24, accuracy: 1)
+        XCTAssertEqual(feedingFormCard.frame.width, 342, accuracy: 1)
+
         let feeding = app.buttons["creatureDetail.category.급여"]
         let molting = app.buttons["creatureDetail.category.탈피"]
         XCTAssertEqual(feeding.value as? String, "선택됨")
@@ -403,6 +410,14 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
         XCTAssertTrue(clearMemo.isHittable)
         clearMemo.tap()
+        let memoClearedExpectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value != %@", "잘 받아먹음"),
+            object: memo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [memoClearedExpectation], timeout: 3), .completed)
+        let memoValueAfterClear = memo.value as? String ?? ""
+        XCTAssertTrue(memoValueAfterClear.isEmpty || memoValueAfterClear == "메모를 입력해 주세요")
+        memo.tap()
         memo.typeText("잘 먹었어요")
         XCTAssertEqual(memo.value as? String, "잘 먹었어요")
         app.buttons["creatureDetail.memo.done"].tap()
@@ -477,5 +492,18 @@ final class TailFriendsUITests: XCTestCase {
 
         album.tap()
         XCTAssertTrue(app.alerts["준비 중"].waitForExistence(timeout: 3))
+    }
+
+    func testCreatureDetailPreviewBackReturnsToHome() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-detail-feeding")
+        app.launch()
+
+        let detailScroll = app.scrollViews["creatureDetail.scroll"]
+        XCTAssertTrue(detailScroll.waitForExistence(timeout: 5))
+        app.buttons["creatureDetail.back"].tap()
+
+        XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
+        XCTAssertFalse(detailScroll.exists)
     }
 }
