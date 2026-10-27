@@ -241,4 +241,52 @@ final class TailFriendsUITests: XCTestCase {
 
         XCTAssertTrue(sheetTitle.waitForNonExistence(timeout: 3))
     }
+
+    func testFeedingRecordMemoWrapsAcrossMultipleLines() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let scrollView = app.scrollViews["feeding.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+
+        let memo = app.textFields["feeding.memo"]
+        if !memo.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(memo.waitForExistence(timeout: 3))
+        let initialHeight = memo.frame.height
+        let sheetHandle = app.descendants(matching: .any)
+            .matching(identifier: "feeding.sheet.handle")
+            .firstMatch
+        let sheetTitle = app.staticTexts["기록 추가"]
+        let closeButton = app.buttons["feeding.close"]
+        let saveButton = app.buttons["feeding.save"]
+        XCTAssertTrue(sheetHandle.exists)
+        XCTAssertTrue(closeButton.exists)
+        XCTAssertTrue(saveButton.exists)
+        let initialHandleY = sheetHandle.frame.minY
+        let initialTitleY = sheetTitle.frame.minY
+        let initialCloseY = closeButton.frame.minY
+        let initialSaveY = saveButton.frame.minY
+
+        memo.tap()
+        XCTAssertTrue(app.buttons["feeding.memo.done"].waitForExistence(timeout: 3))
+        XCTAssertEqual(sheetHandle.frame.minY, initialHandleY, accuracy: 1)
+        XCTAssertEqual(sheetTitle.frame.minY, initialTitleY, accuracy: 1)
+        XCTAssertEqual(closeButton.frame.minY, initialCloseY, accuracy: 1)
+        XCTAssertEqual(saveButton.frame.minY, initialSaveY, accuracy: 1)
+
+        let clearMemo = app.buttons["feeding.memo.clear"]
+        XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
+        clearMemo.tap()
+
+        let attemptedMemo = String(repeating: "a", count: 320)
+        let expectedMemo = String(attemptedMemo.prefix(300))
+        memo.typeText(attemptedMemo)
+
+        XCTAssertEqual(memo.value as? String, expectedMemo)
+        XCTAssertEqual(expectedMemo.count, 300)
+        XCTAssertGreaterThan(memo.frame.height, initialHeight + 20)
+    }
 }
