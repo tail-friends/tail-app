@@ -9,7 +9,9 @@ struct FeedingRecordView: View {
     @State private var quantity = 5
     @State private var didNotEat = false
     @State private var memo = "잘 받아먹음"
-    @State private var isSavePreviewPresented = false
+    @State private var isNoticePresented = false
+    @State private var noticeTitle = ""
+    @State private var noticeMessage = ""
     @State private var sheetDragOffset: CGFloat = 0
     @State private var isSheetPresented = true
     @State private var isSheetClosing = false
@@ -31,7 +33,13 @@ struct FeedingRecordView: View {
                 homeBackdrop(topInset: topInset, size: CGSize(width: geometry.size.width, height: fullHeight))
 
                 if isSheetPresented {
-                    sheet(bottomInset: bottomInset, dismissalDistance: fullHeight)
+                    sheet(
+                        bottomInset: bottomInset,
+                        dismissalDistance: fullHeight,
+                        backdropTopInset: topInset,
+                        backdropSize: CGSize(width: geometry.size.width, height: fullHeight),
+                        backdropVerticalOffset: fullHeight - sheetHeight
+                    )
                         .frame(height: sheetHeight)
                         .frame(maxWidth: .infinity)
                         .offset(y: sheetDragOffset)
@@ -57,10 +65,10 @@ struct FeedingRecordView: View {
                 .accessibilityIdentifier("feeding.memo.done")
             }
         }
-        .alert("저장 미리보기", isPresented: $isSavePreviewPresented) {
+        .alert(noticeTitle, isPresented: $isNoticePresented) {
             Button("확인", role: .cancel) { }
         } message: {
-            Text("입력한 기록은 이 미리보기에서만 유지되며 실제로 저장되지 않습니다.")
+            Text(noticeMessage)
         }
         .preferredColorScheme(.light)
     }
@@ -144,7 +152,13 @@ struct FeedingRecordView: View {
         .accessibilityHidden(true)
     }
 
-    private func sheet(bottomInset: CGFloat, dismissalDistance: CGFloat) -> some View {
+    private func sheet(
+        bottomInset: CGFloat,
+        dismissalDistance: CGFloat,
+        backdropTopInset: CGFloat,
+        backdropSize: CGSize,
+        backdropVerticalOffset: CGFloat
+    ) -> some View {
         VStack(spacing: 0) {
             dragHandle(dismissalDistance: dismissalDistance)
 
@@ -154,19 +168,28 @@ struct FeedingRecordView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 16)
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    recordTypeControl
-                    foodSection
-                    quantitySection
-                    notEatenSection
-                    memoSection
+            ScrollViewReader { scrollProxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        recordTypeControl
+                        foodSection
+                        quantitySection
+                        notEatenSection
+                        memoSection
+                            .id("feeding.memo.focus-target")
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 12)
+                .scrollDismissesKeyboard(.interactively)
+                .accessibilityIdentifier("feeding.scroll")
+                .onChange(of: isMemoFocused) { _, isFocused in
+                    guard isFocused else { return }
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
+                    }
+                }
             }
-            .scrollDismissesKeyboard(.interactively)
-            .accessibilityIdentifier("feeding.scroll")
 
             saveAction
                 .padding(.horizontal, 24)
@@ -174,13 +197,32 @@ struct FeedingRecordView: View {
                 .padding(.bottom, max(12, bottomInset + 8))
         }
         .background {
-            FeedingPalette.sheet
+            GeometryReader { backgroundGeometry in
+                ZStack(alignment: .topLeading) {
+                    homeBackdrop(topInset: backdropTopInset, size: backdropSize)
+                        .blur(radius: 18)
+                        .offset(y: -backdropVerticalOffset)
+
+                    LinearGradient(
+                        colors: [.white.opacity(0.94), .white.opacity(0.64)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(width: backgroundGeometry.size.width, height: backgroundGeometry.size.height)
+                }
+                .frame(
+                    width: backgroundGeometry.size.width,
+                    height: backgroundGeometry.size.height,
+                    alignment: .topLeading
+                )
+                .clipped()
                 .clipShape(UnevenRoundedRectangle(
                     topLeadingRadius: 32,
                     topTrailingRadius: 32,
                     style: .continuous
                 ))
-                .ignoresSafeArea(edges: .bottom)
+            }
+            .ignoresSafeArea(edges: .bottom)
         }
     }
 
@@ -269,7 +311,13 @@ struct FeedingRecordView: View {
 
                 Button {
                     isMemoFocused = false
-                    selectedRecordType = type
+                    if type == .feeding {
+                        selectedRecordType = .feeding
+                    } else {
+                        noticeTitle = "준비 중"
+                        noticeMessage = "\(type.title) 기록은 준비 중이에요."
+                        isNoticePresented = true
+                    }
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: type.symbol)
@@ -326,6 +374,8 @@ struct FeedingRecordView: View {
                                     .fill(isSelected ? .white : FeedingPalette.unselectedChip)
                                     .shadow(color: isSelected ? FeedingPalette.shadow : .clear, radius: 4, x: 0, y: 2)
                             }
+                            .frame(minWidth: 45, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(food.title)
@@ -485,7 +535,9 @@ struct FeedingRecordView: View {
     private var saveAction: some View {
         Button {
             isMemoFocused = false
-            isSavePreviewPresented = true
+            noticeTitle = "저장 미리보기"
+            noticeMessage = "입력한 기록은 이 미리보기에서만 유지되며 실제로 저장되지 않습니다."
+            isNoticePresented = true
         } label: {
             Text("저장")
                 .font(.custom("Jua", size: 14, relativeTo: .body))
