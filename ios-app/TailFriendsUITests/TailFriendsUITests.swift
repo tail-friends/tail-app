@@ -167,6 +167,17 @@ final class TailFriendsUITests: XCTestCase {
         let mealworm = app.buttons["feeding.food.mealworm"]
         XCTAssertTrue(cricket.waitForExistence(timeout: 3))
         XCTAssertEqual(cricket.value as? String, "선택됨")
+        let foodChips = [
+            cricket,
+            mealworm,
+            app.buttons["feeding.food.dubia"],
+            app.buttons["feeding.food.superworm"]
+        ]
+        for chip in foodChips {
+            XCTAssertTrue(chip.waitForExistence(timeout: 3))
+            XCTAssertGreaterThanOrEqual(chip.frame.width, 44, "\(chip.identifier) width")
+            XCTAssertGreaterThanOrEqual(chip.frame.height, 44, "\(chip.identifier) height")
+        }
         mealworm.tap()
         XCTAssertEqual(mealworm.value as? String, "선택됨")
         cricket.tap()
@@ -193,6 +204,7 @@ final class TailFriendsUITests: XCTestCase {
         memo.tap()
         let clearMemo = app.buttons["feeding.memo.clear"]
         XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
+        XCTAssertTrue(clearMemo.isHittable)
         clearMemo.tap()
         memo.typeText("잘 먹었어요")
         XCTAssertEqual(memo.value as? String, "잘 먹었어요")
@@ -208,6 +220,32 @@ final class TailFriendsUITests: XCTestCase {
         }
         save.tap()
         XCTAssertTrue(app.alerts["저장 미리보기"].waitForExistence(timeout: 3))
+    }
+
+    func testFeedingRecordUnavailableTypesStayOnFeedingAndShowNotice() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-feeding-record")
+        app.launch()
+
+        let feeding = app.buttons["feeding.type.feeding"]
+        let molting = app.buttons["feeding.type.molting"]
+        let weight = app.buttons["feeding.type.weight"]
+        XCTAssertTrue(feeding.waitForExistence(timeout: 5))
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+
+        molting.tap()
+        let notice = app.alerts["준비 중"]
+        XCTAssertTrue(notice.waitForExistence(timeout: 3))
+        XCTAssertTrue(notice.staticTexts["탈피 기록은 준비 중이에요."].exists)
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+        XCTAssertEqual(molting.value as? String, "선택 안 됨")
+        notice.buttons["확인"].tap()
+
+        weight.tap()
+        XCTAssertTrue(notice.waitForExistence(timeout: 3))
+        XCTAssertTrue(notice.staticTexts["체중 기록은 준비 중이에요."].exists)
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+        XCTAssertEqual(weight.value as? String, "선택 안 됨")
     }
 
     func testFeedingRecordSheetCanBeDismissedByDraggingHandle() {
@@ -279,12 +317,18 @@ final class TailFriendsUITests: XCTestCase {
 
         let clearMemo = app.buttons["feeding.memo.clear"]
         XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
+        XCTAssertTrue(clearMemo.isHittable)
         clearMemo.tap()
 
         let attemptedMemo = String(repeating: "a", count: 320)
         let expectedMemo = String(attemptedMemo.prefix(300))
         memo.typeText(attemptedMemo)
 
+        let memoCappedExpectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value == %@", expectedMemo),
+            object: memo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [memoCappedExpectation], timeout: 3), .completed)
         XCTAssertEqual(memo.value as? String, expectedMemo)
         XCTAssertEqual(expectedMemo.count, 300)
         XCTAssertGreaterThan(memo.frame.height, initialHeight + 20)
