@@ -7,6 +7,8 @@ struct TailFriendsApp: App {
 #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--preview-registration") {
                 RegistrationView()
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-detail-feeding") {
+                CreatureDetailFeedingFormView()
             } else if ProcessInfo.processInfo.arguments.contains("--preview-feeding-record") {
                 FeedingRecordView()
             } else if ProcessInfo.processInfo.arguments.contains("--preview-home") {
