@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
+import 'pet_photo_add_sheet.dart';
 import 'pet_species_picker_sheet.dart';
 
 enum PetGender { male, female, unspecified }
@@ -12,9 +14,16 @@ typedef PetDatePicker =
     Future<DateTime?> Function(BuildContext context, DateTime? currentDate);
 
 class PetRegistrationScreen extends StatefulWidget {
-  const PetRegistrationScreen({this.datePicker, super.key});
+  const PetRegistrationScreen({this.datePicker, super.key})
+    : _photoPreview = false;
+
+  /// Independent Debug target uses Figma examples without saving any pet.
+  const PetRegistrationScreen.photoAddPreview({super.key})
+    : datePicker = null,
+      _photoPreview = true;
 
   final PetDatePicker? datePicker;
+  final bool _photoPreview;
 
   @override
   State<PetRegistrationScreen> createState() => _PetRegistrationScreenState();
@@ -82,6 +91,23 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
   String? _feedingCycleError;
 
   @override
+  void initState() {
+    super.initState();
+    if (kDebugMode && widget._photoPreview) {
+      _nameController.text = '욱이';
+      _species = '레오파드 게코';
+      _morphController.text = '탠저린 · 꼬리 재생';
+      _gender = PetGender.male;
+      _hatchingDate = DateTime(2024, 7, 12);
+      _feedingCycleController.text = '4';
+      _memoController.text = '온순함, 손에 잘 올라옴';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) showPetPhotoAddSheet(context);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _morphController.dispose();
@@ -131,15 +157,26 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
     });
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
+    final cycle = int.tryParse(_feedingCycleController.text);
     setState(() {
       _nameError = _nameController.text.trim().isEmpty ? '이름을 입력해 주세요.' : null;
       _speciesError = _species == null ? '종을 선택해 주세요.' : null;
       _feedingCycleError = _feedingCycleController.text.isEmpty
           ? '급여 주기를 입력해 주세요.'
+          : cycle == null || cycle <= 0
+          ? '1 이상의 숫자를 입력해 주세요.'
           : null;
     });
-    _showMessage('저장 기능은 준비 중입니다.');
+    if (_nameError != null ||
+        _speciesError != null ||
+        _feedingCycleError != null) {
+      _showMessage('저장 기능은 준비 중입니다.');
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    await showPetPhotoAddSheet(context);
   }
 
   String? get _formattedDate {
