@@ -8,6 +8,7 @@ import 'features/auth/presentation/privacy_consent_sheet.dart';
 import 'features/auth/presentation/terms_preview_screen.dart';
 import 'features/design_system_preview/design_system_preview_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/notifications/presentation/notification_screen.dart';
 import 'features/pets/presentation/pet_registration_screen.dart';
 import 'features/records/presentation/feeding_record_preview_screen.dart';
 
@@ -27,6 +28,8 @@ class TailFriendsApp extends StatelessWidget {
       theme: AppTheme.mist,
       home: const LoginScreen(),
       routes: {
+        if (kDebugMode)
+          '/notifications-preview': (_) => const NotificationScreen.preview(),
         if (kDebugMode)
           '/feeding-record-preview': (_) => const FeedingRecordPreviewScreen(),
         if (kDebugMode) '/terms-preview': (_) => const TermsPreviewScreen(),
