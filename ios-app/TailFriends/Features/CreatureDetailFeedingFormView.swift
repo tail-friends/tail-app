@@ -3,6 +3,7 @@ import SwiftUI
 struct CreatureDetailFeedingFormView: View {
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isMemoFocused: Bool
+    var onBack: (() -> Void)? = nil
 
     @State private var selectedFood = "귀뚜라미"
     @State private var quantity = 50
@@ -40,10 +41,10 @@ struct CreatureDetailFeedingFormView: View {
                     recentRecordSection
                     managementSection
                 }
-                .padding(.horizontal, 24)
                 .padding(.top, 8)
                 .padding(.bottom, 28)
-                .frame(maxWidth: 342)
+                .frame(maxWidth: 390)
+                .padding(.horizontal, 24)
                 .frame(maxWidth: .infinity)
             }
             .accessibilityIdentifier("creatureDetail.scroll")
@@ -87,7 +88,11 @@ struct CreatureDetailFeedingFormView: View {
             VStack(spacing: 8) {
                 HStack {
                     Button {
-                        dismiss()
+                        if let onBack {
+                            onBack()
+                        } else {
+                            dismiss()
+                        }
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 15, weight: .semibold))
@@ -390,7 +395,10 @@ struct CreatureDetailFeedingFormView: View {
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .overlay(alignment: .trailing) {
                         if isMemoFocused && !memo.isEmpty {
-                            Button { memo = "" } label: {
+                            Button {
+                                memo = ""
+                                isMemoFocused = true
+                            } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 16))
                                     .foregroundStyle(DetailPalette.secondary.opacity(0.72))
@@ -400,6 +408,7 @@ struct CreatureDetailFeedingFormView: View {
                             .buttonStyle(.plain)
                             .accessibilityLabel("메모 지우기")
                             .accessibilityIdentifier("creatureDetail.memo.clear")
+                            .zIndex(1)
                         }
                     }
                     .padding(.horizontal, 13)
@@ -507,23 +516,35 @@ struct CreatureDetailFeedingFormView: View {
                     .foregroundStyle(DetailPalette.forest)
             }
 
-            ZStack {
-                VStack {
-                    ForEach(0..<3) { _ in
-                        Rectangle()
-                            .fill(DetailPalette.line)
-                            .frame(height: 1)
-                        Spacer(minLength: 0)
+            GeometryReader { geometry in
+                let horizontalInset: CGFloat = 8
+                let verticalInset: CGFloat = 8
+                let plotSize = CGSize(
+                    width: max(0, geometry.size.width - horizontalInset),
+                    height: max(0, geometry.size.height - verticalInset * 2)
+                )
+                let endpoint = WeightTrendShape.endpoint(in: CGRect(origin: .zero, size: plotSize))
+
+                ZStack(alignment: .topLeading) {
+                    VStack {
+                        ForEach(0..<3) { _ in
+                            Rectangle()
+                                .fill(DetailPalette.line)
+                                .frame(height: 1)
+                            Spacer(minLength: 0)
+                        }
                     }
+                    WeightTrendShape()
+                        .stroke(DetailPalette.forest, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                        .padding(.vertical, verticalInset)
+                        .padding(.trailing, horizontalInset)
+                    Circle()
+                        .fill(DetailPalette.forest)
+                        .frame(width: 8, height: 8)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .position(x: endpoint.x, y: verticalInset + endpoint.y)
                 }
-                WeightTrendShape()
-                    .stroke(DetailPalette.forest, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                    .padding(.vertical, 8)
-                Circle()
-                    .fill(DetailPalette.forest)
-                    .frame(width: 8, height: 8)
-                    .overlay(Circle().stroke(.white, lineWidth: 2))
-                    .position(x: 300, y: 20)
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .frame(height: 82)
             .accessibilityHidden(true)
@@ -691,18 +712,27 @@ private struct CreatureRecord: Identifiable {
 }
 
 private struct WeightTrendShape: Shape {
+    private static let normalizedPoints: [CGPoint] = [
+        CGPoint(x: 0, y: 0.82),
+        CGPoint(x: 0.18, y: 0.68),
+        CGPoint(x: 0.34, y: 0.75),
+        CGPoint(x: 0.51, y: 0.46),
+        CGPoint(x: 0.67, y: 0.53),
+        CGPoint(x: 0.83, y: 0.28),
+        CGPoint(x: 1, y: 0.12)
+    ]
+
+    static func endpoint(in rect: CGRect) -> CGPoint {
+        guard let point = normalizedPoints.last else { return .zero }
+        return CGPoint(
+            x: rect.minX + point.x * rect.width,
+            y: rect.minY + point.y * rect.height
+        )
+    }
+
     func path(in rect: CGRect) -> Path {
-        let points: [CGPoint] = [
-            CGPoint(x: 0, y: 0.82),
-            CGPoint(x: 0.18, y: 0.68),
-            CGPoint(x: 0.34, y: 0.75),
-            CGPoint(x: 0.51, y: 0.46),
-            CGPoint(x: 0.67, y: 0.53),
-            CGPoint(x: 0.83, y: 0.28),
-            CGPoint(x: 1, y: 0.12)
-        ]
         var path = Path()
-        for (index, point) in points.enumerated() {
+        for (index, point) in Self.normalizedPoints.enumerated() {
             let scaled = CGPoint(x: point.x * rect.width, y: point.y * rect.height)
             if index == 0 { path.move(to: scaled) } else { path.addLine(to: scaled) }
         }
