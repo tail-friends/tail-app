@@ -203,6 +203,8 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertEqual(memo.value as? String, "잘 받아먹음")
         memo.tap()
         XCTAssertTrue(app.buttons["feeding.memo.done"].waitForExistence(timeout: 5))
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
         let clearMemo = app.buttons["feeding.memo.clear"]
         XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
         let clearMemoIsHittable = XCTNSPredicateExpectation(
@@ -210,6 +212,7 @@ final class TailFriendsUITests: XCTestCase {
             object: clearMemo
         )
         XCTAssertEqual(XCTWaiter.wait(for: [clearMemoIsHittable], timeout: 5), .completed)
+        XCTAssertLessThan(clearMemo.frame.maxY, keyboard.frame.minY, "Memo clear control must sit above the keyboard")
         clearMemo.tap()
         memo.typeText("잘 먹었어요")
         XCTAssertEqual(memo.value as? String, "잘 먹었어요")
@@ -315,6 +318,8 @@ final class TailFriendsUITests: XCTestCase {
 
         memo.tap()
         XCTAssertTrue(app.buttons["feeding.memo.done"].waitForExistence(timeout: 3))
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
         XCTAssertEqual(sheetHandle.frame.minY, initialHandleY, accuracy: 1)
         XCTAssertEqual(sheetTitle.frame.minY, initialTitleY, accuracy: 1)
         XCTAssertEqual(closeButton.frame.minY, initialCloseY, accuracy: 1)
@@ -327,6 +332,7 @@ final class TailFriendsUITests: XCTestCase {
             object: clearMemo
         )
         XCTAssertEqual(XCTWaiter.wait(for: [clearMemoIsHittable], timeout: 5), .completed)
+        XCTAssertLessThan(clearMemo.frame.maxY, keyboard.frame.minY, "Memo clear control must sit above the keyboard")
         clearMemo.tap()
 
         let attemptedMemo = String(repeating: "a", count: 320)
