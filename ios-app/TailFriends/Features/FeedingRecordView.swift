@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct FeedingRecordView: View {
     @Environment(\.dismiss) private var dismiss
@@ -18,6 +19,7 @@ struct FeedingRecordView: View {
     @State private var stableFullHeight: CGFloat?
     @State private var stableTopInset: CGFloat?
     @State private var stableBottomInset: CGFloat?
+    @State private var keyboardOverlapHeight: CGFloat = 0
 
     var body: some View {
         GeometryReader { geometry in
@@ -52,6 +54,21 @@ struct FeedingRecordView: View {
                     stableFullHeight = measuredFullHeight
                     stableTopInset = measuredTopInset
                     stableBottomInset = measuredBottomInset
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { notification in
+                guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+                    return
+                }
+
+                let overlap = max(0, fullHeight - keyboardFrame.minY)
+                withAnimation(.easeOut(duration: 0.2)) {
+                    keyboardOverlapHeight = overlap
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                withAnimation(.easeOut(duration: 0.2)) {
+                    keyboardOverlapHeight = 0
                 }
             }
         }
@@ -179,12 +196,18 @@ struct FeedingRecordView: View {
                             .id("feeding.memo.focus-target")
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 12 + keyboardOverlapHeight)
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .accessibilityIdentifier("feeding.scroll")
                 .onChange(of: isMemoFocused) { _, isFocused in
                     guard isFocused else { return }
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
+                    guard isMemoFocused else { return }
                     withAnimation(.easeOut(duration: 0.2)) {
                         scrollProxy.scrollTo("feeding.memo.focus-target", anchor: .top)
                     }
