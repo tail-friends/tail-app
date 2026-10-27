@@ -13,12 +13,18 @@ struct FeedingRecordView: View {
     @State private var sheetDragOffset: CGFloat = 0
     @State private var isSheetPresented = true
     @State private var isSheetClosing = false
+    @State private var stableFullHeight: CGFloat?
+    @State private var stableTopInset: CGFloat?
+    @State private var stableBottomInset: CGFloat?
 
     var body: some View {
         GeometryReader { geometry in
-            let fullHeight = geometry.size.height + geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom
-            let topInset = geometry.safeAreaInsets.top
-            let bottomInset = geometry.safeAreaInsets.bottom
+            let measuredTopInset = geometry.safeAreaInsets.top
+            let measuredBottomInset = geometry.safeAreaInsets.bottom
+            let measuredFullHeight = geometry.size.height + measuredTopInset + measuredBottomInset
+            let fullHeight = stableFullHeight ?? measuredFullHeight
+            let topInset = stableTopInset ?? measuredTopInset
+            let bottomInset = stableBottomInset ?? measuredBottomInset
             let sheetHeight = max(500, fullHeight - 294)
 
             ZStack(alignment: .bottom) {
@@ -33,7 +39,15 @@ struct FeedingRecordView: View {
             }
             .frame(width: geometry.size.width, height: fullHeight)
             .offset(y: -topInset)
+            .onAppear {
+                if stableFullHeight == nil {
+                    stableFullHeight = measuredFullHeight
+                    stableTopInset = measuredTopInset
+                    stableBottomInset = measuredBottomInset
+                }
+            }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -423,7 +437,8 @@ struct FeedingRecordView: View {
                 .foregroundStyle(FeedingPalette.secondary)
                 .accessibilityAddTraits(.isHeader)
 
-            TextField("메모를 입력해 주세요", text: $memo)
+            TextField("메모를 입력해 주세요", text: $memo, axis: .vertical)
+                .lineLimit(1...4)
                 .font(.custom("Jua", size: 14, relativeTo: .body))
                 .foregroundStyle(FeedingPalette.primary)
                 .textInputAutocapitalization(.never)
