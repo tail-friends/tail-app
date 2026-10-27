@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
+import '../../notifications/presentation/notification_screen.dart';
 import '../../pets/presentation/pet_registration_screen.dart';
 
 part 'home_first_visit_content.dart';
@@ -115,6 +116,14 @@ class HomeScreen extends StatelessWidget {
 
   bool get _hasData => _data != null;
 
+  void _openNotifications(BuildContext context) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => kDebugMode && (_hasData || _firstVisitPreview)
+          ? const NotificationScreen.preview()
+          : const NotificationScreen(),
+    ),
+  );
+
   void _showComingSoon(BuildContext context) {
     final messenger = ScaffoldMessenger.of(context);
     messenger
@@ -202,7 +211,7 @@ class HomeScreen extends StatelessWidget {
                                       ? '사진 한 장이면 우리 아이 캐릭터가 만들어져요'
                                       : '캐릭터 생성 기능은 준비 중이에요',
                                   onNotification: () =>
-                                      _showComingSoon(context),
+                                      _openNotifications(context),
                                   onRegister: () => Navigator.of(context).push(
                                     MaterialPageRoute<void>(
                                       builder: (_) =>
@@ -321,7 +330,7 @@ class HomeScreen extends StatelessWidget {
           semanticLabel: '알림',
           asset: 'assets/icons/home_bell.svg',
           iconSize: 16,
-          onTap: () => _showComingSoon(context),
+          onTap: () => _openNotifications(context),
         ),
       ],
     );

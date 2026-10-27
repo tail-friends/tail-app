@@ -167,10 +167,9 @@ void main() {
     }
   });
 
-  testWidgets('알림·미구현 탭은 준비 중 안내만 표시하고 사육장 선택을 유지한다', (tester) async {
+  testWidgets('미구현 탭은 준비 중 안내만 표시하고 사육장 선택을 유지한다', (tester) async {
     await _open(tester);
     for (final target in [
-      _key('home_notification_button'),
       for (final tab in [AppTab.records, AppTab.pets, AppTab.profile])
         _key('app_bottom_navigation_${tab.name}_touch_target'),
     ]) {

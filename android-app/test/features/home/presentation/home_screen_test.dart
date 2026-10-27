@@ -91,7 +91,6 @@ void main() {
     await tester.pumpWidget(_host(const HomeScreen.preview()));
 
     for (final key in const [
-      'home_notification_button',
       'home_feeding_cta',
       'home_weight_card',
       'home_shed_card',
