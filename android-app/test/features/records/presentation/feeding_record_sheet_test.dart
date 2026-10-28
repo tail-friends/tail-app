@@ -201,9 +201,9 @@ void main() {
     }
   });
 
-  testWidgets('탈피·체중 탭은 준비 중 안내만 표시하며 급여 선택과 입력값을 유지한다', (tester) async {
+  testWidgets('체중 탭은 준비 중 안내만 표시하며 급여 선택과 입력값을 유지한다', (tester) async {
     await _open(tester);
-    for (final (i, label) in [(1, '탈피'), (2, '체중')]) {
+    for (final (i, label) in [(2, '체중')]) {
       await tester.tap(_key('feeding_type_$i'));
       await tester.pumpAndSettle();
       expect(find.text('$label 기록 화면은 후속 구현 예정입니다.'), findsOneWidget);
