@@ -8,6 +8,7 @@ import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
 import 'record_sheet_controls.dart';
 import 'shedding_record_sheet.dart';
+import 'weight_record_sheet.dart';
 
 /// UI only: no record is created, stored, transmitted or used in date math.
 Future<void> showFeedingRecordSheet(
@@ -23,14 +24,14 @@ Future<void> showFeedingRecordSheet(
     ),
     builder: (_) => FeedingRecordSheet(
       designPreview: designPreview,
-      onSheddingChanged: route.setShedding,
+      onRecordTypeChanged: route.setRecordType,
     ),
   );
   return navigator.push<void>(route);
 }
 
-// One modal and one background throughout tab changes. Only its scrim changes
-// from the feeding reference's 18% to the shedding reference's 20%.
+// One modal and one background throughout tab changes. The feeding reference
+// has an 18% scrim; shedding and weight use 20%.
 class _RecordSheetRoute extends ModalBottomSheetRoute<void> {
   _RecordSheetRoute({required super.builder, required super.capturedThemes})
     : super(
@@ -41,14 +42,14 @@ class _RecordSheetRoute extends ModalBottomSheetRoute<void> {
         constraints: const BoxConstraints(maxWidth: double.infinity),
       );
 
-  bool _shedding = false;
+  int _recordType = 0;
 
   @override
-  Color get barrierColor => Color(_shedding ? 0x332F6B57 : 0x2E2F6B57);
+  Color get barrierColor => Color(_recordType == 0 ? 0x2E2F6B57 : 0x332F6B57);
 
-  void setShedding(bool value) {
-    if (_shedding == value) return;
-    _shedding = value;
+  void setRecordType(int value) {
+    if (_recordType == value) return;
+    _recordType = value;
     changedInternalState();
   }
 }
@@ -56,13 +57,13 @@ class _RecordSheetRoute extends ModalBottomSheetRoute<void> {
 class FeedingRecordSheet extends StatefulWidget {
   const FeedingRecordSheet({
     this.designPreview = false,
-    this.onSheddingChanged,
+    this.onRecordTypeChanged,
     super.key,
   });
 
   /// Figma sample memo, pet name and date are allowed only in Debug previews.
   final bool designPreview;
-  final ValueChanged<bool>? onSheddingChanged;
+  final ValueChanged<int>? onRecordTypeChanged;
 
   @override
   State<FeedingRecordSheet> createState() => _FeedingRecordSheetState();
@@ -102,7 +103,7 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
   int _food = 0;
   int _quantity = 5;
   bool _didNotEat = false;
-  bool _showShedding = false;
+  int _recordType = 0;
 
   bool get _isDesignPreview => kDebugMode && widget.designPreview;
 
@@ -135,23 +136,46 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
     );
   }
 
-  void _selectShedding(bool selected) {
+  void _selectRecordType(int selected) {
     FocusScope.of(context).unfocus();
-    widget.onSheddingChanged?.call(selected);
-    setState(() => _showShedding = selected);
+    widget.onRecordTypeChanged?.call(selected);
+    setState(() => _recordType = selected);
   }
 
   @override
-  Widget build(BuildContext context) => IndexedStack(
-    index: _showShedding ? 1 : 0,
-    alignment: Alignment.bottomCenter,
-    children: [
-      _feedingBody(context),
-      SheddingRecordSheet(
-        designPreview: widget.designPreview,
-        onFeedingSelected: () => _selectShedding(false),
-      ),
-    ],
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final media = MediaQuery.of(context);
+      final available = math.max(
+        0.0,
+        constraints.maxHeight - media.viewInsets.bottom,
+      );
+      final height = math.min(
+        media.size.height * const [551, 560, 671][_recordType] / 844,
+        available,
+      );
+      // Constrain the stack to the active sheet, not its tallest hidden sibling.
+      // This leaves the entire visible area above the sheet dismissible.
+      return SizedBox(
+        height: height + media.viewInsets.bottom,
+        child: IndexedStack(
+          index: _recordType,
+          alignment: Alignment.bottomCenter,
+          children: [
+            _feedingBody(context),
+            SheddingRecordSheet(
+              designPreview: widget.designPreview,
+              onFeedingSelected: () => _selectRecordType(0),
+              onWeightSelected: () => _selectRecordType(2),
+            ),
+            WeightRecordSheet(
+              designPreview: widget.designPreview,
+              onRecordTypeSelected: _selectRecordType,
+            ),
+          ],
+        ),
+      );
+    },
   );
 
   Widget _feedingBody(BuildContext context) {
@@ -311,10 +335,7 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
   Widget _recordTypes() => RecordTypeTabs(
     prefix: 'feeding',
     selectedIndex: 0,
-    onSelected: (index) {
-      if (index == 1) _selectShedding(true);
-      if (index == 2) _notice('체중 기록 화면은 후속 구현 예정입니다.');
-    },
+    onSelected: _selectRecordType,
   );
 
   Widget _foodChoices() => Column(
