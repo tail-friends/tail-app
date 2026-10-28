@@ -6,27 +6,63 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
+import 'record_sheet_controls.dart';
+import 'shedding_record_sheet.dart';
 
 /// UI only: no record is created, stored, transmitted or used in date math.
 Future<void> showFeedingRecordSheet(
   BuildContext context, {
   bool designPreview = false,
-}) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  useSafeArea: true,
-  backgroundColor: Colors.transparent,
-  barrierColor: const Color(0x2E2F6B57),
-  barrierLabel: '기록 추가 미리보기 닫기',
-  constraints: const BoxConstraints(maxWidth: double.infinity),
-  builder: (context) => FeedingRecordSheet(designPreview: designPreview),
-);
+}) {
+  final navigator = Navigator.of(context);
+  late final _RecordSheetRoute route;
+  route = _RecordSheetRoute(
+    capturedThemes: InheritedTheme.capture(
+      from: context,
+      to: navigator.context,
+    ),
+    builder: (_) => FeedingRecordSheet(
+      designPreview: designPreview,
+      onSheddingChanged: route.setShedding,
+    ),
+  );
+  return navigator.push<void>(route);
+}
+
+// One modal and one background throughout tab changes. Only its scrim changes
+// from the feeding reference's 18% to the shedding reference's 20%.
+class _RecordSheetRoute extends ModalBottomSheetRoute<void> {
+  _RecordSheetRoute({required super.builder, required super.capturedThemes})
+    : super(
+        isScrollControlled: true,
+        useSafeArea: true,
+        backgroundColor: Colors.transparent,
+        barrierLabel: '기록 추가 미리보기 닫기',
+        constraints: const BoxConstraints(maxWidth: double.infinity),
+      );
+
+  bool _shedding = false;
+
+  @override
+  Color get barrierColor => Color(_shedding ? 0x332F6B57 : 0x2E2F6B57);
+
+  void setShedding(bool value) {
+    if (_shedding == value) return;
+    _shedding = value;
+    changedInternalState();
+  }
+}
 
 class FeedingRecordSheet extends StatefulWidget {
-  const FeedingRecordSheet({this.designPreview = false, super.key});
+  const FeedingRecordSheet({
+    this.designPreview = false,
+    this.onSheddingChanged,
+    super.key,
+  });
 
   /// Figma sample memo, pet name and date are allowed only in Debug previews.
   final bool designPreview;
+  final ValueChanged<bool>? onSheddingChanged;
 
   @override
   State<FeedingRecordSheet> createState() => _FeedingRecordSheetState();
@@ -66,6 +102,7 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
   int _food = 0;
   int _quantity = 5;
   bool _didNotEat = false;
+  bool _showShedding = false;
 
   bool get _isDesignPreview => kDebugMode && widget.designPreview;
 
@@ -98,8 +135,26 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
     );
   }
 
+  void _selectShedding(bool selected) {
+    FocusScope.of(context).unfocus();
+    widget.onSheddingChanged?.call(selected);
+    setState(() => _showShedding = selected);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => IndexedStack(
+    index: _showShedding ? 1 : 0,
+    alignment: Alignment.bottomCenter,
+    children: [
+      _feedingBody(context),
+      SheddingRecordSheet(
+        designPreview: widget.designPreview,
+        onFeedingSelected: () => _selectShedding(false),
+      ),
+    ],
+  );
+
+  Widget _feedingBody(BuildContext context) {
     final media = MediaQuery.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -230,7 +285,7 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
           ],
         ),
       ),
-      _RecordTouchTarget(
+      RecordTouchTarget(
         key: const ValueKey('feeding_close'),
         label: '닫기',
         alignment: Alignment.centerRight,
@@ -253,68 +308,13 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
     ],
   );
 
-  Widget _recordTypes() => AppGlassSurface(
-    key: const ValueKey('feeding_record_types'),
-    borderRadius: BorderRadius.circular(AppRadius.full),
-    gradient: AppColors.glassSoftGradient,
-    padding: const EdgeInsets.symmetric(horizontal: 4),
-    child: IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final (index, item) in const [
-            ('급여', 'feeding_feed.svg'),
-            ('탈피', 'feeding_shed.svg'),
-            ('체중', 'feeding_weight.svg'),
-          ].indexed)
-            Expanded(
-              flex: index == 0 ? 112 : 110,
-              child: _RecordTouchTarget(
-                key: ValueKey('feeding_type_$index'),
-                label: item.$1,
-                selected: index == 0,
-                onTap: index == 0
-                    ? () {}
-                    : () => _notice('${item.$1} 기록 화면은 후속 구현 예정입니다.'),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: AppGlassSurface(
-                    key: ValueKey('feeding_type_${index}_surface'),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                    gradient: index == 0
-                        ? const LinearGradient(
-                            colors: [Colors.white, Colors.white],
-                          )
-                        : const LinearGradient(
-                            colors: [Colors.transparent, Colors.transparent],
-                          ),
-                    borderColor: index == 0
-                        ? _selectedBorder
-                        : Colors.transparent,
-                    boxShadow: index == 0 ? _selectedShadow : const [],
-                    padding: EdgeInsets.symmetric(
-                      vertical: index == 0 ? 10 : 9,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset('assets/icons/${item.$2}'),
-                        const SizedBox(width: 6),
-                        Text(
-                          item.$1,
-                          style: _label.copyWith(
-                            color: index == 0 ? _ink : _secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    ),
+  Widget _recordTypes() => RecordTypeTabs(
+    prefix: 'feeding',
+    selectedIndex: 0,
+    onSelected: (index) {
+      if (index == 1) _selectShedding(true);
+      if (index == 2) _notice('체중 기록 화면은 후속 구현 예정입니다.');
+    },
   );
 
   Widget _foodChoices() => Column(
@@ -328,7 +328,7 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
         runSpacing: 8,
         children: [
           for (final (index, food) in _foods.indexed)
-            _RecordTouchTarget(
+            RecordTouchTarget(
               key: ValueKey('feeding_food_$index'),
               label: food,
               selected: _food == index,
@@ -415,7 +415,7 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
     String label,
     String asset,
     VoidCallback onTap,
-  ) => _RecordTouchTarget(
+  ) => RecordTouchTarget(
     key: ValueKey('feeding_$id'),
     label: label,
     onTap: onTap,
@@ -431,7 +431,7 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
     ),
   );
 
-  Widget _refusedControl() => _RecordTouchTarget(
+  Widget _refusedControl() => RecordTouchTarget(
     key: const ValueKey('feeding_not_eaten'),
     label: '안 먹음, 체크하면 다음 급여일 계산에서 빠져요',
     toggled: _didNotEat,
@@ -465,48 +465,6 @@ class _FeedingRecordSheetState extends State<FeedingRecordSheet> {
           else
             SvgPicture.asset('assets/icons/feeding_switch_off.svg'),
         ],
-      ),
-    ),
-  );
-}
-
-class _RecordTouchTarget extends StatelessWidget {
-  const _RecordTouchTarget({
-    required this.label,
-    required this.onTap,
-    required this.child,
-    this.selected,
-    this.toggled,
-    this.alignment = Alignment.center,
-    super.key,
-  });
-
-  final String label;
-  final VoidCallback onTap;
-  final Widget child;
-  final bool? selected;
-  final bool? toggled;
-  final Alignment alignment;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: label,
-    button: toggled == null,
-    selected: selected,
-    toggled: toggled,
-    excludeSemantics: true,
-    onTap: onTap,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.full),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-        child: Align(
-          widthFactor: 1,
-          heightFactor: 1,
-          alignment: alignment,
-          child: child,
-        ),
       ),
     ),
   );
