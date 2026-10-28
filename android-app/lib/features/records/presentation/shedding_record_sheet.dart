@@ -53,13 +53,14 @@ class _SheddingRecordSheetState extends State<SheddingRecordSheet> {
   late final TextEditingController _memo;
   late DateTime _date;
   late final Set<int> _retained;
-  int _status = 0;
+  int? _status;
 
   bool get _isDesignPreview => kDebugMode && widget.designPreview;
 
   @override
   void initState() {
     super.initState();
+    _status = _isDesignPreview ? 0 : null;
     _date = _isDesignPreview ? DateTime(2024, 10, 20, 9, 12) : DateTime.now();
     _retained = _isDesignPreview ? {0, 1} : {};
     _memo = TextEditingController(

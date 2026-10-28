@@ -267,7 +267,7 @@ void main() {
     expect(_selected(tester, 'shedding_type_1'), isTrue);
   });
 
-  testWidgets('일반 호출은 현재 날짜·빈 메모·부위 미선택으로 시작한다', (tester) async {
+  testWidgets('일반 호출은 현재 날짜·빈 메모·탈피 상태와 부위 미선택으로 시작한다', (tester) async {
     final today = DateTime.now();
     await _open(tester, designPreview: false);
     expect(find.text('탈피 기록 미리보기'), findsOneWidget);
@@ -279,6 +279,35 @@ void main() {
     );
     for (var index = 0; index < 4; index++) {
       expect(_selected(tester, 'shedding_part_$index'), isFalse);
+    }
+    for (var index = 0; index < 3; index++) {
+      expect(_selected(tester, 'shedding_status_$index'), isFalse);
+    }
+  });
+
+  testWidgets('일반 호출의 수동 상태 선택은 탭 전환 시 유지되고 다시 열면 미선택이다', (tester) async {
+    await _open(tester, designPreview: false);
+    for (var selected = 0; selected < 3; selected++) {
+      await tester.tap(_key('shedding_status_$selected'));
+      await tester.pumpAndSettle();
+      for (var index = 0; index < 3; index++) {
+        expect(_selected(tester, 'shedding_status_$index'), index == selected);
+      }
+    }
+    await tester.tap(_key('shedding_type_0'));
+    await tester.pumpAndSettle();
+    await tester.tap(_key('feeding_type_1'));
+    await tester.pumpAndSettle();
+    expect(_selected(tester, 'shedding_status_2'), isTrue);
+
+    await tester.tap(_key('shedding_close'));
+    await tester.pumpAndSettle();
+    unawaited(showFeedingRecordSheet(tester.element(find.byType(HomeScreen))));
+    await tester.pumpAndSettle();
+    await tester.tap(_key('feeding_type_1'));
+    await tester.pumpAndSettle();
+    for (var index = 0; index < 3; index++) {
+      expect(_selected(tester, 'shedding_status_$index'), isFalse);
     }
   });
 
