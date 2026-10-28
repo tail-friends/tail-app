@@ -201,13 +201,14 @@ void main() {
     }
   });
 
-  testWidgets('체중 탭은 준비 중 안내만 표시하며 급여 선택과 입력값을 유지한다', (tester) async {
+  testWidgets('체중 탭을 다녀와도 급여 선택과 입력값을 유지한다', (tester) async {
     await _open(tester);
     for (final (i, label) in [(2, '체중')]) {
       await tester.tap(_key('feeding_type_$i'));
       await tester.pumpAndSettle();
-      expect(find.text('$label 기록 화면은 후속 구현 예정입니다.'), findsOneWidget);
-      await tester.tap(find.text('확인'));
+      expect(_key('weight_record_sheet'), findsOneWidget);
+      expect(find.text('$label 기록 화면은 후속 구현 예정입니다.'), findsNothing);
+      await tester.tap(_key('weight_type_0'));
       await tester.pumpAndSettle();
       expect(
         tester.getSemantics(_key('feeding_type_0')).flagsCollection.isSelected,

@@ -59,6 +59,7 @@ Future<void> _open(
         builder: (_) => SheddingRecordSheet(
           designPreview: designPreview,
           onFeedingSelected: () {},
+          onWeightSelected: () {},
           dateTimePicker: picker,
         ),
       ),
@@ -257,12 +258,12 @@ void main() {
     expect(tester.element(find.byType(HomeScreen)), same(home));
   });
 
-  testWidgets('체중은 준비 중 안내만 표시하고 탈피 입력을 유지한다', (tester) async {
+  testWidgets('체중 탭을 다녀와도 탈피 선택과 입력을 유지한다', (tester) async {
     await _open(tester);
     await tester.tap(_key('shedding_type_2'));
     await tester.pumpAndSettle();
-    expect(find.text('체중 기록 화면은 후속 구현 예정입니다.'), findsOneWidget);
-    await tester.tap(find.text('확인'));
+    expect(_key('weight_record_sheet'), findsOneWidget);
+    await tester.tap(_key('weight_type_1'));
     await tester.pumpAndSettle();
     expect(_selected(tester, 'shedding_type_1'), isTrue);
   });

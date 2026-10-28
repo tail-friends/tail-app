@@ -8,19 +8,20 @@ import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
 import 'record_sheet_controls.dart';
 
-typedef SheddingDateTimePicker =
-    Future<DateTime?> Function(BuildContext context, DateTime current);
+typedef SheddingDateTimePicker = RecordDateTimePicker;
 
 /// Local form state only. This sheet never produces or stores a record.
 class SheddingRecordSheet extends StatefulWidget {
   const SheddingRecordSheet({
     required this.onFeedingSelected,
+    required this.onWeightSelected,
     this.designPreview = false,
     this.dateTimePicker,
     super.key,
   });
 
   final VoidCallback onFeedingSelected;
+  final VoidCallback onWeightSelected;
   final bool designPreview;
   final SheddingDateTimePicker? dateTimePicker;
 
@@ -91,29 +92,9 @@ class _SheddingRecordSheetState extends State<SheddingRecordSheet> {
     );
   }
 
-  Future<DateTime?> _pickDateTime(
-    BuildContext context,
-    DateTime current,
-  ) async {
-    final day = await showDatePicker(
-      context: context,
-      initialDate: current,
-      // Picker navigation bounds only, not an API or business validation rule.
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100, 12, 31),
-    );
-    if (day == null || !context.mounted) return null;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(current),
-    );
-    if (time == null) return null;
-    return DateTime(day.year, day.month, day.day, time.hour, time.minute);
-  }
-
   Future<void> _changeDate() async {
     FocusScope.of(context).unfocus();
-    final result = await (widget.dateTimePicker ?? _pickDateTime)(
+    final result = await (widget.dateTimePicker ?? pickRecordDateTime)(
       context,
       _date,
     );
@@ -121,11 +102,7 @@ class _SheddingRecordSheetState extends State<SheddingRecordSheet> {
     setState(() => _date = result);
   }
 
-  String get _dateLabel {
-    final time = TimeOfDay.fromDateTime(_date);
-    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-    return '${_date.month}월 ${_date.day}일 ${time.period == DayPeriod.am ? '오전' : '오후'} $hour:${time.minute.toString().padLeft(2, '0')}';
-  }
+  String get _dateLabel => formatRecordDateTime(_date);
 
   void _togglePart(int index) => setState(() {
     if (_retained.remove(index)) return;
@@ -212,7 +189,8 @@ class _SheddingRecordSheetState extends State<SheddingRecordSheet> {
                                     widget.onFeedingSelected();
                                   }
                                   if (index == 2) {
-                                    _notice('체중 기록 화면은 후속 구현 예정입니다.');
+                                    FocusScope.of(context).unfocus();
+                                    widget.onWeightSelected();
                                   }
                                 },
                               ),
