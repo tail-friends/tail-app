@@ -424,7 +424,8 @@ void main() {
       '53.4',
     );
     expect(find.bySemanticsLabel('소수점'), findsOneWidget);
-    expect(find.bySemanticsLabel('마지막 숫자 지우기'), findsOneWidget);
+    expect(find.bySemanticsLabel('마지막 입력 문자 지우기'), findsOneWidget);
+    expect(find.bySemanticsLabel('마지막 숫자 지우기'), findsNothing);
     final icons = find
         .descendant(of: _sheet, matching: find.byType(SvgPicture))
         .evaluate()

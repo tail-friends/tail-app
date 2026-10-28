@@ -349,7 +349,7 @@ class _WeightRecordSheetState extends State<WeightRecordSheet> {
                   key: ValueKey('weight_key_${row * 3 + column}'),
                   label: switch (_keys[row * 3 + column]) {
                     '.' => '소수점',
-                    '⌫' => '마지막 숫자 지우기',
+                    '⌫' => '마지막 입력 문자 지우기',
                     final key => key,
                   },
                   onTap: () => _press(_keys[row * 3 + column]),
