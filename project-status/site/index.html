@@ -29,14 +29,14 @@
         <div class="panel-heading">
           <div>
             <h2 id="status-heading">번호별 현황</h2>
-            <p class="muted">완료 상태는 develop Merge와 유효한 PR 메타데이터를 기준으로 합니다.</p>
+            <p class="muted">UI 퍼블리싱과 API 연동은 독립 집계합니다. UI 완료는 검증·승인된 화면 구현이며 실제 저장·API 동작을 뜻하지 않습니다.</p>
           </div>
           <div class="filters" aria-label="현황 필터">
             <label>
               구분
               <select id="kind-filter">
-                <option value="ui">UI</option>
-                <option value="api">API</option>
+                <option value="ui">UI 퍼블리싱</option>
+                <option value="api">API 연동</option>
               </select>
             </label>
             <label>
@@ -52,7 +52,9 @@
                 <option value="all">전체</option>
                 <option value="complete">완료</option>
                 <option value="incomplete">미완료</option>
+                <option value="partial">일부 구현</option>
                 <option value="review">재검토 필요</option>
+                <option value="preparing">집계 준비 중</option>
               </select>
             </label>
           </div>
@@ -80,6 +82,7 @@
     </main>
 
     <footer>
+      <p>UI 분모는 플랫폼별 Figma 화면 89개입니다. 일부 구현은 완료율에 포함하지 않으며, 디자인 변경 후 재검토가 필요한 UI도 완료율에서 제외합니다. API 상태는 디자인 변경과 무관하게 유지합니다. Debug 전용 여부 등은 비고의 구현 범위를 확인하세요.</p>
       <p>API 명세가 등록되기 전에는 API 진행률을 퍼센트로 계산하지 않습니다.</p>
     </footer>
     <script src="./app.js" defer></script>

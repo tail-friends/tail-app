@@ -28,25 +28,28 @@ function progressCard(label, item) {
   </article>`;
 }
 
-function renderProgress() {
-  const progress = statusData.progress;
+function renderProgress(data = statusData) {
+  const progress = data.progress;
   document.querySelector("#progress-cards").innerHTML = [
-    progressCard("Android UI", progress.ui.android),
-    progressCard("iOS UI", progress.ui.ios),
-    progressCard("Android API", progress.api.android),
-    progressCard("iOS API", progress.api.ios),
+    progressCard("Android UI 퍼블리싱", progress.ui.android),
+    progressCard("iOS UI 퍼블리싱", progress.ui.ios),
+    progressCard("Android API 연동", progress.api.android),
+    progressCard("iOS API 연동", progress.api.ios),
   ].join("");
 }
 
-function badge(value, reviewRequired = false) {
+function badge(value, reviewRequired = false, kind = "api") {
   if (reviewRequired) return '<span class="badge review">재검토 필요</span>';
-  return `<span class="badge ${escapeHtml(value)}">${escapeHtml(STATUS_LABELS[value] || value)}</span>`;
+  const label = value === "complete" && kind === "ui" ? "퍼블리싱 완료" : STATUS_LABELS[value] || value;
+  return `<span class="badge ${escapeHtml(value)}">${escapeHtml(label)}</span>`;
 }
 
 function matchesStatus(value, reviewRequired, filter) {
   if (filter === "all") return true;
   if (filter === "complete") return value === "complete" && !reviewRequired;
   if (filter === "review") return reviewRequired || value === "needs_confirmation";
+  if (filter === "partial") return value === "partial" && !reviewRequired;
+  if (filter === "preparing") return value === "not_registered";
   return value !== "complete" || reviewRequired;
 }
 
@@ -57,14 +60,14 @@ function links(values, kind) {
     .join(", ");
 }
 
-function renderDesigns(platform, statusFilter) {
-  const rows = statusData.designs.filter((design) => {
+function renderDesigns(platform, statusFilter, data = statusData) {
+  const rows = data.designs.filter((design) => {
     const state = design.ui[platform].status;
     return matchesStatus(state, design.review_required, statusFilter);
   });
   document.querySelector("#status-head").innerHTML = `<tr>
-    <th>번호</th><th>화면·상태</th><th>플랫폼</th><th>UI 상태</th>
-    <th>API 상태</th><th>Issue</th><th>PR</th><th>버전</th><th>디자인</th>
+    <th>번호</th><th>화면·상태</th><th>플랫폼</th><th>UI 퍼블리싱</th>
+    <th>API 연동</th><th>Issue</th><th>PR</th><th>버전</th><th>디자인</th><th>비고·구현 범위</th>
   </tr>`;
   document.querySelector("#status-body").innerHTML = rows
     .map((design) => {
@@ -73,31 +76,32 @@ function renderDesigns(platform, statusFilter) {
         <td><strong>${escapeHtml(design.figma_number)}</strong></td>
         <td>${escapeHtml(design.name)}</td>
         <td>${platform === "android" ? "Android" : "iOS"}</td>
-        <td>${badge(state.status, design.review_required)}</td>
+        <td>${badge(state.status, design.review_required, "ui")}</td>
         <td>${badge(design.api[platform])}</td>
         <td>${links(state.related_issues, "issues")}</td>
         <td>${links(state.related_prs, "pull")}</td>
         <td>${escapeHtml(design.current_design_version || "미동기화")}</td>
         <td><a href="${escapeHtml(design.figma_url)}" target="_blank" rel="noreferrer">Figma 열기</a></td>
+        <td class="scope-notes">${(state.notes || []).map(escapeHtml).join("<br>") || "-"}</td>
       </tr>`;
     })
     .join("");
 }
 
-function renderApi(platform, statusFilter) {
+function renderApi(platform, statusFilter, data = statusData) {
   document.querySelector("#status-head").innerHTML = `<tr>
     <th>작업 ID</th><th>메서드</th><th>경로</th><th>Figma 번호</th>
     <th>플랫폼</th><th>연동 상태</th><th>Issue</th><th>PR</th>
   </tr>`;
-  if (statusData.api_catalog_status !== "ready") {
+  if (!data.api_tasks.some((task) => task.integration[platform])) {
     document.querySelector("#status-message").hidden = false;
     document.querySelector("#status-message").textContent =
       "OpenAPI/Swagger 명세가 아직 등록되지 않아 API 진행률은 집계 준비 중입니다.";
     document.querySelector("#status-body").innerHTML = "";
     return;
   }
-  const rows = statusData.api_tasks.filter((task) =>
-    matchesStatus(task.integration[platform].status, false, statusFilter),
+  const rows = data.api_tasks.filter((task) =>
+    task.integration[platform] && matchesStatus(task.integration[platform].status, false, statusFilter),
   );
   document.querySelector("#status-body").innerHTML = rows
     .map((task) => {
@@ -160,5 +164,5 @@ if (typeof document !== "undefined") {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { matchesStatus };
+  module.exports = { matchesStatus, badge, progressCard, renderProgress, renderDesigns, renderApi };
 }

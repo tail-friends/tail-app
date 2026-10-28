@@ -120,6 +120,7 @@ table { width: 100%; border-collapse: collapse; min-width: 820px; }
 th, td { padding: 13px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 th { color: var(--muted); font-size: 0.78rem; }
 td { font-size: 0.9rem; }
+.scope-notes { min-width: 220px; max-width: 360px; overflow-wrap: anywhere; }
 
 .badge {
   display: inline-flex;
