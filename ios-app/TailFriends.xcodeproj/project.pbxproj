@@ -20,6 +20,7 @@
 		A10000000000000000000012 /* SocialIcons.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* SocialIcons.xcassets */; };
 		A10000000000000000000013 /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* RegistrationView.swift */; };
 		A10000000000000000000014 /* FeedingRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* FeedingRecordView.swift */; };
+		A10000000000000000000015 /* CreatureDetailFeedingFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* CreatureDetailFeedingFormView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		A20000000000000000000016 /* SocialIcons.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SocialIcons.xcassets; sourceTree = "<group>"; };
 		A20000000000000000000017 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
 		A20000000000000000000018 /* FeedingRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedingRecordView.swift; sourceTree = "<group>"; };
+		A20000000000000000000019 /* CreatureDetailFeedingFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatureDetailFeedingFormView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,7 +99,7 @@
 		A80000000000000000000006 /* Products */ = {isa = PBXGroup; name = Products; sourceTree = "<group>"; children = (A20000000000000000000006 /* TailFriends.app */, A20000000000000000000007 /* TailFriendsTests.xctest */, A20000000000000000000008 /* TailFriendsUITests.xctest */,); };
 		A80000000000000000000007 /* App */ = {isa = PBXGroup; path = App; sourceTree = "<group>"; children = (A20000000000000000000001 /* TailFriendsApp.swift */,); };
 		A80000000000000000000008 /* Core */ = {isa = PBXGroup; path = Core; sourceTree = "<group>"; children = (A80000000000000000000011 /* Navigation */, A80000000000000000000012 /* Network */, A80000000000000000000013 /* Storage */,); };
-		A80000000000000000000009 /* Features */ = {isa = PBXGroup; path = Features; sourceTree = "<group>"; children = (A20000000000000000000002 /* PlaceholderView.swift */, A20000000000000000000009 /* LoginView.swift */, A20000000000000000000014 /* HomeView.swift */, A20000000000000000000017 /* RegistrationView.swift */, A20000000000000000000018 /* FeedingRecordView.swift */,); };
+		A80000000000000000000009 /* Features */ = {isa = PBXGroup; path = Features; sourceTree = "<group>"; children = (A20000000000000000000002 /* PlaceholderView.swift */, A20000000000000000000009 /* LoginView.swift */, A20000000000000000000014 /* HomeView.swift */, A20000000000000000000017 /* RegistrationView.swift */, A20000000000000000000018 /* FeedingRecordView.swift */, A20000000000000000000019 /* CreatureDetailFeedingFormView.swift */,); };
 		A80000000000000000000010 /* Resources */ = {isa = PBXGroup; path = Resources; sourceTree = "<group>"; children = (A20000000000000000000010 /* login_background.png */, A20000000000000000000015 /* home_background.png */, A20000000000000000000012 /* Info.plist */, A20000000000000000000016 /* SocialIcons.xcassets */, A80000000000000000000014 /* Fonts */,); };
 		A80000000000000000000011 /* Navigation */ = {isa = PBXGroup; path = Navigation; sourceTree = "<group>"; };
 		A80000000000000000000012 /* Network */ = {isa = PBXGroup; path = Network; sourceTree = "<group>"; };
@@ -165,7 +167,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A90000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001 /* TailFriendsApp.swift in Sources */, A10000000000000000000002 /* PlaceholderView.swift in Sources */, A10000000000000000000007 /* LoginView.swift in Sources */, A10000000000000000000010 /* HomeView.swift in Sources */, A10000000000000000000013 /* RegistrationView.swift in Sources */, A10000000000000000000014 /* FeedingRecordView.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		A90000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001 /* TailFriendsApp.swift in Sources */, A10000000000000000000002 /* PlaceholderView.swift in Sources */, A10000000000000000000007 /* LoginView.swift in Sources */, A10000000000000000000010 /* HomeView.swift in Sources */, A10000000000000000000013 /* RegistrationView.swift in Sources */, A10000000000000000000014 /* FeedingRecordView.swift in Sources */, A10000000000000000000015 /* CreatureDetailFeedingFormView.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 		A90000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000003 /* PlaceholderContentTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 		A90000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000004 /* TailFriendsUITests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */

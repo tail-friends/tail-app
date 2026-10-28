@@ -348,4 +348,162 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertEqual(expectedMemo.count, 300)
         XCTAssertGreaterThan(memo.frame.height, initialHeight + 20)
     }
+
+    func testCreatureDetailFeedingPreviewShowsFigmaContentAndSupportsEditing() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-detail-feeding")
+        app.launch()
+
+        let scrollView = app.scrollViews["creatureDetail.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["욱이"].exists)
+        XCTAssertTrue(app.staticTexts["creatureDetail.description"].exists)
+        XCTAssertTrue(app.staticTexts["급여 기록"].exists)
+        XCTAssertTrue(app.staticTexts["직전 기록으로 채웠어요"].exists)
+
+        let feedingFormCard = app.descendants(matching: .any)
+            .matching(identifier: "creatureDetail.feedingForm")
+            .firstMatch
+        XCTAssertTrue(feedingFormCard.waitForExistence(timeout: 3))
+        XCTAssertEqual(feedingFormCard.frame.minX, 24, accuracy: 1)
+        XCTAssertEqual(feedingFormCard.frame.width, 342, accuracy: 1)
+
+        let feeding = app.buttons["creatureDetail.category.급여"]
+        let molting = app.buttons["creatureDetail.category.탈피"]
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+        molting.tap()
+        let unavailableNotice = app.alerts["준비 중"]
+        XCTAssertTrue(unavailableNotice.waitForExistence(timeout: 3))
+        XCTAssertTrue(unavailableNotice.staticTexts["탈피 기록은 준비 중이에요."].exists)
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+        unavailableNotice.buttons["확인"].tap()
+
+        let cricket = app.buttons["creatureDetail.food.귀뚜라미"]
+        let mealworm = app.buttons["creatureDetail.food.밀웜"]
+        XCTAssertTrue(cricket.waitForExistence(timeout: 3))
+        XCTAssertEqual(cricket.value as? String, "선택됨")
+        mealworm.tap()
+        XCTAssertEqual(mealworm.value as? String, "선택됨")
+
+        let quantity = app.staticTexts["creatureDetail.quantity.value"]
+        XCTAssertEqual(quantity.label, "50")
+        app.buttons["creatureDetail.quantity.decrease"].tap()
+        XCTAssertEqual(quantity.label, "49")
+        app.buttons["creatureDetail.quantity.increase"].tap()
+        XCTAssertEqual(quantity.label, "50")
+
+        let notEaten = app.buttons["creatureDetail.notEaten"]
+        XCTAssertEqual(notEaten.value as? String, "끔")
+        notEaten.tap()
+        XCTAssertEqual(notEaten.value as? String, "켬")
+        notEaten.tap()
+
+        let memo = app.textFields["creatureDetail.memo"]
+        for _ in 0..<5 where !memo.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(memo.waitForExistence(timeout: 3))
+        XCTAssertEqual(memo.value as? String, "잘 받아먹음")
+        memo.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+        let clearMemo = app.buttons["creatureDetail.memo.clear"]
+        XCTAssertTrue(clearMemo.waitForExistence(timeout: 3))
+        XCTAssertTrue(clearMemo.isHittable)
+        clearMemo.tap()
+        let memoClearedExpectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value != %@", "잘 받아먹음"),
+            object: memo
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [memoClearedExpectation], timeout: 3), .completed)
+        let memoValueAfterClear = memo.value as? String ?? ""
+        XCTAssertTrue(memoValueAfterClear.isEmpty || memoValueAfterClear == "메모를 입력해 주세요")
+        memo.tap()
+        memo.typeText("잘 먹었어요")
+        XCTAssertEqual(memo.value as? String, "잘 먹었어요")
+        app.buttons["creatureDetail.memo.done"].tap()
+
+        let memoAttachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        memoAttachment.name = "05-a memo form on iPhone 17e"
+        memoAttachment.lifetime = .keepAlways
+        add(memoAttachment)
+
+        let cancel = app.buttons["creatureDetail.cancel"]
+        for _ in 0..<5 where !cancel.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(cancel.isHittable)
+        cancel.tap()
+        XCTAssertEqual(quantity.label, "50")
+        XCTAssertEqual(app.buttons["creatureDetail.food.귀뚜라미"].value as? String, "선택됨")
+    }
+
+    func testCreatureDetailDateSaveAndLowerSections() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-detail-feeding")
+        app.launch()
+
+        let scrollView = app.scrollViews["creatureDetail.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+
+        let date = app.buttons["creatureDetail.date"]
+        XCTAssertTrue(date.waitForExistence(timeout: 3))
+        date.tap()
+        XCTAssertTrue(app.staticTexts["날짜 선택"].waitForExistence(timeout: 3))
+        let dateDone = app.buttons["creatureDetail.date.done"]
+        XCTAssertTrue(dateDone.isHittable)
+        dateDone.tap()
+
+        let save = app.buttons["creatureDetail.save"]
+        for _ in 0..<5 where !save.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(save.isHittable)
+        save.tap()
+        let savePreview = app.alerts["저장 미리보기"]
+        XCTAssertTrue(savePreview.waitForExistence(timeout: 3))
+        savePreview.buttons["확인"].tap()
+
+        let chart = app.otherElements["creatureDetail.weightChart"]
+        for _ in 0..<6 where !chart.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(chart.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["체중 변화"].exists)
+        XCTAssertTrue(app.staticTexts["최근 기록"].exists)
+
+        let firstRecord = app.buttons["creatureDetail.record.delete.weight-1020"]
+        if !firstRecord.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(firstRecord.waitForExistence(timeout: 3))
+        firstRecord.tap()
+        XCTAssertFalse(firstRecord.exists)
+
+        let album = app.buttons["creatureDetail.management.0"]
+        for _ in 0..<5 where !album.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(album.waitForExistence(timeout: 3))
+
+        let lowerContentAttachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        lowerContentAttachment.name = "05-a lower sections on iPhone 17e"
+        lowerContentAttachment.lifetime = .keepAlways
+        add(lowerContentAttachment)
+
+        album.tap()
+        XCTAssertTrue(app.alerts["준비 중"].waitForExistence(timeout: 3))
+    }
+
+    func testCreatureDetailPreviewBackReturnsToHome() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-detail-feeding")
+        app.launch()
+
+        let detailScroll = app.scrollViews["creatureDetail.scroll"]
+        XCTAssertTrue(detailScroll.waitForExistence(timeout: 5))
+        app.buttons["creatureDetail.back"].tap()
+
+        XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
+        XCTAssertFalse(detailScroll.exists)
+    }
 }
