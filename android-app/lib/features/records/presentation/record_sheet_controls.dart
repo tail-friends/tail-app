@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
 
-/// Shared only by the feeding and shedding UI sheets.
+/// Shared by the feeding, shedding and weight UI sheets.
 class RecordTypeTabs extends StatelessWidget {
   const RecordTypeTabs({
     required this.prefix,
@@ -22,6 +22,12 @@ class RecordTypeTabs extends StatelessWidget {
     BoxShadow(color: Color(0x0F3D2E1F), offset: Offset(0, 1), blurRadius: 2),
     BoxShadow(color: Color(0x1A3D2E1F), offset: Offset(0, 2), blurRadius: 8),
   ];
+
+  List<String> get _icons => switch (selectedIndex) {
+    1 => const ['shedding_feed', 'shedding_shed', 'feeding_weight'],
+    2 => const ['shedding_feed', 'feeding_shed', 'weight_record_weight'],
+    _ => const ['feeding_feed', 'feeding_shed', 'feeding_weight'],
+  };
 
   @override
   Widget build(BuildContext context) => AppGlassSurface(
@@ -65,9 +71,7 @@ class RecordTypeTabs extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SvgPicture.asset(
-                          'assets/icons/${index == 2 ? 'feeding_weight' : '${selectedIndex == 1 ? 'shedding' : 'feeding'}_${index == 0 ? 'feed' : 'shed'}'}.svg',
-                        ),
+                        SvgPicture.asset('assets/icons/${_icons[index]}.svg'),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
@@ -133,4 +137,33 @@ class RecordTouchTarget extends StatelessWidget {
       ),
     ),
   );
+}
+
+typedef RecordDateTimePicker =
+    Future<DateTime?> Function(BuildContext context, DateTime current);
+
+Future<DateTime?> pickRecordDateTime(
+  BuildContext context,
+  DateTime current,
+) async {
+  final day = await showDatePicker(
+    context: context,
+    initialDate: current,
+    // Picker navigation bounds only, not an API or business validation rule.
+    firstDate: DateTime(1900),
+    lastDate: DateTime(2100, 12, 31),
+  );
+  if (day == null || !context.mounted) return null;
+  final time = await showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.fromDateTime(current),
+  );
+  if (time == null) return null;
+  return DateTime(day.year, day.month, day.day, time.hour, time.minute);
+}
+
+String formatRecordDateTime(DateTime date) {
+  final time = TimeOfDay.fromDateTime(date);
+  final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+  return '${date.month}월 ${date.day}일 ${time.period == DayPeriod.am ? '오전' : '오후'} $hour:${time.minute.toString().padLeft(2, '0')}';
 }
