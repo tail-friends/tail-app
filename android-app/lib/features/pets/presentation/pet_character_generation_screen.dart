@@ -22,6 +22,10 @@ Future<void> showPetCharacterGenerationPreview(BuildContext context) async {
       ),
       actions: [
         TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('취소'),
+        ),
+        TextButton(
           onPressed: () => Navigator.of(context).pop(true),
           child: const Text('미리보기 열기'),
         ),

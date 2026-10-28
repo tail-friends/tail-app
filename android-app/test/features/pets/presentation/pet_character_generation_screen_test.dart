@@ -203,6 +203,39 @@ void main() {
     expect(find.byType(PetCharacterGenerationScreen), findsNothing);
   });
 
+  testWidgets('안내 취소 버튼은 미리보기를 열지 않고 등록 폼의 입력값을 보존한다', (tester) async {
+    await _open(tester, home: const PetRegistrationScreen());
+    final form = tester.element(find.byType(PetRegistrationScreen));
+    final values = {'pet_name_field': '모모', 'pet_memo_field': '취소 후에도 유지할 메모'};
+    for (final entry in values.entries) {
+      await tester.ensureVisible(_field(entry.key));
+      await tester.enterText(_field(entry.key), entry.value);
+    }
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+
+    final opening = showPetCharacterGenerationPreview(form);
+    await tester.pumpAndSettle();
+    expect(find.text('미리보기 열기'), findsOneWidget);
+    await tester.tap(
+      find.descendant(of: find.byType(AlertDialog), matching: find.text('취소')),
+    );
+    await tester.pumpAndSettle();
+    await opening;
+
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(PetCharacterGenerationScreen), findsNothing);
+    expect(tester.element(find.byType(PetRegistrationScreen)), same(form));
+    for (final entry in values.entries) {
+      await tester.ensureVisible(_field(entry.key));
+      expect(
+        tester.widget<TextFormField>(_field(entry.key)).controller!.text,
+        entry.value,
+      );
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   for (final exit in ['close', 'cancel', 'back']) {
     testWidgets('$exit 후 기존 등록 폼과 입력값을 보존한다', (tester) async {
       await _open(tester, home: const PetRegistrationScreen());
