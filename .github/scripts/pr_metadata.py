@@ -17,6 +17,7 @@ from typing import Any
 
 from project_status import (
     METADATA_PATTERN, PLATFORM_NAMES, active_metadata_blocks, parse_pr_metadata,
+    completion_confirmed, completion_field, pr_field, visible_pr_body,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -41,14 +42,11 @@ def digest(text: str) -> str:
 
 def visible(body: str) -> str:
     """Ignore comments, fenced examples and tool-owned notices during inference."""
-    body = re.sub(r"```.*?```|~~~.*?~~~", "", body, flags=re.S)
-    return re.sub(r"<!--.*?-->", "", NOTE.sub("", body), flags=re.S)
+    return visible_pr_body(body)
 
 
 def field(body: str, label: str) -> str:
-    pattern = rf"^[ \t]*(?:-[ \t]*)?{re.escape(label)}[ \t]*[:：][ \t]*([^\r\n]*)\r?$"
-    match = re.search(pattern, visible(body), re.M | re.I)
-    return match.group(1).strip().strip("` ") if match else ""
+    return pr_field(body, label)
 
 
 def issue_numbers(body: str, repository: str) -> list[int]:
@@ -124,10 +122,9 @@ def infer(
         api_ids.update(task_id for task_id in tasks
                        if re.search(rf"(?<![\w-]){re.escape(task_id)}(?![\w-])", text))
     explicit_api = field(body, "API 작업 ID")
-    if explicit_api and explicit_api not in {"해당 없음", "없음", "미정", "-"}:
-        supplied = {item.strip().strip("` ") for item in explicit_api.split(",")}
-        if supplied - tasks.keys():
-            reasons.append("등록되지 않은 API 작업 ID는 입력하지 않았습니다. 명세·레지스트리를 확인해 주세요.")
+    supplied = {item.strip().strip("` ") for item in explicit_api.split(",")}
+    unknown_api = bool(explicit_api and explicit_api not in {"해당 없음", "없음", "미정", "-"}
+                       and supplied - tasks.keys())
 
     app_files = [p.lower() for p in files if p.startswith(("android-app/", "ios-app/"))]
     ui = any(re.search(r"/(?:presentation|features)/|(?:view|screen)\.swift$", p) for p in app_files)
@@ -144,6 +141,8 @@ def infer(
         reasons.append("UI/API 혼합 변경입니다. 집계할 작업 종류와 완료 범위를 명시해 주세요.")
     else:
         kind = "API" if api else "UI" if ui else "OTHER"
+    if unknown_api and kind != "UI":
+        reasons.append("등록되지 않은 API 작업 ID는 입력하지 않았습니다. 명세·레지스트리를 확인해 주세요.")
     if kind in {"UI", "API"} and not platforms:
         reasons.append("앱 변경 경로에서 플랫폼을 확인할 수 없습니다.")
         kind = "OTHER"
@@ -153,26 +152,22 @@ def infer(
     if kind == "API" and not api_ids:
         reasons.append("확정된 API 작업 ID가 없습니다. API 명세·레지스트리 등록이 필요합니다.")
         kind = "OTHER"
+    if kind == "UI":
+        # API absence (or an excluded API reference) is not UI incompleteness.
+        api_ids.clear()
     for api_id in api_ids:
         numbers.update(number for number in tasks[api_id].get("figma_numbers", [])
                        if number in {item["figma_number"] for item in registry["designs"]})
 
-    scope = field(body, "완료 범위")
-    confirmed = field(body, "완료 여부") in {"완료", "true"}
-    evidence = field(body, "완료 근거")
-    verified_sha = field(body, "완료 검증 커밋")
-    only_ci_or_merge = bool(re.fullmatch(
-        r"(?:CI\s*(?:성공|통과)|(?:PR\s*)?(?:Merge|머지)(?:\s*완료)?|tests? passed)[.! ]*",
-        evidence, re.I,
-    ))
-    completed = bool(
-        confirmed and scope and evidence and not only_ci_or_merge
-        and verified_sha == pull.get("head", {}).get("sha")
-        and re.fullmatch(r"[a-f0-9]{40}", verified_sha)
-        and kind in {"UI", "API"} and not pull.get("draft") and not reasons
-    )
-    if not completed and (kind in {"UI", "API"} or ui or api or numbers):
-        reasons.append("완료 여부·완료 범위·완료 근거·현재 HEAD의 완료 검증 커밋을 확인해 주세요. CI 성공·Merge는 완료 근거로 추정하지 않습니다.")
+    scope = completion_field(body, kind, "완료 범위")
+    design_version = field(body, "디자인 버전") or None
+    design_review = field(body, "디자인 검토") or None
+    if design_review not in {None, "implemented", "no_changes_needed"}:
+        reasons.append("디자인 검토 값은 implemented 또는 no_changes_needed여야 합니다.")
+    completed = completion_confirmed(pull, kind, scope) and not reasons
+    if not completed and (kind in {"UI", "API"} or ((ui or api or numbers) and selected_type != "OTHER")):
+        label = {"UI": "UI 퍼블리싱", "API": "API 연동"}.get(kind, "해당 범위")
+        reasons.append(f"{label} 완료 여부·범위·검증 근거·현재 HEAD 전체 SHA를 확인해 주세요. UI는 API·DB·AI 연동과 별도로 판단하며 CI 성공·Merge만으로 완료를 추정하지 않습니다.")
     if pull.get("draft"):
         reasons.append("Draft PR은 완료로 자동 처리하지 않습니다.")
     # Strip comment delimiters/newlines from user-controlled single-line fields.
@@ -181,7 +176,7 @@ def infer(
         "figma_numbers": sorted(numbers), "work_type": kind, "platforms": platforms,
         "completed_scope": scope or "변경 파일 기반 자동 추정; 완료 범위 확인 필요",
         "completed": completed, "api_work_ids": sorted(api_ids),
-        "design_version": None, "design_review": None,
+        "design_version": design_version, "design_review": design_review,
     }, list(dict.fromkeys(reasons))
 
 
@@ -242,7 +237,12 @@ def plan(pull: dict[str, Any], files: list[str], issues: list[dict[str, Any]],
     # The old repository template was syntactically valid OTHER but empty, not an opt-out.
     placeholder = bool(metadata and not metadata["completed_scope"] and not metadata["figma_numbers"]
                        and not metadata["api_work_ids"] and not metadata["platforms"])
-    if (not managed and not placeholder and metadata and not errors
+    declared_update = bool(metadata and not metadata["completed"] and completion_confirmed(
+        pull, metadata["work_type"], completion_field(original, metadata["work_type"], "완료 범위")))
+    if metadata:
+        declared_update |= any(field(original, label) and field(original, label) != metadata[key]
+                               for label, key in (("디자인 버전", "design_version"), ("디자인 검토", "design_review")))
+    if (not managed and not placeholder and not declared_update and metadata and not errors
             and valid_manual(metadata, pull, files, issues, registry, catalog)):
         return {"body": original, "changed": False, "action": "preserve", "reasons": [],
                 "metadata": metadata}

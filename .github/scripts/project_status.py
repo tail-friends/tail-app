@@ -82,6 +82,61 @@ def active_metadata_blocks(body: str | None) -> list[re.Match[str]]:
     return list(METADATA_PATTERN.finditer(scanned))
 
 
+def visible_pr_body(body: str) -> str:
+    """Human declarations only; examples and generated comments are not evidence."""
+    body = re.sub(r"```.*?```|~~~.*?~~~", "", body, flags=re.S)
+    body = re.sub(r"<!-- tail-metadata-note:start -->.*?<!-- tail-metadata-note:end -->",
+                  "", body, flags=re.S)
+    return re.sub(r"<!--.*?-->", "", body, flags=re.S)
+
+
+def pr_field(body: str, label: str) -> str:
+    pattern = rf"^[ \t]*(?:-[ \t]*)?{re.escape(label)}[ \t]*[:：][ \t]*([^\r\n]*)\r?$"
+    match = re.search(pattern, visible_pr_body(body), re.M | re.I)
+    return match.group(1).strip().strip("` ") if match else ""
+
+
+def completion_field(body: str, kind: str, label: str) -> str:
+    prefix = {"UI": "UI 퍼블리싱", "API": "API 연동"}.get(kind)
+    return (pr_field(body, f"{prefix} {label}") if prefix else "") or pr_field(body, label)
+
+
+def completion_confirmed(pull: dict[str, Any], kind: str, scope: str) -> bool:
+    """Verify a scoped human declaration, not whether app features really work.
+
+    UI evidence covers the design, interactions and UI tests; API/DB/AI absence
+    is never a UI blocker. Only the caller handling a develop merge counts it.
+    """
+    body = pull.get("body") or ""
+    evidence = completion_field(body, kind, "완료 근거")
+    verified_sha = completion_field(body, kind, "완료 검증 커밋")
+    only_ci_or_merge = re.fullmatch(
+        r"(?:CI\s*(?:성공|통과)|(?:PR\s*)?(?:Merge|머지)(?:\s*완료)?|tests? passed)[.! ]*",
+        evidence, re.I,
+    )
+    ui_evidence = kind != "UI" or (
+        re.search(r"Figma|피그마|화면|시각|디자인", evidence, re.I)
+        and re.search(r"테스트|\btests?\b", evidence, re.I)
+    )
+    api_evidence = kind != "API" or (
+        re.search(r"API|연동|integration", evidence, re.I)
+        and re.search(r"테스트|검증|\btests?\b", evidence, re.I)
+    )
+    subject = (r"Figma\s*(?:시각\s*)?(?:비교|검증)|(?:Widget|위젯|UI)\s*테스트"
+               if kind == "UI" else r"API\s*(?:연동|검증|테스트)|연동\s*(?:검증|테스트)")
+    unverified = re.search(
+        rf"(?:{subject})\s*(?:는|가|도|를|:)?\s*(?:미실행|미검증|미완료|실패|불가|예정|대기|보류|하지\s*않)",
+        evidence, re.I,
+    )
+    return bool(
+        kind in {"UI", "API"} and not pull.get("draft")
+        and completion_field(body, kind, "완료 여부") in {"완료", "true"}
+        and scope and evidence and not only_ci_or_merge and ui_evidence and api_evidence and not unverified
+        and re.fullmatch(r"[a-f0-9]{40}", verified_sha)
+        and verified_sha == pull.get("head", {}).get("sha")
+    )
+
+
 def parse_pr_metadata(body: str | None) -> tuple[dict[str, Any] | None, list[str]]:
     matches = active_metadata_blocks(body)
     if not matches:
@@ -203,6 +258,41 @@ def merge_figma_state_from_previous(
         design["review_required"] = bool(old.get("review_required"))
 
 
+def _preserve_integration(state: dict[str, Any], old: dict[str, Any]) -> None:
+    ranks = {"not_started": 0, "needs_confirmation": 1, "partial": 2, "complete": 3}
+    if ranks.get(old.get("status"), -1) > ranks.get(state.get("status"), -1):
+        state["status"] = old["status"]
+    for key in ("related_prs", "related_issues", "notes", "completion_history"):
+        for value in old.get(key, []):
+            _append_unique(state.setdefault(key, []), copy.deepcopy(value))
+    for key in ("merge_date", "completion_merge_date"):
+        dates = [value for value in (state.get(key), old.get(key)) if value]
+        if dates:
+            state[key] = max(dates)
+    if old.get("implemented_version") is not None:
+        state["implemented_version"] = old["implemented_version"]
+    for key, value in old.items():
+        state.setdefault(key, copy.deepcopy(value))
+
+
+def preserve_previous_progress(designs: list[dict[str, Any]], api_catalog: dict[str, Any],
+                               previous: dict[str, Any] | None) -> None:
+    if not previous:
+        return
+    merge_figma_state_from_previous(designs, previous)
+    old_designs = {item["node_id"]: item for item in previous.get("designs", [])}
+    for design in designs:
+        old = old_designs.get(design["node_id"], {})
+        for platform in PLATFORM_NAMES:
+            _preserve_integration(design["ui"][platform], old.get("ui", {}).get(platform, {}))
+    old_tasks = {item["id"]: item for item in previous.get("api_tasks", [])}
+    # Never re-register removed/unknown API tasks from old data or UI PRs.
+    for task in api_catalog.get("tasks", []):
+        old = old_tasks.get(task["id"], {})
+        for platform, state in task.get("integration", {}).items():
+            _preserve_integration(state, old.get("integration", {}).get(platform, {}))
+
+
 def _append_unique(values: list[Any], value: Any) -> None:
     if value not in values:
         values.append(value)
@@ -223,26 +313,47 @@ def apply_merged_prs(
     review_items: list[dict[str, Any]] = []
     history: list[dict[str, Any]] = []
     applied_prs: set[int] = set()
+    previously_complete: set[int] = set()
 
     for design in designs:
         for platform in PLATFORM_NAMES:
             for pr_number in design["ui"][platform].get("related_prs", []):
                 applied_prs.add(int(pr_number))
+                if design["ui"][platform]["status"] == "complete":
+                    previously_complete.add(int(pr_number))
 
-    for pull in sorted(pulls, key=lambda item: item.get("merged_at") or ""):
+    for task in api_catalog.get("tasks", []):
+        for state in task.get("integration", {}).values():
+            applied_prs.update(int(number) for number in state.get("related_prs", []))
+            if state["status"] == "complete":
+                previously_complete.update(int(number) for number in state.get("related_prs", []))
+
+    # Re-read metadata even for previously applied PRs. Deduplication is by PR
+    # identity, not a skip list that would permanently freeze partial work.
+    unique_pulls = {}
+    for pull in sorted(pulls, key=lambda item: item.get("updated_at") or ""):
+        unique_pulls[int(pull["number"])] = pull
+    for pull in sorted(unique_pulls.values(), key=lambda item: item.get("merged_at") or ""):
         number = int(pull["number"])
-        if number in applied_prs:
-            continue
         merged_at = pull.get("merged_at")
         if not merged_at or parse_timestamp(merged_at) < parse_timestamp(
             tracking_started_at
         ):
             continue
-        if (pull.get("base") or {}).get("ref") not in {None, "develop"}:
+        if (pull.get("base") or {}).get("ref") != "develop":
             continue
 
         metadata, errors = parse_pr_metadata(pull.get("body"))
+        if (metadata is None and number in previously_complete
+                and not active_metadata_blocks(pull.get("body"))):
+            # Verified legacy seed/history without a block remains historical
+            # completion. Do not demand a retroactive metadata format migration.
+            continue
         if metadata:
+            for label, key in (("디자인 버전", "design_version"), ("디자인 검토", "design_review")):
+                metadata[key] = pr_field(pull.get("body") or "", label) or metadata[key]
+            if metadata["design_review"] not in {None, "implemented", "no_changes_needed"}:
+                errors.append("디자인 검토 값은 implemented 또는 no_changes_needed여야 합니다.")
             unknown_designs = sorted(
                 set(metadata["figma_numbers"]) - set(design_by_number)
             )
@@ -251,8 +362,12 @@ def apply_merged_prs(
                 errors.append(
                     "등록되지 않은 Figma 번호: " + ", ".join(unknown_designs)
                 )
-            if unknown_apis:
+            if unknown_apis and metadata["work_type"] == "API":
                 errors.append("등록되지 않은 API 작업 ID: " + ", ".join(unknown_apis))
+            if metadata["work_type"] == "API" and not unknown_apis:
+                for api_id in metadata["api_work_ids"]:
+                    if set(metadata["platforms"]) - set(api_by_id[api_id].get("integration", {})):
+                        errors.append(f"API 작업에 등록되지 않은 플랫폼: {api_id}")
 
         if errors or metadata is None:
             review_items.append(
@@ -268,6 +383,21 @@ def apply_merged_prs(
             continue
 
         related_issues = _related_issue_numbers(pull.get("body"))
+        kind = metadata["work_type"]
+        scope = completion_field(pull.get("body") or "", kind, "완료 범위") or metadata["completed_scope"]
+        confirmed = completion_confirmed(pull, kind, scope)
+        states = ([design_by_number[n]["ui"][p] for n in metadata["figma_numbers"] for p in metadata["platforms"]]
+                  if kind == "UI" else [api_by_id[n]["integration"][p] for n in metadata["api_work_ids"] for p in metadata["platforms"]]
+                  if kind == "API" else [])
+        historical_completion = bool(states) and all(
+            s["status"] == "complete" and number in s.get("related_prs", []) for s in states)
+        if metadata["completed"] and not confirmed and not historical_completion and kind in {"UI", "API"}:
+            review_items.append({
+                "kind": "pr_completion", "pr_number": number,
+                "title": pull.get("title", ""), "url": pull.get("html_url"),
+                "merged_at": merged_at,
+                "reasons": [f"{kind} 완료 선언·범위·검증 근거·현재 HEAD 전체 SHA 확인 필요. 기존 완료 이력은 유지합니다."],
+            })
         if metadata["work_type"] == "UI":
             for figma_number in metadata["figma_numbers"]:
                 design = design_by_number[figma_number]
@@ -276,15 +406,25 @@ def apply_merged_prs(
                     _append_unique(state["related_prs"], number)
                     for issue in related_issues:
                         _append_unique(state["related_issues"], issue)
-                    state["merge_date"] = merged_at
-                    state["notes"] = [metadata["completed_scope"]]
-                    if metadata["completed"]:
+                    state["merge_date"] = max(state.get("merge_date") or "", merged_at)
+                    _append_unique(state.setdefault("notes", []), scope)
+                    if confirmed:
+                        completion_date = state.get("completion_merge_date") or (
+                            state.get("merge_date") if state["status"] == "complete" else "") or ""
                         state["status"] = "complete"
-                        state["implemented_version"] = metadata["design_version"]
+                        if (metadata["design_version"] is not None
+                                and merged_at >= completion_date):
+                            state["implemented_version"] = metadata["design_version"]
+                        state["completion_merge_date"] = max(completion_date, merged_at)
+                        _append_unique(state.setdefault("completion_history", []), {
+                            "pr_number": number, "merged_at": merged_at,
+                            "head_sha": pull.get("head", {}).get("sha"),
+                            "design_version": metadata["design_version"], "completed_scope": scope,
+                        })
                     elif state["status"] != "complete":
                         state["status"] = "partial"
 
-                if design.get("review_required"):
+                if design.get("review_required") and confirmed:
                     version_matches = (
                         metadata["design_version"]
                         and metadata["design_version"]
@@ -301,10 +441,15 @@ def apply_merged_prs(
                 task = api_by_id[api_id]
                 for platform in metadata["platforms"]:
                     integration = task["integration"][platform]
-                    integration["status"] = (
-                        "complete" if metadata["completed"] else "partial"
-                    )
-                    integration["merge_date"] = merged_at
+                    if confirmed:
+                        integration["status"] = "complete"
+                        _append_unique(integration.setdefault("completion_history", []), {
+                            "pr_number": number, "merged_at": merged_at,
+                            "head_sha": pull.get("head", {}).get("sha"), "completed_scope": scope,
+                        })
+                    elif integration["status"] != "complete":
+                        integration["status"] = "partial"
+                    integration["merge_date"] = max(integration.get("merge_date") or "", merged_at)
                     _append_unique(integration["related_prs"], number)
                     for issue in related_issues:
                         _append_unique(integration["related_issues"], issue)
@@ -320,8 +465,8 @@ def apply_merged_prs(
                 "platforms": metadata["platforms"],
                 "figma_numbers": metadata["figma_numbers"],
                 "api_work_ids": metadata["api_work_ids"],
-                "completed_scope": metadata["completed_scope"],
-                "completed": metadata["completed"],
+                "completed_scope": scope,
+                "completed": confirmed,
             }
         )
         applied_prs.add(number)
@@ -343,6 +488,7 @@ def calculate_progress(
         )
         partial = sum(
             1 for item in designs if item["ui"][platform]["status"] == "partial"
+            and not item["review_required"]
         )
         review = sum(
             1
@@ -782,6 +928,8 @@ def build_notification(
         number = int(pull.get("number") or event.get("number") or 0)
         if not pull.get("merged") or pull.get("base", {}).get("ref") != "develop":
             return notification
+        if number in previous_prs or f"pr:{number}" in (previous or {}).get("notification_events", []):
+            return notification
         review = next(
             (
                 item
@@ -861,7 +1009,7 @@ def build(args: argparse.Namespace) -> None:
     previous = None
     if args.previous_status and Path(args.previous_status).is_file():
         previous = read_json(Path(args.previous_status))
-        merge_figma_state_from_previous(designs, previous)
+        preserve_previous_progress(designs, api_tasks, previous)
 
     if args.github_fixture:
         pulls = read_json(Path(args.github_fixture))["pull_requests"]
@@ -877,6 +1025,10 @@ def build(args: argparse.Namespace) -> None:
         pulls,
         config["tracking_started_at"],
     )
+    fetched_prs = {int(pull["number"]) for pull in pulls}
+    for item in (previous or {}).get("review_items", []):
+        if item.get("pr_number") not in fetched_prs:
+            _append_unique(review_items, copy.deepcopy(item))
     sync_design_api_status(designs, api_tasks)
 
     previous_figma = copy.deepcopy(
@@ -898,11 +1050,7 @@ def build(args: argparse.Namespace) -> None:
     else:
         figma = previous_figma
 
-    seeded_history: list[dict[str, Any]] = [
-        item
-        for item in (previous or {}).get("history", [])
-        if item.get("kind") == "figma-change"
-    ]
+    seeded_history = copy.deepcopy((previous or {}).get("history", []))
     for design in designs:
         for platform in PLATFORM_NAMES:
             state = design["ui"][platform]
@@ -936,18 +1084,19 @@ def build(args: argparse.Namespace) -> None:
                 "completed_scope": "재검토 필요: " + ", ".join(figma_changes),
             }
         )
-    unique_history = {
-        (
-            item.get("kind"),
-            item.get("pr_number"),
-            item.get("version_id"),
-            tuple(item.get("figma_numbers", [])),
-        ): item
-        for item in seeded_history + history
-    }
+    unique_history = {}
+    for item in seeded_history + history:
+        key = (("merge", item["pr_number"]) if item.get("kind") == "merge" else
+               (item.get("kind"), item.get("version_id"), tuple(item.get("figma_numbers", []))))
+        old = unique_history.get(key, {})
+        if old.get("previous_completion"):
+            item = {**item, "previous_completion": old["previous_completion"]}
+        if old.get("completed") and not item.get("completed"):
+            item = {**item, "previous_completion": old.get("previous_completion", old)}
+        unique_history[key] = item
     all_history = sorted(
         unique_history.values(), key=lambda item: item.get("merged_at") or "", reverse=True
-    )[:50]
+    )
 
     event = read_json(Path(args.event_path)) if args.event_path else {}
     status = {
@@ -963,11 +1112,18 @@ def build(args: argparse.Namespace) -> None:
         "api_tasks": api_tasks.get("tasks", []),
         "review_items": review_items,
         "history": all_history,
-        "applied_prs": applied_prs,
+        "applied_prs": sorted(set(applied_prs) | set((previous or {}).get("applied_prs", []))),
+        "notification_events": list((previous or {}).get("notification_events", [])),
     }
     notification = build_notification(
         args.event_name, event, previous, status, figma_changes
     )
+    if getattr(args, "dry_run", False):
+        notification = {"kind": "none"}
+    elif notification["kind"] != "none":
+        event_key = (f'figma:{notification["version"]["id"]}' if notification["kind"] == "figma-change"
+                     else f'pr:{notification["pr_number"]}')
+        _append_unique(status["notification_events"], event_key)
 
     output = Path(args.output)
     resolved_output = output.resolve()
@@ -996,6 +1152,8 @@ def parser() -> argparse.ArgumentParser:
     build_parser.add_argument("--sync-figma", action="store_true")
     build_parser.add_argument("--figma-version-id")
     build_parser.add_argument("--accept-figma-baseline", action="store_true")
+    build_parser.add_argument("--dry-run", action="store_true",
+                              help="Local report only; emit no notification or deployment request")
     build_parser.set_defaults(handler=build)
     return result
 

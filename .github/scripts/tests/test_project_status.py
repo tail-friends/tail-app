@@ -34,10 +34,15 @@ def merged_pr(number: int, body: str | None, *, base: str = "develop"):
         "html_url": f"https://github.com/tail-friends/tail-app/pull/{number}",
         "merged_at": "2026-10-26T10:00:00Z",
         "base": {"ref": base},
+        "head": {"sha": "c" * 40},
     }
 
 
 VALID_UI_BODY = """Closes #100
+완료 여부: 완료
+완료 범위: 기본 화면과 선택 상호작용
+완료 근거: Figma 시각 비교와 UI 상호작용 테스트 완료
+완료 검증 커밋: cccccccccccccccccccccccccccccccccccccccc
 <!-- tail-status
 figma_numbers: 04
 work_type: UI
@@ -247,6 +252,10 @@ class FigmaTests(unittest.TestCase):
             )
 
         review_body = """Closes #51
+완료 여부: 완료
+완료 범위: 디자인 변경 검토
+완료 근거: Figma 변경 시각 비교와 UI 회귀 테스트 완료
+완료 검증 커밋: cccccccccccccccccccccccccccccccccccccccc
 <!-- tail-status
 figma_numbers: 01
 work_type: UI

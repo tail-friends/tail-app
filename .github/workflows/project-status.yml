@@ -1,7 +1,7 @@
 name: 개발 현황 갱신
 
 # schedule, workflow_dispatch, repository_dispatch, pull_request_target 등록을 위해
-# 이 파일은 승인된 develop → main 릴리스 PR로 기본 브랜치에도 반영되어야 합니다.
+# 이 파일과 호환 스크립트는 승인된 자동화 전용 릴리스 PR로 main에도 반영해야 합니다.
 
 on:
   pull_request_target:
@@ -9,6 +9,11 @@ on:
     types: [closed]
   workflow_dispatch:
     inputs:
+      dry_run:
+        description: 재집계 결과만 artifact로 확인합니다 (Pages 배포·Discord 발송 없음).
+        required: false
+        type: boolean
+        default: false
       sync_figma:
         description: Figma 이름 붙인 버전을 조회합니다.
         required: false
@@ -37,13 +42,15 @@ permissions:
 jobs:
   build:
     if: >-
-      github.event_name != 'pull_request_target'
-      || (github.event.pull_request.merged == true
-          && vars.PROJECT_STATUS_ENABLED == 'true')
+      github.event_name == 'workflow_dispatch'
+      || (vars.PROJECT_STATUS_ENABLED == 'true'
+          && (github.event_name != 'pull_request_target'
+              || github.event.pull_request.merged == true))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
       notification-kind: ${{ steps.result.outputs.notification-kind }}
+      dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
     steps:
       - name: Checkout trusted develop branch
         uses: actions/checkout@v7
@@ -61,6 +68,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          STATUS_ENABLED: ${{ vars.PROJECT_STATUS_ENABLED }}
         shell: bash
         run: |
           mkdir -p build/project-status-state
@@ -86,7 +94,12 @@ jobs:
               "$status_url" \
               --output build/project-status-state/previous-status.json; then
               echo "path=build/project-status-state/previous-status.json" >> "$GITHUB_OUTPUT"
+              exit 0
             fi
+          fi
+          if [[ "$STATUS_ENABLED" == "true" ]]; then
+            echo "::error::Previous status is unavailable; refusing to reset published history."
+            exit 1
           fi
 
       - name: Build dashboard data
@@ -98,6 +111,7 @@ jobs:
           DISPATCH_VERSION_ID: ${{ github.event.client_payload.version_id }}
           INPUT_SYNC_FIGMA: ${{ inputs.sync_figma }}
           INPUT_ACCEPT_BASELINE: ${{ inputs.accept_figma_baseline }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
         shell: bash
         run: |
           args=(
@@ -126,6 +140,9 @@ jobs:
           if [[ "$INPUT_ACCEPT_BASELINE" == "true" ]]; then
             args+=(--accept-figma-baseline)
           fi
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && "$INPUT_DRY_RUN" == "true" ]]; then
+            args+=(--dry-run)
+          fi
 
           python .github/scripts/project_status.py "${args[@]}"
 
@@ -137,9 +154,11 @@ jobs:
           echo "notification-kind=$kind" >> "$GITHUB_OUTPUT"
 
       - name: Configure GitHub Pages
+        if: "!(github.event_name == 'workflow_dispatch' && inputs.dry_run)"
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
+        if: "!(github.event_name == 'workflow_dispatch' && inputs.dry_run)"
         uses: actions/upload-pages-artifact@v4
         with:
           path: build/project-status-site
@@ -155,6 +174,7 @@ jobs:
           retention-days: 1
 
       - name: Preserve status for the next run
+        if: "!(github.event_name == 'workflow_dispatch' && inputs.dry_run)"
         uses: actions/upload-artifact@v6
         with:
           name: project-status-state
@@ -162,8 +182,18 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      - name: Upload read-only reconciliation preview
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run
+        uses: actions/upload-artifact@v6
+        with:
+          name: project-status-preview-${{ github.run_id }}
+          path: build/project-status-site
+          if-no-files-found: error
+          retention-days: 7
+
   deploy:
     needs: build
+    if: needs.build.outputs.dry-run != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
