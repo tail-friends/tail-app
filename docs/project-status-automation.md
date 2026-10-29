@@ -14,9 +14,14 @@
 
 ## 진행률 규칙
 
-UI 진행률의 분모는 플랫폼별 89개 디자인이다. `complete`만 완료로 계산하며
-`partial`, `not_started`, `needs_confirmation`, 디자인 변경 후 `review_required`는
-완료율을 올리지 않는다. Figma 변경은 UI 재검토만 표시하며 API 상태를 바꾸지 않는다.
+UI **머지 진행률**의 분모는 플랫폼별 89개 디자인이다. 유효한 화면 번호·플랫폼이 있는
+UI PR이 `develop`에 Merge되면 해당 화면은 `completed: false`이더라도 분자에 포함한다.
+`partial` 상태나 디자인 재검토 중인 화면도 머지된 작업은 그대로 계산한다.
+동일 화면에 여러 PR이 Merge되어도 화면은 한 번만 세고, PR 미머지·번호 누락은 포함하지 않는다.
+`percent`는 머지 진행률, `merged`는 머지된 UI 화면 수, `complete`는 검증·승인되고
+디자인 재검토가 필요 없는 UI 수, `verified_percent`는 해당 검증 완료율이다.
+대시보드의 화면별 `일부 구현`/`퍼블리싱 완료` 상태는 변하지 않는다.
+Figma 변경은 UI 재검토만 표시하며 API 상태를 바꾸지 않는다.
 
 UI 완료는 Figma 화면·필요한 상호작용·시각 비교·관련 Widget/UI 테스트에 대한
 명시적 완료 확인, 검증한 현재 PR HEAD 전체 SHA, develop Merge가 모두 확인된

@@ -72,13 +72,15 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual([29], species_picker["related_prs"])
         self.assertEqual("2026-10-25T15:18:04Z", species_picker["merge_date"])
 
-    def test_initial_progress_counts_only_confirmed_completion(self):
+    def test_initial_progress_separates_merged_from_verified_completion(self):
         progress = project_status.calculate_progress(
             load_registry(), {"catalog_status": "preparing", "tasks": []}
         )
         self.assertEqual(4, progress["ui"]["android"]["complete"])
         self.assertEqual(89, progress["ui"]["android"]["total"])
-        self.assertEqual(4.5, progress["ui"]["android"]["percent"])
+        self.assertEqual(6, progress["ui"]["android"]["merged"])
+        self.assertEqual(4.5, progress["ui"]["android"]["verified_percent"])
+        self.assertEqual(6.7, progress["ui"]["android"]["percent"])
         self.assertEqual(0, progress["ui"]["ios"]["complete"])
         self.assertEqual("preparing", progress["api"]["android"]["state"])
         self.assertIsNone(progress["api"]["android"]["percent"])
@@ -226,7 +228,8 @@ class FigmaTests(unittest.TestCase):
             designs, {"catalog_status": "preparing", "tasks": []}
         )
         self.assertEqual(3, progress["ui"]["android"]["complete"])
-        self.assertEqual(3.4, progress["ui"]["android"]["percent"])
+        self.assertEqual(3.4, progress["ui"]["android"]["verified_percent"])
+        self.assertEqual(6.7, progress["ui"]["android"]["percent"])
 
     def test_review_completion_restores_progress_and_promotes_node_baseline(self):
         designs = load_registry()
@@ -285,7 +288,9 @@ design_review: no_changes_needed
         self.assertEqual("changed", figma["node_hashes"][node_id])
         self.assertEqual("version-2", figma["baseline_version"]["id"])
         self.assertEqual(4, progress["ui"]["android"]["complete"])
-        self.assertEqual(4.5, progress["ui"]["android"]["percent"])
+        self.assertEqual(6, progress["ui"]["android"]["merged"])
+        self.assertEqual(4.5, progress["ui"]["android"]["verified_percent"])
+        self.assertEqual(6.7, progress["ui"]["android"]["percent"])
 
     def test_next_sync_reports_only_nodes_changed_since_last_checked_version(self):
         designs = load_registry()
