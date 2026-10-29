@@ -68,6 +68,6 @@ assert.equal(nodes["#status-body"].innerHTML,"");
 const index = fs.readFileSync("project-status/site/index.html","utf8");
 assert.match(index,/value="partial"/);
 assert.match(index,/value="preparing"/);
-assert.match(index,/UI 퍼블리싱과 API 연동은 독립 집계/);
+assert.match(index,/UI 머지 진행률은 develop에 머지된 UI 작업의 화면 수/);
 
 console.log("status filters, independent UI/API renderers and historical page compatibility: OK");
