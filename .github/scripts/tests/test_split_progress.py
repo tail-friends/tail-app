@@ -70,6 +70,44 @@ class IndependentProgressTests(unittest.TestCase):
         self.assertEqual(before["ui"]["android"]["complete"] - 1, after["ui"]["android"]["complete"])
         self.assertEqual(before["api"]["android"]["percent"], after["api"]["android"]["percent"])
 
+    def test_ui_pr_merge_publishes_screen_without_faking_verification(self):
+        partial = VALID_UI_BODY.replace("completed: true", "completed: false").replace(
+            "완료 여부: 완료", "완료 여부: 확인 필요")
+        self.apply(partial)
+        ui_state = target(self.designs)["ui"]["android"]
+        self.assertEqual("partial", ui_state["status"])
+        self.assertEqual([100], ui_state["merged_ui_prs"])
+        self.assertEqual("complete", status.ui_publication_status(ui_state))
+        self.assertEqual("not_started", status.ui_publication_status(
+            target(self.designs)["ui"]["ios"]))
+        self.assertIsNone(status.calculate_progress(self.designs, self.empty)["api"]["android"]["percent"])
+        self.apply(partial)
+        self.assertEqual([100], ui_state["merged_ui_prs"])
+        self.apply(partial, number=101)
+        self.assertEqual([100, 101], ui_state["merged_ui_prs"])
+        self.assertEqual("complete", status.ui_publication_status(ui_state))
+        self.assertEqual("partial", ui_state["status"])
+
+    def test_parent_related_pr_does_not_publish_unfinished_child(self):
+        design = next(d for d in self.designs if d["figma_number"] == "03-0")
+        state = design["ui"]["android"]
+        self.assertEqual("partial", state["status"])
+        self.assertTrue(state["related_prs"])  # Parent registration PR.
+        self.assertFalse(state.get("merged_ui_prs"))
+        self.assertEqual("partial", status.ui_publication_status(state))
+
+    def test_ui_pr_merge_cannot_publish_invalid_or_unmerged_work(self):
+        for modification in [{"merged_at": None}, {"base": {"ref": "main"}}]:
+            candidate = merged_pr(100, VALID_UI_BODY)
+            candidate.update(modification)
+            status.apply_merged_prs(self.designs, self.empty, [candidate], START)
+        state = target(self.designs)["ui"]["android"]
+        self.assertFalse(state.get("merged_ui_prs"))
+        invalid = merged_pr(101, "No Figma metadata")
+        status.apply_merged_prs(self.designs, self.empty, [invalid], START)
+        self.assertFalse(state.get("merged_ui_prs"))
+        self.assertEqual("not_started", status.ui_publication_status(state))
+
     def test_ui_complete_without_api_specification(self):
         self.apply(VALID_UI_BODY + "\nAPI·DB·AI 연동과 실제 저장은 미구현입니다.")
         progress = status.calculate_progress(self.designs, self.empty)
@@ -225,6 +263,8 @@ class IndependentProgressTests(unittest.TestCase):
             state = by_number[figma]["ui"]["android"]
             self.assertEqual("partial", state["status"])
             self.assertEqual([pr], state["related_prs"])
+            self.assertEqual([pr], state["merged_ui_prs"])
+            self.assertEqual("complete", status.ui_publication_status(state))
         self.assertEqual(5, status.calculate_progress(self.designs, self.empty)["ui"]["android"]["complete"])
         self.assertEqual(13, status.calculate_progress(self.designs, self.empty)["ui"]["android"]["merged"])
 

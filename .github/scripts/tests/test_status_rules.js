@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const { matchesStatus, renderProgress, renderDesigns, renderApi, badge } = require("../../../project-status/site/app.js");
+const { matchesStatus, renderProgress, renderDesigns, renderApi, badge, uiPublishingStatus } = require("../../../project-status/site/app.js");
 
 assert.equal(matchesStatus("complete", false, "complete"), true);
 assert.equal(matchesStatus("complete", true, "complete"), false);
@@ -21,14 +21,14 @@ const nodes = {};
 global.document = { querySelector: (key) => nodes[key] ||= { innerHTML: "", textContent: "", hidden: true } };
 const ready = { state:"ready", complete:1, total:89, remaining:88, percent:1.1, remaining_percent:98.9 };
 const preparing = { state:"preparing", complete:null, total:null, percent:null };
-const design = (number, ui, api, review=false) => ({
+const design = (number, ui, api, review=false, mergedUiPrs=[]) => ({
   figma_number:number, name:"테스트", figma_url:"https://www.figma.com/design/test", review_required:review,
   current_design_version:"v2", api:{ android:api },
-  ui:{ android:{ status:ui, related_prs:[100], related_issues:[99], notes:["Debug 전용, API 미연동", "<script>bad()</script>"] } },
+  ui:{ android:{ status:ui, merged_ui_prs:mergedUiPrs, related_prs:[100], related_issues:[99], notes:["Debug 전용, API 미연동", "<script>bad()</script>"] } },
 });
 const data = {
   progress:{ ui:{android:ready,ios:ready}, api:{android:preparing,ios:preparing} },
-  designs:[design("04", "complete", "not_registered"), design("04-1", "partial", "complete"), design("04-2", "complete", "complete", true)],
+  designs:[design("04", "complete", "not_registered"), design("04-1", "partial", "complete", false, [100]), design("04-2", "complete", "complete", true), design("03-0", "partial", "not_registered")],
   api_catalog_status:"preparing", api_tasks:[],
 };
 renderProgress(data);
@@ -43,7 +43,11 @@ assert.match(nodes["#progress-cards"].innerHTML,/검증 완료 1개/);
 assert.match(nodes["#progress-cards"].innerHTML,/3.4%/);
 assert.doesNotMatch(nodes["#progress-cards"].innerHTML,/null%/);
 renderDesigns("android", "complete", data);
-assert.equal((nodes["#status-body"].innerHTML.match(/<tr>/g)||[]).length,1);
+assert.equal((nodes["#status-body"].innerHTML.match(/<tr>/g)||[]).length,2);
+assert.equal(uiPublishingStatus(data.designs[1].ui.android), "complete");
+assert.equal(uiPublishingStatus(data.designs[3].ui.android), "partial");
+assert.match(nodes["#status-body"].innerHTML,/04-1/);
+assert.match(nodes["#status-body"].innerHTML,/최종 검증은 별도/);
 assert.match(nodes["#status-body"].innerHTML,/집계 준비 중/);
 assert.match(nodes["#status-body"].innerHTML,/Debug 전용, API 미연동/);
 assert.match(nodes["#status-body"].innerHTML,/&lt;script&gt;/);
@@ -53,7 +57,8 @@ assert.match(nodes["#status-body"].innerHTML,/04-2/);
 assert.match(nodes["#status-body"].innerHTML,/재검토 필요/);
 assert.match(nodes["#status-body"].innerHTML,/badge complete/); // API stays complete.
 renderDesigns("android", "partial", data);
-assert.match(nodes["#status-body"].innerHTML,/04-1/);
+assert.match(nodes["#status-body"].innerHTML,/03-0/);
+assert.doesNotMatch(nodes["#status-body"].innerHTML,/04-1/);
 assert.doesNotMatch(nodes["#status-body"].innerHTML,/04-2/);
 renderApi("android", "all", data);
 assert.equal(nodes["#status-body"].innerHTML,"");
@@ -68,6 +73,6 @@ assert.equal(nodes["#status-body"].innerHTML,"");
 const index = fs.readFileSync("project-status/site/index.html","utf8");
 assert.match(index,/value="partial"/);
 assert.match(index,/value="preparing"/);
-assert.match(index,/UI 머지 진행률은 develop에 머지된 UI 작업의 화면 수/);
+assert.match(index,/UI PR이 develop에 머지되면 해당 화면은/);
 
 console.log("status filters, independent UI/API renderers and historical page compatibility: OK");

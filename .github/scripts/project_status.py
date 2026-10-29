@@ -404,6 +404,10 @@ def apply_merged_prs(
                 for platform in metadata["platforms"]:
                     state = design["ui"][platform]
                     _append_unique(state["related_prs"], number)
+                    # A successful develop merge publishes the named UI screen.
+                    # This is independent of the separately verified status.
+                    # Do not infer publication from legacy parent PR links.
+                    _append_unique(state.setdefault("merged_ui_prs", []), number)
                     for issue in related_issues:
                         _append_unique(state["related_issues"], issue)
                     state["merge_date"] = max(state.get("merge_date") or "", merged_at)
@@ -472,6 +476,13 @@ def apply_merged_prs(
         applied_prs.add(number)
 
     return review_items, history, sorted(applied_prs)
+
+
+def ui_publication_status(state: dict[str, Any]) -> str:
+    """UI merge publication is separate from the verified design state."""
+    if state.get("merged_ui_prs") or state.get("status") == "complete":
+        return "complete"
+    return state.get("status", "not_started")
 
 
 def calculate_progress(
@@ -815,8 +826,8 @@ def write_xlsx(path: Path, status: dict[str, Any]) -> None:
                 design["figma_number"],
                 design["name"],
                 design["node_id"],
-                design["ui"]["android"]["status"],
-                design["ui"]["ios"]["status"],
+                ui_publication_status(design["ui"]["android"]),
+                ui_publication_status(design["ui"]["ios"]),
                 design["api"]["android"],
                 design["api"]["ios"],
                 "Y" if design["review_required"] else "N",
