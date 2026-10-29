@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
+import 'pet_hatching_date_sheet.dart';
 import 'pet_photo_add_sheet.dart';
 import 'pet_species_picker_sheet.dart';
 
@@ -15,15 +16,24 @@ typedef PetDatePicker =
 
 class PetRegistrationScreen extends StatefulWidget {
   const PetRegistrationScreen({this.datePicker, super.key})
-    : _photoPreview = false;
+    : _photoPreview = false,
+      _hatchingDatePreview = false;
 
   /// Independent Debug target uses Figma examples without saving any pet.
   const PetRegistrationScreen.photoAddPreview({super.key})
     : datePicker = null,
-      _photoPreview = true;
+      _photoPreview = true,
+      _hatchingDatePreview = false;
+
+  /// Figma samples are confined to this independent Debug preview.
+  const PetRegistrationScreen.hatchingDatePreview({super.key})
+    : datePicker = null,
+      _photoPreview = false,
+      _hatchingDatePreview = true;
 
   final PetDatePicker? datePicker;
   final bool _photoPreview;
+  final bool _hatchingDatePreview;
 
   @override
   State<PetRegistrationScreen> createState() => _PetRegistrationScreenState();
@@ -84,7 +94,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
   final _memoController = TextEditingController();
 
   PetGender _gender = PetGender.unspecified;
-  DateTime? _hatchingDate;
+  HatchingDateSelection? _hatchingDate;
   String? _species;
   String? _nameError;
   String? _speciesError;
@@ -93,16 +103,25 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
   @override
   void initState() {
     super.initState();
-    if (kDebugMode && widget._photoPreview) {
+    if (kDebugMode && (widget._photoPreview || widget._hatchingDatePreview)) {
       _nameController.text = '욱이';
       _species = '레오파드 게코';
       _morphController.text = '탠저린 · 꼬리 재생';
       _gender = PetGender.male;
-      _hatchingDate = DateTime(2024, 7, 12);
+      _hatchingDate = const HatchingDateSelection(
+        year: 2024,
+        month: 7,
+        day: 12,
+      );
       _feedingCycleController.text = '4';
       _memoController.text = '온순함, 손에 잘 올라옴';
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) showPetPhotoAddSheet(context);
+        if (!mounted) return;
+        if (widget._photoPreview) {
+          showPetPhotoAddSheet(context);
+        } else {
+          _pickHatchingDate();
+        }
       });
     }
   }
@@ -123,26 +142,23 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<DateTime?> _showDatePicker(
+  Future<HatchingDateSelection?> _showDatePicker(
     BuildContext context,
-    DateTime? currentDate,
-  ) {
-    final today = DateUtils.dateOnly(DateTime.now());
-    return showDatePicker(
-      context: context,
-      initialDate: currentDate ?? today,
-      firstDate: DateTime(1900),
-      lastDate: today,
-    );
-  }
+    HatchingDateSelection? currentDate,
+  ) => showPetHatchingDateSheet(context: context, initialValue: currentDate);
 
   Future<void> _pickHatchingDate() async {
-    final selected = await (widget.datePicker ?? _showDatePicker)(
-      context,
-      _hatchingDate,
-    );
+    FocusScope.of(context).unfocus();
+    final legacyPicker = widget.datePicker;
+    final HatchingDateSelection? selected;
+    if (legacyPicker != null) {
+      final date = await legacyPicker(context, _hatchingDate?.exactDate);
+      selected = date == null ? null : HatchingDateSelection.fromDate(date);
+    } else {
+      selected = await _showDatePicker(context, _hatchingDate);
+    }
     if (!mounted || selected == null) return;
-    setState(() => _hatchingDate = DateUtils.dateOnly(selected));
+    setState(() => _hatchingDate = selected);
   }
 
   Future<void> _pickSpecies() async {
@@ -179,13 +195,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
     await showPetPhotoAddSheet(context);
   }
 
-  String? get _formattedDate {
-    final date = _hatchingDate;
-    if (date == null) return null;
-    return '${date.year.toString().padLeft(4, '0')}.'
-        '${date.month.toString().padLeft(2, '0')}.'
-        '${date.day.toString().padLeft(2, '0')}';
-  }
+  String? get _formattedDate => _hatchingDate?.label;
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tail_friends/core/design_system/design_system.dart';
+import 'package:tail_friends/features/pets/presentation/pet_hatching_date_sheet.dart';
 import 'package:tail_friends/features/pets/presentation/pet_registration_screen.dart';
 import 'package:tail_friends/features/pets/presentation/pet_species_picker_sheet.dart';
 
@@ -59,6 +60,14 @@ Future<void> _openSpeciesPicker(WidgetTester tester) async {
   await tester.tap(
     find.descendant(of: speciesField, matching: find.byType(InkWell)),
   );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openHatchingPicker(WidgetTester tester) async {
+  final field = find.byKey(const ValueKey('pet_hatching_date_field'));
+  await tester.ensureVisible(field);
+  await tester.pumpAndSettle();
+  await tester.tap(find.descendant(of: field, matching: find.byType(InkWell)));
   await tester.pumpAndSettle();
 }
 
@@ -151,6 +160,7 @@ void main() {
         PetRegistrationScreen(
           datePicker: (_, currentDate) async {
             pickCount++;
+            expect(currentDate, pickCount == 1 ? null : DateTime(2024, 7, 12));
             return pickCount == 1 ? DateTime(2024, 7, 12) : null;
           },
         ),
@@ -182,6 +192,164 @@ void main() {
     expect(tester.widget<TextFormField>(feedingField).controller!.text, '123');
     expect(find.text('일'), findsOneWidget);
   });
+
+  testWidgets('기본 해칭일 필드는 Glass 시트를 열고 월 단위 표시를 손실 없이 유지한다', (tester) async {
+    _setViewSize(tester, const Size(390, 844));
+    await tester.pumpWidget(_host(const PetRegistrationScreen()));
+    await _openHatchingPicker(tester);
+    expect(find.byType(PetHatchingDateSheet), findsOneWidget);
+    expect(find.byType(DatePickerDialog), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('pet_hatching_month_only')));
+    await tester.tap(find.byKey(const ValueKey('pet_hatching_confirm')));
+    await tester.pumpAndSettle();
+    final today = DateTime.now();
+    final label = HatchingDateSelection(
+      year: today.year,
+      month: today.month,
+    ).label;
+    expect(find.text(label), findsOneWidget);
+    expect(find.text(label.replaceAll(' (일자 미상)', '.01')), findsNothing);
+    await _openHatchingPicker(tester);
+    expect(
+      tester
+          .getSemantics(find.byKey(const ValueKey('pet_hatching_month_only')))
+          .flagsCollection
+          .isChecked,
+      ui.CheckedState.isTrue,
+    );
+    await tester.tap(find.byKey(const ValueKey('pet_hatching_close')));
+    await tester.pumpAndSettle();
+    expect(find.text(label), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('월 단위 값은 기존 DateTime 콜백에 임의의 1일로 전달되지 않는다', (tester) async {
+    _setViewSize(tester, const Size(390, 844));
+    var useLegacyPicker = false;
+    var called = false;
+    late StateSetter updateHost;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.mist,
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            updateHost = setState;
+            return PetRegistrationScreen(
+              datePicker: useLegacyPicker
+                  ? (_, currentDate) async {
+                      called = true;
+                      expect(currentDate, isNull);
+                      return null;
+                    }
+                  : null,
+            );
+          },
+        ),
+      ),
+    );
+    await _openHatchingPicker(tester);
+    await tester.tap(find.byKey(const ValueKey('pet_hatching_month_only')));
+    await tester.tap(find.byKey(const ValueKey('pet_hatching_confirm')));
+    await tester.pumpAndSettle();
+    updateHost(() => useLegacyPicker = true);
+    await tester.pumpAndSettle();
+    await _openHatchingPicker(tester);
+    expect(called, isTrue);
+    expect(find.textContaining('(일자 미상)'), findsOneWidget);
+    expect(find.byType(PetHatchingDateSheet), findsNothing);
+  });
+
+  for (final exit in ['confirm', 'close', 'outside', 'back', 'drag']) {
+    testWidgets('날짜 $exit 후 기존 날짜와 이름·종·특징·성별·주기·메모 보존', (tester) async {
+      _setViewSize(tester, const Size(390, 974));
+      await tester.pumpWidget(_host(const PetRegistrationScreen()));
+      final form = tester.element(find.byType(PetRegistrationScreen));
+      final values = {
+        'pet_name_field': '모모',
+        'pet_morph_field': '내가 입력한 특징',
+        'pet_feeding_cycle_field': '4',
+        'pet_memo_field': '유지할 메모',
+      };
+      for (final entry in values.entries) {
+        await tester.ensureVisible(_textField(entry.key));
+        await tester.enterText(_textField(entry.key), entry.value);
+      }
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('pet_gender_female')),
+      );
+      await tester.tap(find.byKey(const ValueKey('pet_gender_female')));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('pet_species_field')),
+      );
+      await tester.pumpAndSettle();
+      await _openSpeciesPicker(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('pet_species_search_field')),
+        '내 종',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('pet_species_option_내 종')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('pet_species_confirm_button')),
+      );
+      await tester.pumpAndSettle();
+
+      await _openHatchingPicker(tester);
+      await tester.tap(find.byKey(const ValueKey('pet_hatching_confirm')));
+      await tester.pumpAndSettle();
+      final original = HatchingDateSelection.fromDate(DateTime.now());
+      expect(find.text(original.label), findsOneWidget);
+      await _openHatchingPicker(tester);
+      final month = find.byKey(const ValueKey('pet_hatching_year_wheel'));
+      tester.widget<Semantics>(month).properties.onDecrease!();
+      await tester.pumpAndSettle();
+      if (exit == 'confirm') {
+        await tester.tap(find.byKey(const ValueKey('pet_hatching_confirm')));
+      } else if (exit == 'close') {
+        await tester.tap(find.byKey(const ValueKey('pet_hatching_close')));
+      } else if (exit == 'outside') {
+        await tester.tapAt(const Offset(12, 150));
+      } else if (exit == 'back') {
+        await tester.binding.handlePopRoute();
+      } else {
+        await tester.dragFrom(
+          tester.getCenter(find.byKey(const ValueKey('pet_hatching_grabber'))),
+          const Offset(0, 400),
+        );
+      }
+      await tester.pumpAndSettle();
+      expect(tester.element(find.byType(PetRegistrationScreen)), same(form));
+      expect(find.byType(PetHatchingDateSheet), findsNothing);
+      final expected = exit == 'confirm'
+          ? HatchingDateSelection(
+              year: original.year - 1,
+              month: original.month,
+              day: original.day,
+            )
+          : original;
+      expect(find.text(expected.label), findsOneWidget);
+      for (final entry in values.entries) {
+        expect(
+          tester.widget<TextFormField>(_textField(entry.key)).controller!.text,
+          entry.value,
+        );
+      }
+      expect(find.text('내 종'), findsOneWidget);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('pet_gender_female')),
+      );
+      expect(
+        tester
+            .getSemantics(find.byKey(const ValueKey('pet_gender_female')))
+            .flagsCollection
+            .isSelected,
+        ui.Tristate.isTrue,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('종 필드에서 Figma 종 선택 시트를 열고 닫을 수 있다', (tester) async {
     _setViewSize(tester, const Size(390, 974));
