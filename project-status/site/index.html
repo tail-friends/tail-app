@@ -29,7 +29,7 @@
         <div class="panel-heading">
           <div>
             <h2 id="status-heading">번호별 현황</h2>
-            <p class="muted">UI 퍼블리싱과 API 연동은 독립 집계합니다. UI 완료는 검증·승인된 화면 구현이며 실제 저장·API 동작을 뜻하지 않습니다.</p>
+            <p class="muted">UI 머지 진행률은 develop에 머지된 UI 작업의 화면 수입니다. UI 퍼블리싱 검증 완료와 API 연동 완료는 각각 별도 상태로 표시합니다.</p>
           </div>
           <div class="filters" aria-label="현황 필터">
             <label>
@@ -82,7 +82,7 @@
     </main>
 
     <footer>
-      <p>UI 분모는 플랫폼별 Figma 화면 89개입니다. 일부 구현은 완료율에 포함하지 않으며, 디자인 변경 후 재검토가 필요한 UI도 완료율에서 제외합니다. API 상태는 디자인 변경과 무관하게 유지합니다. Debug 전용 여부 등은 비고의 구현 범위를 확인하세요.</p>
+      <p>UI 분모는 플랫폼별 Figma 화면 89개입니다. UI 머지 진행률은 일부 구현·디자인 재검토 대상도 포함합니다. 검증 완료 개수는 별도이며, API 완료율은 머지된 UI와 무관합니다. Debug 전용 여부 등은 비고의 구현 범위를 확인하세요.</p>
       <p>API 명세가 등록되기 전에는 API 진행률을 퍼센트로 계산하지 않습니다.</p>
     </footer>
     <script src="./app.js" defer></script>

@@ -40,6 +40,36 @@ class IndependentProgressTests(unittest.TestCase):
         return status.apply_merged_prs(self.designs, catalog or self.empty,
                                       [merged_pr(number, body)], START)
 
+    def test_ui_merge_progress_increases_for_unverified_partial_ui(self):
+        before = status.calculate_progress(self.designs, self.empty)
+        self.assertEqual(6, before["ui"]["android"]["merged"])
+        partial = VALID_UI_BODY.replace("completed: true", "completed: false").replace(
+            "완료 여부: 완료", "완료 여부: 확인 필요")
+        self.apply(partial)
+        after = status.calculate_progress(self.designs, self.empty)
+        self.assertEqual("partial", target(self.designs)["ui"]["android"]["status"])
+        self.assertEqual(before["ui"]["android"]["complete"], after["ui"]["android"]["complete"])
+        self.assertEqual(before["ui"]["android"]["merged"] + 1, after["ui"]["android"]["merged"])
+        self.assertEqual(round(7 * 100 / 89, 1), after["ui"]["android"]["percent"])
+        self.assertEqual(before["ui"]["android"]["verified_percent"], after["ui"]["android"]["verified_percent"])
+        self.assertIsNone(after["api"]["android"]["percent"])
+        self.assertEqual(0, after["ui"]["ios"]["merged"])
+        self.apply(partial)
+        self.apply(partial, number=101)
+        self.assertEqual(after["ui"]["android"]["merged"],
+                         status.calculate_progress(self.designs, self.empty)["ui"]["android"]["merged"])
+
+    def test_ui_merge_progress_preserves_review_status_and_api_independence(self):
+        catalog = api_catalog()
+        self.apply(catalog=catalog)
+        before = status.calculate_progress(self.designs, catalog)
+        target(self.designs)["review_required"] = True
+        after = status.calculate_progress(self.designs, catalog)
+        self.assertEqual(before["ui"]["android"]["merged"], after["ui"]["android"]["merged"])
+        self.assertEqual(before["ui"]["android"]["percent"], after["ui"]["android"]["percent"])
+        self.assertEqual(before["ui"]["android"]["complete"] - 1, after["ui"]["android"]["complete"])
+        self.assertEqual(before["api"]["android"]["percent"], after["api"]["android"]["percent"])
+
     def test_ui_complete_without_api_specification(self):
         self.apply(VALID_UI_BODY + "\nAPI·DB·AI 연동과 실제 저장은 미구현입니다.")
         progress = status.calculate_progress(self.designs, self.empty)
@@ -196,6 +226,7 @@ class IndependentProgressTests(unittest.TestCase):
             self.assertEqual("partial", state["status"])
             self.assertEqual([pr], state["related_prs"])
         self.assertEqual(5, status.calculate_progress(self.designs, self.empty)["ui"]["android"]["complete"])
+        self.assertEqual(13, status.calculate_progress(self.designs, self.empty)["ui"]["android"]["merged"])
 
 
 class ScopedMetadataTests(unittest.TestCase):

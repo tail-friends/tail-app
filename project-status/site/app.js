@@ -20,19 +20,22 @@ function progressCard(label, item) {
   if (item.state !== "ready") {
     return `<article class="progress-card"><span>${label}</span><strong>집계 준비 중</strong><small>확정된 API 작업이 등록되면 계산합니다.</small></article>`;
   }
+  const detail = Number.isInteger(item.merged)
+    ? `${item.merged}/${item.total} 화면 머지 · 검증 완료 ${item.complete}개 · ${item.remaining}개 미머지`
+    : `${item.complete}/${item.total} 완료 · ${item.remaining}개 남음 (${item.remaining_percent}%)`;
   return `<article class="progress-card">
     <span>${label}</span>
     <strong>${item.percent}%</strong>
     <div class="bar" aria-label="${label} ${item.percent}%"><span style="width:${item.percent}%"></span></div>
-    <small>${item.complete}/${item.total} 완료 · ${item.remaining}개 남음 (${item.remaining_percent}%)</small>
+    <small>${detail}</small>
   </article>`;
 }
 
 function renderProgress(data = statusData) {
   const progress = data.progress;
   document.querySelector("#progress-cards").innerHTML = [
-    progressCard("Android UI 퍼블리싱", progress.ui.android),
-    progressCard("iOS UI 퍼블리싱", progress.ui.ios),
+    progressCard("Android UI 머지 진행률", progress.ui.android),
+    progressCard("iOS UI 머지 진행률", progress.ui.ios),
     progressCard("Android API 연동", progress.api.android),
     progressCard("iOS API 연동", progress.api.ios),
   ].join("");

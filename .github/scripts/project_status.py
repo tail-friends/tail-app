@@ -496,15 +496,27 @@ def calculate_progress(
             if item["review_required"]
             or item["ui"][platform]["status"] == "needs_confirmation"
         )
-        percent = round(complete * 100 / total, 1) if total else 0.0
+        # The visible UI progress bar measures distinct Figma screens with
+        # merged UI work, not the number of PRs and not API implementation.
+        # A partial/Debug-only UI stays unverified, but its merged screen
+        # contributes to UI work progress. Figma reviews do not erase work.
+        merged = sum(
+            1 for item in designs
+            if item["ui"][platform]["status"] in {"complete", "partial"}
+            or bool(item["ui"][platform].get("related_prs"))
+        )
+        percent = round(merged * 100 / total, 1) if total else 0.0
+        verified_percent = round(complete * 100 / total, 1) if total else 0.0
         ui[platform] = {
             "state": "ready",
             "total": total,
+            "merged": merged,
             "complete": complete,
             "partial": partial,
             "review_required": review,
-            "remaining": total - complete,
+            "remaining": total - merged,
             "percent": percent,
+            "verified_percent": verified_percent,
             "remaining_percent": round(100 - percent, 1),
         }
 
@@ -842,18 +854,27 @@ def write_xlsx(path: Path, status: dict[str, Any]) -> None:
             ]
         )
 
-    summary_rows = [["구분", "완료", "전체", "진행률"]]
+    summary_rows = [["구분", "집계 수", "전체", "진행률"]]
     for kind in ("ui", "api"):
         for platform in PLATFORM_NAMES:
             item = status["progress"][kind][platform]
-            summary_rows.append(
-                [
-                    f"{PLATFORM_NAMES[platform]} {kind.upper()}",
+            if kind == "ui":
+                summary_rows.append([
+                    f"{PLATFORM_NAMES[platform]} UI 머지",
+                    item["merged"], item["total"], f'{item["percent"]}%',
+                ])
+                summary_rows.append([
+                    f"{PLATFORM_NAMES[platform]} UI 검증 완료",
+                    item["complete"], item["total"],
+                    f'{item["verified_percent"]}%',
+                ])
+            else:
+                summary_rows.append([
+                    f"{PLATFORM_NAMES[platform]} API 연동",
                     item["complete"] if item["state"] == "ready" else "집계 준비 중",
                     item["total"] if item["state"] == "ready" else "집계 준비 중",
                     f'{item["percent"]}%' if item["state"] == "ready" else "집계 준비 중",
-                ]
-            )
+                ])
 
     sheets = [
         ("Summary", summary_rows),

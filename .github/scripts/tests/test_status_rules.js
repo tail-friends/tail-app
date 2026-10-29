@@ -32,10 +32,15 @@ const data = {
   api_catalog_status:"preparing", api_tasks:[],
 };
 renderProgress(data);
-assert.match(nodes["#progress-cards"].innerHTML,/Android UI 퍼블리싱/);
+assert.match(nodes["#progress-cards"].innerHTML,/Android UI 머지 진행률/);
 assert.match(nodes["#progress-cards"].innerHTML,/iOS API 연동/);
 assert.match(nodes["#progress-cards"].innerHTML,/1\/89 완료/);
 assert.equal((nodes["#progress-cards"].innerHTML.match(/집계 준비 중/g)||[]).length,2);
+const mergedUi = {...ready, merged:3, percent:3.4, remaining:86, remaining_percent:96.6, verified_percent:1.1};
+renderProgress({...data, progress:{...data.progress, ui:{android:mergedUi, ios:mergedUi}}});
+assert.match(nodes["#progress-cards"].innerHTML,/3\/89 화면 머지/);
+assert.match(nodes["#progress-cards"].innerHTML,/검증 완료 1개/);
+assert.match(nodes["#progress-cards"].innerHTML,/3.4%/);
 assert.doesNotMatch(nodes["#progress-cards"].innerHTML,/null%/);
 renderDesigns("android", "complete", data);
 assert.equal((nodes["#status-body"].innerHTML.match(/<tr>/g)||[]).length,1);
