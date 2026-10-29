@@ -20,10 +20,15 @@ UI PR이 `develop`에 Merge되면 해당 화면은 `completed: false`이더라�
 동일 화면에 여러 PR이 Merge되어도 화면은 한 번만 세고, PR 미머지·번호 누락은 포함하지 않는다.
 `percent`는 머지 진행률, `merged`는 머지된 UI 화면 수, `complete`는 검증·승인되고
 디자인 재검토가 필요 없는 UI 수, `verified_percent`는 해당 검증 완료율이다.
-대시보드의 화면별 `일부 구현`/`퍼블리싱 완료` 상태는 변하지 않는다.
+화면별 표의 `퍼블리싱 완료`는 유효한 UI PR의 `develop` 머지 상태를 뜻한다.
+이는 검증 완료를 뜻하지 않으며 내부 `ui.status`, `completion_history`와 상단 `검증 완료`
+개수는 별도로 유지한다. `completed:false`인 UI PR도 머지되면 표에 퍼블리싱 완료로
+표시하되 비고에 최종 검증이 별도임을 알린다.
+중복 PR은 `merged_ui_prs`에 번호를 한 번만 기록한다. 구버전의 부모 PR `related_prs`
+링크만 있는 미완성 하위 화면은 자동 완료 표시하지 않는다.
 Figma 변경은 UI 재검토만 표시하며 API 상태를 바꾸지 않는다.
 
-UI 완료는 Figma 화면·필요한 상호작용·시각 비교·관련 Widget/UI 테스트에 대한
+UI 검증 완료는 Figma 화면·필요한 상호작용·시각 비교·관련 Widget/UI 테스트에 대한
 명시적 완료 확인, 검증한 현재 PR HEAD 전체 SHA, develop Merge가 모두 확인된
 범위다. API 호출·DB 저장·사진 업로드·AI 연동이 없는 것은 UI 미완료 사유가 아니다.
 Debug 미리보기만 구현한 UI도 이 조건을 충족하면 완료할 수 있으며 범위/비고에

@@ -47,6 +47,14 @@ function badge(value, reviewRequired = false, kind = "api") {
   return `<span class="badge ${escapeHtml(value)}">${escapeHtml(label)}</span>`;
 }
 
+function uiPublishingStatus(state) {
+  // Only a valid, explicitly targeted UI PR merge counts as publication.
+  // Older parent PR links alone do not publish an unfinished child screen.
+  return state.status === "complete" || state.merged_ui_prs?.length
+    ? "complete"
+    : state.status;
+}
+
 function matchesStatus(value, reviewRequired, filter) {
   if (filter === "all") return true;
   if (filter === "complete") return value === "complete" && !reviewRequired;
@@ -65,27 +73,32 @@ function links(values, kind) {
 
 function renderDesigns(platform, statusFilter, data = statusData) {
   const rows = data.designs.filter((design) => {
-    const state = design.ui[platform].status;
+    const state = uiPublishingStatus(design.ui[platform]);
     return matchesStatus(state, design.review_required, statusFilter);
   });
   document.querySelector("#status-head").innerHTML = `<tr>
-    <th>번호</th><th>화면·상태</th><th>플랫폼</th><th>UI 퍼블리싱</th>
+    <th>번호</th><th>화면·상태</th><th>플랫폼</th><th>UI 퍼블리싱 (머지 기준)</th>
     <th>API 연동</th><th>Issue</th><th>PR</th><th>버전</th><th>디자인</th><th>비고·구현 범위</th>
   </tr>`;
   document.querySelector("#status-body").innerHTML = rows
     .map((design) => {
       const state = design.ui[platform];
+      const publication = uiPublishingStatus(state);
+      const pendingReview = publication === "complete" && state.status !== "complete";
+      const notes = pendingReview
+        ? [...(state.notes || []), "UI PR 머지 확인 · 최종 검증은 별도"]
+        : (state.notes || []);
       return `<tr>
         <td><strong>${escapeHtml(design.figma_number)}</strong></td>
         <td>${escapeHtml(design.name)}</td>
         <td>${platform === "android" ? "Android" : "iOS"}</td>
-        <td>${badge(state.status, design.review_required, "ui")}</td>
+        <td>${badge(publication, design.review_required, "ui")}</td>
         <td>${badge(design.api[platform])}</td>
         <td>${links(state.related_issues, "issues")}</td>
         <td>${links(state.related_prs, "pull")}</td>
         <td>${escapeHtml(design.current_design_version || "미동기화")}</td>
         <td><a href="${escapeHtml(design.figma_url)}" target="_blank" rel="noreferrer">Figma 열기</a></td>
-        <td class="scope-notes">${(state.notes || []).map(escapeHtml).join("<br>") || "-"}</td>
+        <td class="scope-notes">${notes.map(escapeHtml).join("<br>") || "-"}</td>
       </tr>`;
     })
     .join("");
@@ -167,5 +180,5 @@ if (typeof document !== "undefined") {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { matchesStatus, badge, progressCard, renderProgress, renderDesigns, renderApi };
+  module.exports = { matchesStatus, badge, uiPublishingStatus, progressCard, renderProgress, renderDesigns, renderApi };
 }
