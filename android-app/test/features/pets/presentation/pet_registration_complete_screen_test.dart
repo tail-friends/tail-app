@@ -86,6 +86,33 @@ void main() {
     )..addFont(rootBundle.load('assets/fonts/Jua-Regular.ttf'))).load();
   });
 
+  for (final entry in {'콩': '콩이', '모모': '모모가', '욱이': '욱이가'}.entries) {
+    testWidgets('${entry.key} 이름의 조사와 접근성 제목을 함께 표시한다', (tester) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        await _open(
+          tester,
+          home: PetRegistrationCompleteScreen(
+            data: PetRegistrationCompleteData(
+              name: entry.key,
+              speciesLabel: _data.speciesLabel,
+              genderLabel: _data.genderLabel,
+              hatchingDate: _data.hatchingDate,
+              feedingCycleDays: _data.feedingCycleDays,
+            ),
+          ),
+        );
+        final title = '${entry.value} 꼬리친구가 됐어요';
+        expect(find.text(title), findsOneWidget);
+        final heading = tester.getSemantics(find.text(title));
+        expect(heading.flagsCollection.isHeader, isTrue);
+        expect(heading.label, 'Figma 예시: $title. 실제 개체 등록은 실행되지 않았습니다.');
+      } finally {
+        semantics.dispose();
+      }
+    });
+  }
+
   testWidgets('Figma 문구와 요약 네 행을 Jua로 표시한다', (tester) async {
     await _open(tester);
     for (final text in [

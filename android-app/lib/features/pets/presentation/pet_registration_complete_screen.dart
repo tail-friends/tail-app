@@ -88,6 +88,17 @@ class PetRegistrationCompleteScreen extends StatelessWidget {
   );
   static final _button = AppTypography.titleMedium.copyWith(fontFamily: 'Jua');
 
+  String get _completionTitle {
+    final lastRune = data.name.runes.lastOrNull;
+    final hasFinalConsonant =
+        lastRune != null &&
+        lastRune >= 0xAC00 &&
+        lastRune <= 0xD7A3 &&
+        (lastRune - 0xAC00) % 28 != 0;
+    final particle = hasFinalConsonant ? '이' : '가';
+    return '${data.name}$particle 꼬리친구가 됐어요';
+  }
+
   void _createCharacter(BuildContext context) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -220,9 +231,8 @@ class PetRegistrationCompleteScreen extends StatelessWidget {
       Semantics(
         header: true,
         child: Text(
-          '${data.name}가 꼬리친구가 됐어요',
-          semanticsLabel:
-              'Figma 예시: ${data.name}가 꼬리친구가 됐어요. 실제 개체 등록은 실행되지 않았습니다.',
+          _completionTitle,
+          semanticsLabel: 'Figma 예시: $_completionTitle. 실제 개체 등록은 실행되지 않았습니다.',
           textAlign: TextAlign.center,
           style: _title,
         ),
