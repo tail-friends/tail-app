@@ -337,10 +337,23 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertEqual(memo.value as? String, memo.placeholderValue)
 
         let attemptedMemo = String(repeating: "a", count: 320)
-        for offset in stride(from: 0, to: attemptedMemo.count, by: 20) {
+        let memoChunkSize = 5
+        for offset in stride(from: 0, to: attemptedMemo.count, by: memoChunkSize) {
             let start = attemptedMemo.index(attemptedMemo.startIndex, offsetBy: offset)
-            let end = attemptedMemo.index(start, offsetBy: min(20, attemptedMemo.count - offset))
+            let chunkLength = min(memoChunkSize, attemptedMemo.count - offset)
+            let end = attemptedMemo.index(start, offsetBy: chunkLength)
             memo.typeText(String(attemptedMemo[start..<end]))
+
+            let expectedPrefix = String(attemptedMemo.prefix(min(offset + chunkLength, 300)))
+            let memoChunkExpectation = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "value BEGINSWITH %@", expectedPrefix),
+                object: memo
+            )
+            XCTAssertEqual(
+                XCTWaiter.wait(for: [memoChunkExpectation], timeout: 5),
+                .completed,
+                "Memo should accept each chunk while enforcing the 300-character limit"
+            )
         }
         let expectedMemo = String(attemptedMemo.prefix(300))
 
