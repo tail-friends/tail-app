@@ -334,16 +334,21 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [clearMemoIsHittable], timeout: 5), .completed)
         XCTAssertLessThan(clearMemo.frame.maxY, keyboard.frame.minY, "Memo clear control must sit above the keyboard")
         clearMemo.tap()
+        XCTAssertEqual(memo.value as? String, memo.placeholderValue)
 
         let attemptedMemo = String(repeating: "a", count: 320)
+        for offset in stride(from: 0, to: attemptedMemo.count, by: 20) {
+            let start = attemptedMemo.index(attemptedMemo.startIndex, offsetBy: offset)
+            let end = attemptedMemo.index(start, offsetBy: min(20, attemptedMemo.count - offset))
+            memo.typeText(String(attemptedMemo[start..<end]))
+        }
         let expectedMemo = String(attemptedMemo.prefix(300))
-        memo.typeText(attemptedMemo)
 
-        let memoCappedExpectation = XCTNSPredicateExpectation(
+        let memoCapExpectation = XCTNSPredicateExpectation(
             predicate: NSPredicate(format: "value == %@", expectedMemo),
             object: memo
         )
-        XCTAssertEqual(XCTWaiter.wait(for: [memoCappedExpectation], timeout: 3), .completed)
+        XCTAssertEqual(XCTWaiter.wait(for: [memoCapExpectation], timeout: 3), .completed)
         XCTAssertEqual(memo.value as? String, expectedMemo)
         XCTAssertEqual(expectedMemo.count, 300)
         XCTAssertGreaterThan(memo.frame.height, initialHeight + 20)
@@ -366,7 +371,7 @@ final class TailFriendsUITests: XCTestCase {
             .firstMatch
         XCTAssertTrue(feedingFormCard.waitForExistence(timeout: 3))
         XCTAssertEqual(feedingFormCard.frame.minX, 24, accuracy: 1)
-        XCTAssertEqual(feedingFormCard.frame.width, 342, accuracy: 1)
+        XCTAssertEqual(feedingFormCard.frame.maxX, scrollView.frame.maxX - 24, accuracy: 1)
 
         let feeding = app.buttons["creatureDetail.category.급여"]
         let molting = app.buttons["creatureDetail.category.탈피"]
