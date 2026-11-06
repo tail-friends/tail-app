@@ -9,6 +9,8 @@ struct TailFriendsApp: App {
                 RegistrationView()
             } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-detail-feeding") {
                 CreatureDetailFeedingPreviewHost()
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-detail-record-delete") {
+                CreatureDetailRecordDeletePreviewHost()
             } else if ProcessInfo.processInfo.arguments.contains("--preview-feeding-record") {
                 FeedingRecordView()
             } else if ProcessInfo.processInfo.arguments.contains("--preview-home") {
@@ -31,6 +33,20 @@ private struct CreatureDetailFeedingPreviewHost: View {
         Group {
             if isDetailPresented {
                 CreatureDetailFeedingFormView(onBack: { isDetailPresented = false })
+            } else {
+                HomeView()
+            }
+        }
+    }
+}
+
+private struct CreatureDetailRecordDeletePreviewHost: View {
+    @State private var isDetailPresented = true
+
+    var body: some View {
+        Group {
+            if isDetailPresented {
+                CreatureDetailRecordDeleteView(onBack: { isDetailPresented = false })
             } else {
                 HomeView()
             }
