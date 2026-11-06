@@ -505,4 +505,70 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
         XCTAssertFalse(detailScroll.exists)
     }
+
+    func testCreatureDetailRecordEmptyPreviewShowsFigmaStateAndInteractions() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-detail-record-empty")
+        app.launch()
+
+        let scrollView = app.scrollViews["creatureDetailRecordEmpty.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["울이"].exists)
+        XCTAssertTrue(app.staticTexts["creatureDetailRecordEmpty.description"].exists)
+        XCTAssertEqual(
+            app.staticTexts["creatureDetailRecordEmpty.metric.feeding.value"].label,
+            "기록 없음"
+        )
+        XCTAssertEqual(
+            app.staticTexts["creatureDetailRecordEmpty.metric.molting.value"].label,
+            "기록 없음"
+        )
+        XCTAssertEqual(
+            app.staticTexts["creatureDetailRecordEmpty.metric.weight.value"].label,
+            "기록 없음"
+        )
+
+        let feeding = app.buttons["creatureDetailRecordEmpty.category.급여"]
+        XCTAssertEqual(feeding.value as? String, "선택 안 됨")
+        feeding.tap()
+        XCTAssertEqual(feeding.value as? String, "선택됨")
+
+        let emptyRecordTitle = app.staticTexts["creatureDetailRecordEmpty.records.empty.title"]
+        for _ in 0..<8 where !emptyRecordTitle.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(emptyRecordTitle.waitForExistence(timeout: 3))
+        XCTAssertEqual(emptyRecordTitle.label, "아직 기록이 없어요")
+        XCTAssertTrue(app.staticTexts["creatureDetailRecordEmpty.records.empty.message"].exists)
+        XCTAssertTrue(app.staticTexts["creatureDetailRecordEmpty.weightChart.empty"].exists)
+
+        let showAll = app.buttons["creatureDetailRecordEmpty.records.all"]
+        XCTAssertTrue(showAll.isHittable)
+        showAll.tap()
+        let noRecordsNotice = app.alerts["최근 기록"]
+        XCTAssertTrue(noRecordsNotice.waitForExistence(timeout: 3))
+        noRecordsNotice.buttons["확인"].tap()
+
+        let album = app.buttons["creatureDetailRecordEmpty.management.0"]
+        for _ in 0..<4 where !album.isHittable {
+            scrollView.swipeUp()
+        }
+        XCTAssertTrue(album.waitForExistence(timeout: 3))
+
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "05-c empty record detail on iPhone 17e"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+
+        album.tap()
+        XCTAssertTrue(app.alerts["준비 중"].waitForExistence(timeout: 3))
+        app.alerts["준비 중"].buttons["확인"].tap()
+
+        let back = app.buttons["creatureDetailRecordEmpty.back"]
+        for _ in 0..<8 where !back.isHittable {
+            scrollView.swipeDown()
+        }
+        back.tap()
+        XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
+    }
 }
