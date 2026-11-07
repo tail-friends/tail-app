@@ -597,22 +597,28 @@ final class TailFriendsUITests: XCTestCase {
         screenshot.lifetime = .keepAlways
         add(screenshot)
 
+        let dismissWarning = app.buttons["creatureDetailRecordDelete.healthWarning.dismiss"]
         let vetRecord = app.buttons["creatureDetailRecordDelete.healthWarning.vetRecord"]
-        XCTAssertTrue(vetRecord.isHittable)
+        let guide = app.buttons["creatureDetailRecordDelete.healthWarning.guide"]
+        for action in [dismissWarning, vetRecord, guide] {
+            XCTAssertTrue(action.isHittable)
+            XCTAssertGreaterThanOrEqual(action.frame.width, 44)
+            XCTAssertGreaterThanOrEqual(action.frame.height, 44)
+        }
+
         vetRecord.tap()
         let vetNotice = app.alerts["준비 중"]
         XCTAssertTrue(vetNotice.waitForExistence(timeout: 3))
         XCTAssertTrue(vetNotice.staticTexts["진료 기록은 준비 중이에요."].exists)
         vetNotice.buttons["확인"].tap()
 
-        let guide = app.buttons["creatureDetailRecordDelete.healthWarning.guide"]
         guide.tap()
         let guideNotice = app.alerts["준비 중"]
         XCTAssertTrue(guideNotice.waitForExistence(timeout: 3))
         XCTAssertTrue(guideNotice.staticTexts["사육 가이드는 준비 중이에요."].exists)
         guideNotice.buttons["확인"].tap()
 
-        app.buttons["creatureDetailRecordDelete.healthWarning.dismiss"].tap()
+        dismissWarning.tap()
         XCTAssertFalse(warningTitle.exists)
     }
 }

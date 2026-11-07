@@ -274,7 +274,10 @@ struct CreatureDetailRecordDeleteView: View {
                     width: max(0, geometry.size.width - inset),
                     height: max(0, geometry.size.height - inset * 2)
                 )
-                let endpoint = DetailWeightTrendShape.endpoint(in: plotRect)
+                let endpoint = DetailWeightTrendShape.endpoint(
+                    in: plotRect,
+                    forHealthWarning: showsHealthWarning
+                )
 
                 ZStack(alignment: .topLeading) {
                     VStack {
@@ -285,7 +288,7 @@ struct CreatureDetailRecordDeleteView: View {
                             Spacer(minLength: 0)
                         }
                     }
-                    DetailWeightTrendShape()
+                    DetailWeightTrendShape(forHealthWarning: showsHealthWarning)
                         .stroke(
                             RecordDetailPalette.primary,
                             style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round)
@@ -386,8 +389,10 @@ struct CreatureDetailRecordDeleteView: View {
                         .font(.custom("Jua", size: 11, relativeTo: .caption))
                         .foregroundStyle(RecordDetailPalette.primary)
                         .padding(.horizontal, 14)
-                        .frame(minHeight: 34)
+                        .frame(minWidth: 44, minHeight: 34)
                         .background(.white.opacity(0.9), in: Capsule())
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.dismiss")
@@ -413,6 +418,8 @@ struct CreatureDetailRecordDeleteView: View {
                         .foregroundStyle(RecordDetailPalette.primary)
                         .frame(maxWidth: .infinity, minHeight: 34)
                         .background(.white.opacity(0.72), in: Capsule())
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.vetRecord")
@@ -425,6 +432,8 @@ struct CreatureDetailRecordDeleteView: View {
                         .foregroundStyle(RecordDetailPalette.primary)
                         .frame(maxWidth: .infinity, minHeight: 34)
                         .background(.white.opacity(0.72), in: Capsule())
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.guide")
@@ -585,8 +594,10 @@ private struct DetailRecord: Identifiable {
     ]
 }
 
-private struct DetailWeightTrendShape: Shape {
-    private static let normalizedPoints: [CGPoint] = [
+struct DetailWeightTrendShape: Shape {
+    var forHealthWarning = false
+
+    private static let defaultNormalizedPoints: [CGPoint] = [
         CGPoint(x: 0, y: 0.82),
         CGPoint(x: 0.18, y: 0.68),
         CGPoint(x: 0.34, y: 0.75),
@@ -596,13 +607,27 @@ private struct DetailWeightTrendShape: Shape {
         CGPoint(x: 1, y: 0.12)
     ]
 
-    static func endpoint(in rect: CGRect) -> CGPoint {
-        guard let point = normalizedPoints.last else { return .zero }
+    private static let healthWarningNormalizedPoints: [CGPoint] = [
+        CGPoint(x: 0, y: 0.82),
+        CGPoint(x: 0.18, y: 0.68),
+        CGPoint(x: 0.34, y: 0.75),
+        CGPoint(x: 0.51, y: 0.46),
+        CGPoint(x: 0.67, y: 0.53),
+        CGPoint(x: 0.83, y: 0.14),
+        CGPoint(x: 1, y: 0.22)
+    ]
+
+    static func normalizedPoints(forHealthWarning: Bool) -> [CGPoint] {
+        forHealthWarning ? healthWarningNormalizedPoints : defaultNormalizedPoints
+    }
+
+    static func endpoint(in rect: CGRect, forHealthWarning: Bool = false) -> CGPoint {
+        guard let point = normalizedPoints(forHealthWarning: forHealthWarning).last else { return .zero }
         return CGPoint(x: rect.minX + point.x * rect.width, y: rect.minY + point.y * rect.height)
     }
 
     func path(in rect: CGRect) -> Path {
-        let points = Self.normalizedPoints.map {
+        let points = Self.normalizedPoints(forHealthWarning: forHealthWarning).map {
             CGPoint(x: rect.minX + $0.x * rect.width, y: rect.minY + $0.y * rect.height)
         }
         guard let first = points.first else { return Path() }
