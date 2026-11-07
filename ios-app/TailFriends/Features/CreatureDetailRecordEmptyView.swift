@@ -52,18 +52,9 @@ struct CreatureDetailRecordEmptyView: View {
     private var heroCard: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [RecordEmptyPalette.photoTop, RecordEmptyPalette.photoBottom],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(RecordEmptyPalette.photoPlaceholder)
 
-            Image(systemName: "photo")
-                .font(.system(size: 30, weight: .light))
-                .foregroundStyle(RecordEmptyPalette.secondary.opacity(0.38))
-                .accessibilityHidden(true)
+            PhotoPlaceholderMark(color: RecordEmptyPalette.photoPlaceholderMark)
 
             VStack(spacing: 8) {
                 HStack {
@@ -113,7 +104,7 @@ struct CreatureDetailRecordEmptyView: View {
             }
             .padding(12)
         }
-        .frame(height: 228)
+        .frame(height: 230)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
@@ -125,7 +116,7 @@ struct CreatureDetailRecordEmptyView: View {
 
     private var creatureSummary: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Text("울이")
+            Text("욱이")
                 .font(.custom("Jua", size: 20, relativeTo: .title2))
                 .foregroundStyle(RecordEmptyPalette.primary)
                 .accessibilityAddTraits(.isHeader)
@@ -361,8 +352,37 @@ private enum RecordEmptyPalette {
     static let card = Color.white.opacity(0.82)
     static let line = Color(recordEmptyHex: 0xE7E1D6)
     static let divider = Color(recordEmptyHex: 0xE7E1D6).opacity(0.8)
-    static let photoTop = Color(recordEmptyHex: 0xDAD6C9)
-    static let photoBottom = Color(recordEmptyHex: 0xC8C5B9)
+    static let photoPlaceholder = Color(recordEmptyHex: 0xE4DDD3)
+    static let photoPlaceholderMark = Color(recordEmptyHex: 0x9C968D)
+}
+
+private struct PhotoPlaceholderMark: View {
+    let color: Color
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                .stroke(color, lineWidth: 1.25)
+                .frame(width: 21, height: 16)
+
+            Path { path in
+                path.move(to: CGPoint(x: 5, y: 14))
+                path.addLine(to: CGPoint(x: 9, y: 9))
+                path.addLine(to: CGPoint(x: 12, y: 12))
+                path.addLine(to: CGPoint(x: 16, y: 8))
+                path.addLine(to: CGPoint(x: 20, y: 14))
+            }
+            .stroke(color, style: StrokeStyle(lineWidth: 1.25, lineCap: .round, lineJoin: .round))
+            .frame(width: 25, height: 20)
+
+            Circle()
+                .fill(color)
+                .frame(width: 2.5, height: 2.5)
+                .offset(x: 5, y: -4)
+        }
+        .frame(width: 25, height: 20)
+        .accessibilityHidden(true)
+    }
 }
 
 private extension Color {

@@ -513,7 +513,7 @@ final class TailFriendsUITests: XCTestCase {
 
         let scrollView = app.scrollViews["creatureDetailRecordEmpty.scroll"]
         XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["울이"].exists)
+        XCTAssertTrue(app.staticTexts["욱이"].exists)
         XCTAssertTrue(app.staticTexts["creatureDetailRecordEmpty.description"].exists)
         XCTAssertEqual(
             app.staticTexts["creatureDetailRecordEmpty.metric.feeding.value"].label,
