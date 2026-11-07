@@ -571,4 +571,54 @@ final class TailFriendsUITests: XCTestCase {
         back.tap()
         XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
     }
+
+    func testCreatureDetailHealthWarningPreviewShowsRecordBasedWarningAndActions() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-detail-health-warning")
+        app.launch()
+
+        let scrollView = app.scrollViews["creatureDetailRecordDelete.scroll"]
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
+
+        let warningTitle = app.staticTexts["creatureDetailRecordDelete.healthWarning.title"]
+        XCTAssertTrue(warningTitle.waitForExistence(timeout: 3))
+        XCTAssertEqual(warningTitle.label, "거식 경고 · 3번 연속 안 먹었어요")
+        XCTAssertEqual(
+            app.staticTexts["creatureDetailRecordDelete.healthWarning.dates"].label,
+            "10/12 · 10/16 · 10/20"
+        )
+        let feedingMetric = app.staticTexts["creatureDetailRecordDelete.metric.다음 급여"]
+        XCTAssertTrue(feedingMetric.label.contains("8일 지남"))
+        let weightMetric = app.staticTexts["creatureDetailRecordDelete.metric.체중"]
+        XCTAssertTrue(weightMetric.label.contains("52.1g"))
+
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "05-d health warning on iPhone 17e"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+
+        let dismissWarning = app.buttons["creatureDetailRecordDelete.healthWarning.dismiss"]
+        let vetRecord = app.buttons["creatureDetailRecordDelete.healthWarning.vetRecord"]
+        let guide = app.buttons["creatureDetailRecordDelete.healthWarning.guide"]
+        for action in [dismissWarning, vetRecord, guide] {
+            XCTAssertTrue(action.isHittable)
+            XCTAssertGreaterThanOrEqual(action.frame.width, 44)
+            XCTAssertGreaterThanOrEqual(action.frame.height, 44)
+        }
+
+        vetRecord.tap()
+        let vetNotice = app.alerts["준비 중"]
+        XCTAssertTrue(vetNotice.waitForExistence(timeout: 3))
+        XCTAssertTrue(vetNotice.staticTexts["진료 기록은 준비 중이에요."].exists)
+        vetNotice.buttons["확인"].tap()
+
+        guide.tap()
+        let guideNotice = app.alerts["준비 중"]
+        XCTAssertTrue(guideNotice.waitForExistence(timeout: 3))
+        XCTAssertTrue(guideNotice.staticTexts["사육 가이드는 준비 중이에요."].exists)
+        guideNotice.buttons["확인"].tap()
+
+        dismissWarning.tap()
+        XCTAssertFalse(warningTitle.exists)
+    }
 }

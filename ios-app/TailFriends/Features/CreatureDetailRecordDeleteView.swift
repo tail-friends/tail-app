@@ -4,13 +4,23 @@ struct CreatureDetailRecordDeleteView: View {
     @Environment(\.dismiss) private var dismiss
 
     var onBack: (() -> Void)? = nil
+    var showsHealthWarning: Bool = false
 
     @State private var selectedCategory = "급여"
-    @State private var records = DetailRecord.previewRecords
-    @State private var armedDeleteID: String? = "feeding-1016"
+    @State private var records: [DetailRecord]
+    @State private var armedDeleteID: String?
     @State private var isNoticePresented = false
     @State private var noticeTitle = ""
     @State private var noticeMessage = ""
+    @State private var isHealthWarningVisible: Bool
+
+    init(onBack: (() -> Void)? = nil, showsHealthWarning: Bool = false) {
+        self.onBack = onBack
+        self.showsHealthWarning = showsHealthWarning
+        _records = State(initialValue: showsHealthWarning ? DetailRecord.healthWarningRecords : DetailRecord.previewRecords)
+        _armedDeleteID = State(initialValue: showsHealthWarning ? nil : "feeding-1016")
+        _isHealthWarningVisible = State(initialValue: showsHealthWarning)
+    }
 
     private let categories: [(title: String, symbol: String)] = [
         ("급여", "takeoutbag.and.cup.and.straw.fill"),
@@ -30,6 +40,9 @@ struct CreatureDetailRecordDeleteView: View {
                 VStack(spacing: 22) {
                     heroCard
                     creatureSummary
+                    if showsHealthWarning && isHealthWarningVisible {
+                        healthWarningCard
+                    }
                     metricsCard
                     categoryPicker
                     weightChart
@@ -104,7 +117,7 @@ struct CreatureDetailRecordDeleteView: View {
 
                 HStack {
                     Spacer()
-                    Text("오늘 밥 먹는 날!")
+                    Text(showsHealthWarning ? "배고파요…" : "오늘 밥 먹는 날!")
                         .font(.custom("Jua", size: 12, relativeTo: .caption))
                         .foregroundStyle(RecordDetailPalette.primary)
                         .padding(.horizontal, 12)
@@ -157,11 +170,15 @@ struct CreatureDetailRecordDeleteView: View {
 
     private var metricsCard: some View {
         HStack(spacing: 0) {
-            metric(title: "다음 급여", value: "오늘", detail: "4일 주기")
+            metric(
+                title: "다음 급여",
+                value: showsHealthWarning ? "8일 지남" : "오늘",
+                detail: showsHealthWarning ? "안 먹음 제외 · 10/8" : "4일 주기"
+            )
             metricDivider
             metric(title: "마지막 탈피", value: "12일 전", detail: "평균 21일")
             metricDivider
-            metric(title: "체중", value: "53.4g", detail: "+1.4g")
+            metric(title: "체중", value: showsHealthWarning ? "52.1g" : "53.4g", detail: showsHealthWarning ? "−0.4g" : "+1.4g")
         }
         .padding(.vertical, 29)
         .background(RecordDetailPalette.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -189,7 +206,11 @@ struct CreatureDetailRecordDeleteView: View {
                 .minimumScaleFactor(0.85)
             Text(value)
                 .font(.custom("Jua", size: 15, relativeTo: .body))
-                .foregroundStyle(RecordDetailPalette.primary)
+                .foregroundStyle(
+                    showsHealthWarning && title == "다음 급여"
+                        ? RecordDetailPalette.warning
+                        : RecordDetailPalette.primary
+                )
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             Text(detail)
@@ -199,6 +220,7 @@ struct CreatureDetailRecordDeleteView: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("creatureDetailRecordDelete.metric.\(title)")
     }
 
     private var categoryPicker: some View {
@@ -239,7 +261,7 @@ struct CreatureDetailRecordDeleteView: View {
                     .foregroundStyle(RecordDetailPalette.primary)
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
-                Text("최근 53.4g (+1.4g)")
+                Text(showsHealthWarning ? "최근 52.1g (−0.4g)" : "최근 53.4g (+1.4g)")
                     .font(.custom("Jua", size: 10, relativeTo: .caption))
                     .foregroundStyle(RecordDetailPalette.primary)
             }
@@ -252,7 +274,10 @@ struct CreatureDetailRecordDeleteView: View {
                     width: max(0, geometry.size.width - inset),
                     height: max(0, geometry.size.height - inset * 2)
                 )
-                let endpoint = DetailWeightTrendShape.endpoint(in: plotRect)
+                let endpoint = DetailWeightTrendShape.endpoint(
+                    in: plotRect,
+                    forHealthWarning: showsHealthWarning
+                )
 
                 ZStack(alignment: .topLeading) {
                     VStack {
@@ -263,7 +288,7 @@ struct CreatureDetailRecordDeleteView: View {
                             Spacer(minLength: 0)
                         }
                     }
-                    DetailWeightTrendShape()
+                    DetailWeightTrendShape(forHealthWarning: showsHealthWarning)
                         .stroke(
                             RecordDetailPalette.primary,
                             style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round)
@@ -284,7 +309,7 @@ struct CreatureDetailRecordDeleteView: View {
             HStack {
                 Text("최소 41.0g · 5월")
                 Spacer()
-                Text("최대 53.4g · 10월 20일")
+                Text(showsHealthWarning ? "최대 52.5g · 10월 13일" : "최대 53.4g · 10월 20일")
             }
             .font(.custom("Jua", size: 9, relativeTo: .caption2))
             .foregroundStyle(RecordDetailPalette.tertiary)
@@ -342,6 +367,82 @@ struct CreatureDetailRecordDeleteView: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("creatureDetailRecordDelete.records")
         }
+    }
+
+    private var healthWarningCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 8) {
+                Text("거식 경고 · 3번 연속 안 먹었어요")
+                    .font(.custom("Jua", size: 14, relativeTo: .subheadline))
+                    .foregroundStyle(RecordDetailPalette.warning)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.title")
+
+                Spacer(minLength: 0)
+
+                Button {
+                    withAnimation(.easeInOut(duration: 0.18)) {
+                        isHealthWarningVisible = false
+                    }
+                } label: {
+                    Text("확인")
+                        .font(.custom("Jua", size: 11, relativeTo: .caption))
+                        .foregroundStyle(RecordDetailPalette.primary)
+                        .padding(.horizontal, 14)
+                        .frame(minWidth: 44, minHeight: 34)
+                        .background(.white.opacity(0.9), in: Capsule())
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.dismiss")
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("10/12 · 10/16 · 10/20")
+                    .font(.custom("Jua", size: 11, relativeTo: .caption))
+                    .foregroundStyle(RecordDetailPalette.primary)
+                    .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.dates")
+
+                Text("안 먹음 1 기록")
+                    .font(.custom("Jua", size: 10, relativeTo: .caption))
+                    .foregroundStyle(RecordDetailPalette.secondary)
+            }
+
+            HStack(spacing: 8) {
+                Button {
+                    showNotice(title: "준비 중", message: "진료 기록은 준비 중이에요.")
+                } label: {
+                    Text("진료 기록")
+                        .font(.custom("Jua", size: 11, relativeTo: .caption))
+                        .foregroundStyle(RecordDetailPalette.primary)
+                        .frame(maxWidth: .infinity, minHeight: 34)
+                        .background(.white.opacity(0.72), in: Capsule())
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.vetRecord")
+
+                Button {
+                    showNotice(title: "준비 중", message: "사육 가이드는 준비 중이에요.")
+                } label: {
+                    Text("사육 가이드")
+                        .font(.custom("Jua", size: 11, relativeTo: .caption))
+                        .foregroundStyle(RecordDetailPalette.primary)
+                        .frame(maxWidth: .infinity, minHeight: 34)
+                        .background(.white.opacity(0.72), in: Capsule())
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning.guide")
+            }
+        }
+        .padding(12)
+        .background(RecordDetailPalette.warningBackground, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("creatureDetailRecordDelete.healthWarning")
     }
 
     private func recordRow(_ record: DetailRecord) -> some View {
@@ -485,10 +586,18 @@ private struct DetailRecord: Identifiable {
         DetailRecord(id: "feeding-1016", kind: .feeding, detail: "귀뚜라미 50마리", date: "10.16"),
         DetailRecord(id: "weight-1013", kind: .weight, detail: "52.0g · +0.5g", date: "10.13")
     ]
+
+    static let healthWarningRecords = [
+        DetailRecord(id: "feeding-1020", kind: .feeding, detail: "안 먹음", date: "10.20"),
+        DetailRecord(id: "weight-1020-health", kind: .weight, detail: "52.1g · −0.4g", date: "10.20"),
+        DetailRecord(id: "feeding-1016-health", kind: .feeding, detail: "안 먹음", date: "10.16")
+    ]
 }
 
-private struct DetailWeightTrendShape: Shape {
-    private static let normalizedPoints: [CGPoint] = [
+struct DetailWeightTrendShape: Shape {
+    var forHealthWarning = false
+
+    private static let defaultNormalizedPoints: [CGPoint] = [
         CGPoint(x: 0, y: 0.82),
         CGPoint(x: 0.18, y: 0.68),
         CGPoint(x: 0.34, y: 0.75),
@@ -498,13 +607,27 @@ private struct DetailWeightTrendShape: Shape {
         CGPoint(x: 1, y: 0.12)
     ]
 
-    static func endpoint(in rect: CGRect) -> CGPoint {
-        guard let point = normalizedPoints.last else { return .zero }
+    private static let healthWarningNormalizedPoints: [CGPoint] = [
+        CGPoint(x: 0, y: 0.82),
+        CGPoint(x: 0.18, y: 0.68),
+        CGPoint(x: 0.34, y: 0.75),
+        CGPoint(x: 0.51, y: 0.46),
+        CGPoint(x: 0.67, y: 0.53),
+        CGPoint(x: 0.83, y: 0.14),
+        CGPoint(x: 1, y: 0.22)
+    ]
+
+    static func normalizedPoints(forHealthWarning: Bool) -> [CGPoint] {
+        forHealthWarning ? healthWarningNormalizedPoints : defaultNormalizedPoints
+    }
+
+    static func endpoint(in rect: CGRect, forHealthWarning: Bool = false) -> CGPoint {
+        guard let point = normalizedPoints(forHealthWarning: forHealthWarning).last else { return .zero }
         return CGPoint(x: rect.minX + point.x * rect.width, y: rect.minY + point.y * rect.height)
     }
 
     func path(in rect: CGRect) -> Path {
-        let points = Self.normalizedPoints.map {
+        let points = Self.normalizedPoints(forHealthWarning: forHealthWarning).map {
             CGPoint(x: rect.minX + $0.x * rect.width, y: rect.minY + $0.y * rect.height)
         }
         guard let first = points.first else { return Path() }
@@ -542,6 +665,8 @@ private enum RecordDetailPalette {
     static let photoTop = Color(recordDetailHex: 0xDAD6C9)
     static let photoBottom = Color(recordDetailHex: 0xC8C5B9)
     static let delete = Color(recordDetailHex: 0xB78E71)
+    static let warning = Color(recordDetailHex: 0xB75E4D)
+    static let warningBackground = Color(recordDetailHex: 0xFBF4D8)
 }
 
 private extension Color {
