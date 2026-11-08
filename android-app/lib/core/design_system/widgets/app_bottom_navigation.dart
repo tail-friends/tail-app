@@ -13,16 +13,20 @@ class AppBottomNavigation extends StatelessWidget {
     required this.currentTab,
     required this.onTabSelected,
     this.labelStyle,
+    this.labelMaxLines = 1,
     this.iconAssets = const {},
     this.selectedLabelColor = AppColors.textComponentPrimary,
     this.unselectedLabelColor = AppColors.textTertiary,
     this.selectedBackgroundColor = AppColors.surface,
     super.key,
-  });
+  }) : assert(labelMaxLines >= 1);
 
   final AppTab currentTab;
   final ValueChanged<AppTab> onTabSelected;
   final TextStyle? labelStyle;
+
+  /// Existing callers keep one line; narrow previews can allow full labels.
+  final int labelMaxLines;
 
   /// Exact screen assets, when a Figma frame uses a different icon treatment.
   /// Omitted entries keep the existing selected/inactive design-system assets.
@@ -65,6 +69,7 @@ class AppBottomNavigation extends StatelessWidget {
                   selected: currentTab == tab,
                   onTap: () => onTabSelected(tab),
                   labelStyle: labelStyle,
+                  labelMaxLines: labelMaxLines,
                   iconAsset: iconAssets[tab],
                   labelColor: currentTab == tab
                       ? selectedLabelColor
@@ -88,6 +93,7 @@ class _NavigationItem extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.labelStyle,
+    required this.labelMaxLines,
     required this.iconAsset,
     required this.labelColor,
     required this.selectedBackgroundColor,
@@ -99,6 +105,7 @@ class _NavigationItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final TextStyle? labelStyle;
+  final int labelMaxLines;
   final String? iconAsset;
   final Color labelColor;
   final Color selectedBackgroundColor;
@@ -154,9 +161,9 @@ class _NavigationItem extends StatelessWidget {
                     ),
                     Text(
                       label,
-                      maxLines: 1,
+                      maxLines: labelMaxLines,
                       overflow: TextOverflow.fade,
-                      softWrap: false,
+                      softWrap: labelMaxLines > 1,
                       style: (labelStyle ?? AppTypography.captionRegular)
                           .copyWith(
                             fontSize: 10,
