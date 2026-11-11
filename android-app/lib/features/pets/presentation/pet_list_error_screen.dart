@@ -199,6 +199,7 @@ class _PetListErrorScreenState extends State<PetListErrorScreen> {
                         currentTab: AppTab.pets,
                         onTabSelected: _tab,
                         labelStyle: _caption,
+                        labelMaxLines: 2,
                         selectedLabelColor: _ink,
                         unselectedLabelColor: _muted,
                         selectedBackgroundColor: Colors.white,
