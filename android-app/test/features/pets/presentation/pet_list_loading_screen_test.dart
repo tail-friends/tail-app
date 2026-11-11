@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,6 +52,36 @@ Future<void> _open(
 bool _selected(WidgetTester tester, Finder finder) =>
     tester.getSemantics(finder).flagsCollection.isSelected ==
     ui.Tristate.isTrue;
+
+void _fullTabLabels(WidgetTester tester) {
+  for (final entry in {
+    AppTab.habitat: '사육장',
+    AppTab.records: '기록',
+    AppTab.pets: '내 아이들',
+    AppTab.profile: '마이',
+  }.entries) {
+    final label = find.descendant(
+      of: _tab(entry.key),
+      matching: find.text(entry.value),
+    );
+    final paragraph = tester.renderObject<RenderParagraph>(label);
+    expect(paragraph.didExceedMaxLines, isFalse, reason: entry.value);
+    final bounds = Offset.zero & paragraph.size;
+    for (var i = 0; i < entry.value.length; i++) {
+      if (entry.value[i] == ' ') continue;
+      final boxes = paragraph.getBoxesForSelection(
+        TextSelection(baseOffset: i, extentOffset: i + 1),
+      );
+      expect(boxes, isNotEmpty, reason: '${entry.value} 문자 $i');
+      for (final box in boxes) {
+        expect(box.left, greaterThanOrEqualTo(bounds.left - .1));
+        expect(box.right, lessThanOrEqualTo(bounds.right + .1));
+        expect(box.top, greaterThanOrEqualTo(bounds.top - .1));
+        expect(box.bottom, lessThanOrEqualTo(bounds.bottom + .1));
+      }
+    }
+  }
+}
 
 void _rect(WidgetTester tester, Finder finder, Rect expected) {
   final actual = tester.getRect(finder);
@@ -332,6 +363,18 @@ void main() {
         (tester) async {
           await _open(tester, size: size, scale: scale);
           final nav = tester.getRect(_key('navigation'));
+          _fullTabLabels(tester);
+          if (size.width == 320 && scale == 2) {
+            final petsLabel = find.descendant(
+              of: _tab(AppTab.pets),
+              matching: find.text('내 아이들'),
+            );
+            final paragraph = tester.renderObject<RenderParagraph>(petsLabel);
+            final lines = paragraph.getBoxesForSelection(
+              const TextSelection(baseOffset: 0, extentOffset: 5),
+            );
+            expect(lines.map((box) => box.top).toSet().length, 2);
+          }
           expect(nav.bottom, size.height - 24);
           _sixCards(tester);
           for (var i = 0; i < 6; i++) {
@@ -380,6 +423,7 @@ void main() {
     );
     expect(tester.getRect(_key('header')).top, 79);
     expect(tester.getRect(_key('navigation')).bottom, 580);
+    _fullTabLabels(tester);
     await tester.ensureVisible(_key('card_5'));
     await tester.pumpAndSettle();
     expect(_key('card_5').hitTestable(), findsOneWidget);

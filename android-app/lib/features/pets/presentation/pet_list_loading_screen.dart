@@ -187,6 +187,7 @@ class _PetListLoadingScreenState extends State<PetListLoadingScreen> {
                         currentTab: AppTab.pets,
                         onTabSelected: _selectTab,
                         labelStyle: _caption,
+                        labelMaxLines: 2,
                         selectedLabelColor: _ink,
                         unselectedLabelColor: _muted,
                         selectedBackgroundColor: Colors.white,
