@@ -4,6 +4,7 @@ struct CreatureListEmptyView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isRegistrationPresented = false
     @State private var selectedViewMode: CreatureListViewMode = .list
+    var showsBottomNavigation = true
 
     private var navigationMinimumHeight: CGFloat {
         dynamicTypeSize.isAccessibilitySize ? 82 : 54
@@ -38,10 +39,12 @@ struct CreatureListEmptyView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .overlay(alignment: .bottom) {
-                bottomNavigation
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, max(4, geometry.safeAreaInsets.bottom))
-                    .frame(maxWidth: .infinity)
+                if showsBottomNavigation {
+                    bottomNavigation
+                        .padding(.horizontal, 24)
+                        .offset(y: geometry.safeAreaInsets.bottom - 24)
+                        .frame(maxWidth: .infinity)
+                }
             }
         }
         .fullScreenCover(isPresented: $isRegistrationPresented) {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    var showsBottomNavigation = true
 
     private var dateText: String {
         let formatter = DateFormatter()
@@ -67,10 +68,12 @@ struct HomeView: View {
                 .accessibilityIdentifier("home.scroll")
             }
             .overlay(alignment: .bottom) {
-                bottomNavigation
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, max(4, geometry.safeAreaInsets.bottom))
-                    .frame(maxWidth: .infinity)
+                if showsBottomNavigation {
+                    bottomNavigation
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, max(4, geometry.safeAreaInsets.bottom))
+                        .frame(maxWidth: .infinity)
+                }
             }
         }
         .preferredColorScheme(.light)
