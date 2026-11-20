@@ -55,6 +55,43 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertEqual(finalNavigationFrame.maxY, initialNavigationFrame.maxY, accuracy: 1)
     }
 
+    func testCreatureListEmptyPreviewShowsFigmaCopyAndRegistrationFlow() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-list-empty")
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["creatureList.title"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["creatureList.sortCount"].label, "등록순 · 7마리")
+        XCTAssertTrue(app.staticTexts["creatureList.empty.title"].exists)
+        XCTAssertTrue(app.staticTexts["creatureList.empty.subtitle"].exists)
+
+        let listMode = app.buttons["creatureList.mode.list"]
+        XCTAssertTrue(listMode.exists)
+        XCTAssertEqual(listMode.value as? String, "선택됨")
+
+        let wheelMode = app.buttons["creatureList.mode.wheel"]
+        XCTAssertTrue(wheelMode.exists)
+        XCTAssertTrue(wheelMode.isEnabled)
+        wheelMode.tap()
+        XCTAssertEqual(wheelMode.value as? String, "선택됨")
+        XCTAssertEqual(listMode.value as? String, "선택 안 됨")
+        listMode.tap()
+        XCTAssertEqual(listMode.value as? String, "선택됨")
+
+        let selectedTab = app.descendants(matching: .any)
+            .matching(identifier: "creatureList.bottomNavigation.pets")
+            .firstMatch
+        XCTAssertTrue(selectedTab.exists)
+        XCTAssertTrue(selectedTab.isSelected)
+
+        app.buttons["creatureList.empty.register"].tap()
+        XCTAssertTrue(app.staticTexts["새 친구 등록"].waitForExistence(timeout: 5))
+        app.buttons["registration.header"].tap()
+
+        app.buttons["creatureList.registration.plus"].tap()
+        XCTAssertTrue(app.staticTexts["새 친구 등록"].waitForExistence(timeout: 5))
+    }
+
     func testRegistrationPreviewSupportsEditingAndSelections() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-registration")
