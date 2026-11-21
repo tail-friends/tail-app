@@ -13,7 +13,10 @@ const accountWithdrawalPreviewNotice =
     '이 화면은 Figma 디자인 미리보기입니다. 친구 7마리·기록 128개와 삭제·복구 관련 문구는 시안 예시이며 확정된 정책이나 실제 계정 정보가 아닙니다. 실제 회원 탈퇴·데이터 삭제·토큰 삭제는 실행되지 않습니다.';
 final _previewOpen = Expando<bool>('account withdrawal preview');
 
-Future<void> showAccountWithdrawalPreview(BuildContext context) async {
+Future<void> showAccountWithdrawalPreview(
+  BuildContext context, {
+  Future<bool> Function(BuildContext)? confirmPreview,
+}) async {
   if (!kDebugMode || !context.mounted) return;
   final navigator = Navigator.of(context);
   if (_previewOpen[navigator] ?? false) return;
@@ -40,7 +43,8 @@ Future<void> showAccountWithdrawalPreview(BuildContext context) async {
     if (accepted != true || !context.mounted) return;
     await navigator.push<void>(
       MaterialPageRoute(
-        builder: (_) => const AccountWithdrawalScreen.preview(),
+        builder: (_) =>
+            AccountWithdrawalScreen.preview(confirmPreview: confirmPreview),
       ),
     );
   } finally {
@@ -50,7 +54,11 @@ Future<void> showAccountWithdrawalPreview(BuildContext context) async {
 
 /// Figma 09-5 presentation only; these labels are not server reason codes.
 class AccountWithdrawalScreen extends StatefulWidget {
-  const AccountWithdrawalScreen.preview({super.key});
+  const AccountWithdrawalScreen.preview({this.confirmPreview, super.key});
+
+  /// Optional Debug UI confirmation only. No authentication action is supplied.
+  /// Without this callback, the existing 09-5 preview keeps its notice behavior.
+  final Future<bool> Function(BuildContext)? confirmPreview;
 
   @override
   State<AccountWithdrawalScreen> createState() =>
@@ -69,6 +77,7 @@ class _AccountWithdrawalScreenState extends State<AccountWithdrawalScreen> {
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   int? _reason;
   bool _acknowledged = false;
+  bool _confirming = false;
 
   void _back() {
     _messenger.currentState?.removeCurrentSnackBar();
@@ -82,8 +91,19 @@ class _AccountWithdrawalScreenState extends State<AccountWithdrawalScreen> {
     }
   }
 
-  void _requestWithdrawalPreview() {
-    if (!kDebugMode || !_acknowledged) return;
+  Future<void> _requestWithdrawalPreview() async {
+    if (!kDebugMode || !_acknowledged || _confirming) return;
+    final confirm = widget.confirmPreview;
+    if (confirm != null) {
+      _confirming = true;
+      try {
+        final accepted = await confirm(context);
+        if (!mounted || !accepted) return;
+      } finally {
+        _confirming = false;
+      }
+    }
+    if (!mounted) return;
     _messenger.currentState
       ?..removeCurrentSnackBar()
       ..showSnackBar(const SnackBar(content: Text('회원 탈퇴 기능은 아직 연결되지 않았습니다.')));
