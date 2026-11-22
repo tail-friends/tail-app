@@ -7,6 +7,13 @@ struct TailFriendsApp: App {
 #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-empty") {
                 MainTabHostView(initialTab: .pets)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-loading") {
+                MainTabHostView(
+                    initialTab: .pets,
+                    showsCreatureListLoadingPreview: true,
+                    automaticallyAdvances: !ProcessInfo.processInfo.arguments
+                        .contains("--preview-creature-list-loading-static")
+                )
             } else if ProcessInfo.processInfo.arguments.contains("--preview-registration") {
                 RegistrationView()
             } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-detail-record-empty") {
@@ -60,9 +67,17 @@ private struct MainTabHostView: View {
     @State private var selectedTab: MainTab
     @State private var isUnavailableNoticePresented = false
     @State private var unavailableNoticeMessage = ""
+    private let showsCreatureListLoadingPreview: Bool
+    private let automaticallyAdvances: Bool
 
-    init(initialTab: MainTab) {
+    init(
+        initialTab: MainTab,
+        showsCreatureListLoadingPreview: Bool = false,
+        automaticallyAdvances: Bool = true
+    ) {
         _selectedTab = State(initialValue: initialTab)
+        self.showsCreatureListLoadingPreview = showsCreatureListLoadingPreview
+        self.automaticallyAdvances = automaticallyAdvances
     }
 
     private var navigationAccessibilityPrefix: String {
@@ -82,7 +97,13 @@ private struct MainTabHostView: View {
                     .allowsHitTesting(selectedTab == .habitat)
                     .accessibilityHidden(selectedTab != .habitat)
 
-                CreatureListEmptyView(showsBottomNavigation: false)
+                Group {
+                    if showsCreatureListLoadingPreview {
+                        CreatureListLoadingView(automaticallyAdvances: automaticallyAdvances)
+                    } else {
+                        CreatureListEmptyView(showsBottomNavigation: false)
+                    }
+                }
                     .opacity(selectedTab == .pets ? 1 : 0)
                     .allowsHitTesting(selectedTab == .pets)
                     .accessibilityHidden(selectedTab != .pets)
