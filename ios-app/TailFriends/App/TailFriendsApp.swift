@@ -7,6 +7,8 @@ struct TailFriendsApp: App {
 #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-empty") {
                 MainTabHostView(initialTab: .pets)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-error") {
+                MainTabHostView(initialTab: .pets, showsCreatureListErrorPreview: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-loading") {
                 MainTabHostView(
                     initialTab: .pets,
@@ -67,15 +69,18 @@ private struct MainTabHostView: View {
     @State private var selectedTab: MainTab
     @State private var isUnavailableNoticePresented = false
     @State private var unavailableNoticeMessage = ""
+    private let showsCreatureListErrorPreview: Bool
     private let showsCreatureListLoadingPreview: Bool
     private let automaticallyAdvances: Bool
 
     init(
         initialTab: MainTab,
+        showsCreatureListErrorPreview: Bool = false,
         showsCreatureListLoadingPreview: Bool = false,
         automaticallyAdvances: Bool = true
     ) {
         _selectedTab = State(initialValue: initialTab)
+        self.showsCreatureListErrorPreview = showsCreatureListErrorPreview
         self.showsCreatureListLoadingPreview = showsCreatureListLoadingPreview
         self.automaticallyAdvances = automaticallyAdvances
     }
@@ -98,7 +103,9 @@ private struct MainTabHostView: View {
                     .accessibilityHidden(selectedTab != .habitat)
 
                 Group {
-                    if showsCreatureListLoadingPreview {
+                    if showsCreatureListErrorPreview {
+                        CreatureListErrorView()
+                    } else if showsCreatureListLoadingPreview {
                         CreatureListLoadingView(automaticallyAdvances: automaticallyAdvances)
                     } else {
                         CreatureListEmptyView(showsBottomNavigation: false)
