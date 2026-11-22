@@ -39,7 +39,7 @@ struct CareDialView: View {
                         .frame(height: 36)
                         .padding(.bottom, 26)
 
-                    Text("오늘 육이를 돌봐줄\n시간이에요")
+                    Text("오늘 육이를\n돌봐줄 시간이에요")
                         .font(.custom("Jua", size: 20, relativeTo: .title2))
                         .foregroundStyle(CareDialPalette.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -80,17 +80,10 @@ struct CareDialView: View {
     private var topControls: some View {
         HStack(spacing: 10) {
             HStack(spacing: 2) {
-                periodButton(title: "오늘", selected: true, action: {})
-                periodButton(title: "주간", selected: false) {
+                periodButton(title: "오늘", selected: true, width: 44, action: {})
+                periodButton(title: "주간", selected: false, width: 44) {
                     onDestinationTap(.week)
                 }
-            }
-            .padding(3)
-            .frame(width: 132, height: 36)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay {
-                Capsule()
-                    .strokeBorder(.white.opacity(0.86), lineWidth: 1)
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("careDial.periodSwitch")
@@ -117,21 +110,29 @@ struct CareDialView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func periodButton(title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+    private func periodButton(
+        title: String,
+        selected: Bool,
+        width: CGFloat,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
-            Text(title)
-                .font(.custom("Jua", size: 12, relativeTo: .caption))
-                .foregroundStyle(selected ? CareDialPalette.forest : CareDialPalette.secondary)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background {
-                    if selected {
-                        Capsule()
-                            .fill(.white.opacity(0.88))
-                    }
+            ZStack {
+                if selected {
+                    Capsule()
+                        .fill(.white.opacity(0.88))
                 }
-                .contentShape(Capsule())
+
+                Text(title)
+                    .font(.custom("Jua", size: 12, relativeTo: .caption))
+                    .foregroundStyle(selected ? CareDialPalette.forest : CareDialPalette.secondary)
+            }
+                .frame(width: width, height: selected ? 30 : 36)
+                .frame(maxHeight: .infinity)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .frame(width: width, height: 36)
         .accessibilityLabel(title)
         .accessibilityValue(selected ? "선택됨" : "선택 안 됨")
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -240,6 +241,11 @@ private struct CareDialGraphic: View {
             let knobAngle = Angle(degrees: -90 + progress * 360)
 
             ZStack {
+                Circle()
+                    .fill(CareDialPalette.paleSage.opacity(0.52))
+                    .frame(width: 280, height: 280)
+                    .accessibilityHidden(true)
+
                 ForEach(0..<48, id: \.self) { tick in
                     if !tick.isMultiple(of: 12) {
                         Capsule()
@@ -265,7 +271,24 @@ private struct CareDialGraphic: View {
                     .rotationEffect(.degrees(-90))
 
                 Circle()
-                    .fill(CareDialPalette.forest)
+                    .trim(from: progress - 0.055, to: progress)
+                    .stroke(
+                        CareDialPalette.sage,
+                        style: StrokeStyle(lineWidth: 7, lineCap: .round)
+                    )
+                    .frame(width: diameter, height: diameter)
+                    .rotationEffect(.degrees(-90))
+
+                Circle()
+                    .fill(.white.opacity(0.76))
+                    .frame(width: diameter - 12, height: diameter - 12)
+                    .overlay {
+                        Circle()
+                            .strokeBorder(.white.opacity(0.86), lineWidth: 1)
+                    }
+
+                Circle()
+                    .fill(CareDialPalette.paleSage)
                     .frame(width: 14, height: 14)
                     .overlay {
                         Circle()
@@ -283,9 +306,16 @@ private struct CareDialGraphic: View {
                         .font(.custom("Jua", size: 13, relativeTo: .body))
                         .foregroundStyle(CareDialPalette.secondary)
 
-                    Text("6시간")
-                        .font(.custom("Jua", size: 28, relativeTo: .title))
+                    HStack(alignment: .firstTextBaseline, spacing: 1) {
+                        Text("6")
+                            .font(.custom("Jua", size: 40, relativeTo: .largeTitle))
+
+                        Text("시간")
+                            .font(.custom("Jua", size: 18, relativeTo: .body))
+                    }
                         .foregroundStyle(CareDialPalette.primary)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("6시간")
                         .accessibilityIdentifier("careDial.countdown")
                 }
                 .multilineTextAlignment(.center)
@@ -317,5 +347,7 @@ private enum CareDialPalette {
     static let primary = Color(.sRGB, red: 43 / 255, green: 42 / 255, blue: 38 / 255, opacity: 1)
     static let secondary = Color(.sRGB, red: 107 / 255, green: 103 / 255, blue: 94 / 255, opacity: 1)
     static let muted = Color(.sRGB, red: 171 / 255, green: 164 / 255, blue: 152 / 255, opacity: 1)
+    static let paleSage = Color(.sRGB, red: 232 / 255, green: 234 / 255, blue: 227 / 255, opacity: 1)
+    static let sage = Color(.sRGB, red: 143 / 255, green: 154 / 255, blue: 132 / 255, opacity: 1)
     static let shadow = Color(.sRGB, red: 61 / 255, green: 51 / 255, blue: 41 / 255, opacity: 0.08)
 }
