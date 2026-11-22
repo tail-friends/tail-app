@@ -11,10 +11,38 @@ import 'package:tail_friends/core/design_system/design_system.dart';
 import 'package:tail_friends/core/design_system/widgets/app_glass_surface.dart';
 import 'package:tail_friends/features/auth/presentation/login_screen.dart';
 import 'package:tail_friends/features/profile/presentation/account_management_screen.dart';
+import 'package:tail_friends/features/profile/presentation/account_withdrawal_screen.dart';
+import 'package:tail_friends/features/profile/presentation/logout_confirmation_dialog.dart';
 import 'package:tail_friends/main.dart';
 
 Finder _key(String key) => find.byKey(ValueKey('account_management_$key'));
 const _sample = '연결됨 · 2025년 9월 6일 가입';
+
+Future<void> _confirmLogout(WidgetTester tester) async {
+  await tester.tap(_key('logout'));
+  await tester.pumpAndSettle();
+  expect(find.byType(LogoutConfirmationDialog), findsOneWidget);
+  await tester.tap(
+    find.byKey(const ValueKey('logout_confirmation_confirm_button')),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _cancelAction(WidgetTester tester, String action) async {
+  await tester.tap(_key(action));
+  await tester.pumpAndSettle();
+  if (action == 'logout') {
+    expect(find.byType(LogoutConfirmationDialog), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('logout_confirmation_cancel')));
+  } else {
+    expect(find.text(accountWithdrawalPreviewNotice), findsOneWidget);
+    await tester.tap(find.text('미리보기 열기'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountWithdrawalScreen), findsOneWidget);
+    await tester.binding.handlePopRoute();
+  }
+  await tester.pumpAndSettle();
+}
 
 class _Routes extends NavigatorObserver {
   final events = <String>[];
@@ -190,37 +218,34 @@ void main() {
   });
 
   for (final entry in {'logout': '로그아웃', 'delete': '회원 탈퇴'}.entries) {
-    testWidgets('${entry.value}은 안내만 띄우고 화면·계정 예시·라우트를 변경하지 않는다', (
-      tester,
-    ) async {
+    testWidgets('${entry.value} 확인 흐름 취소 후 원래 계정 화면과 예시를 유지한다', (tester) async {
       final routes = _Routes();
       await _open(tester, observers: [routes]);
       final original = tester.element(find.byType(AccountManagementScreen));
       final events = List<String>.of(routes.events);
-      await tester.tap(_key(entry.key));
-      await tester.pumpAndSettle();
-      expect(find.text('${entry.value} 기능은 아직 연결되지 않았습니다.'), findsOneWidget);
+      await _cancelAction(tester, entry.key);
+      expect(find.byType(SnackBar), findsNothing);
       expect(
         tester.element(find.byType(AccountManagementScreen)),
         same(original),
       );
       expect(find.text(_sample), findsOneWidget);
-      expect(routes.events, events);
+      final changes = routes.events.skip(events.length).toList();
+      expect(
+        changes.where((e) => e == 'push').length,
+        changes.where((e) => e == 'pop').length,
+      );
+      expect(changes, isNot(contains('replace')));
       expect(find.byType(LoginScreen), findsNothing);
     });
   }
 
-  testWidgets('반복 클릭은 안내를 쌓지 않고 현재 액션 안내만 유지한다', (tester) async {
+  testWidgets('로그아웃 확인을 반복해도 미연결 안내는 한 개만 유지한다', (tester) async {
     await _open(tester);
     for (var i = 0; i < 3; i++) {
-      await tester.tap(_key('logout'));
-      await tester.pumpAndSettle();
+      await _confirmLogout(tester);
       expect(find.text('로그아웃 기능은 아직 연결되지 않았습니다.'), findsOneWidget);
     }
-    await tester.tap(_key('delete'));
-    await tester.pumpAndSettle();
-    expect(find.text('로그아웃 기능은 아직 연결되지 않았습니다.'), findsNothing);
-    expect(find.text('회원 탈퇴 기능은 아직 연결되지 않았습니다.'), findsOneWidget);
     expect(find.byType(SnackBar), findsOneWidget);
   });
 
@@ -230,8 +255,7 @@ void main() {
       () async {
         await _open(tester);
         for (final key in ['logout', 'delete']) {
-          await tester.tap(_key(key));
-          await tester.pumpAndSettle();
+          await _cancelAction(tester, key);
         }
         await tester.pump(const Duration(minutes: 5));
         await tester.pumpAndSettle();
@@ -256,8 +280,7 @@ void main() {
       expect(find.text(_sample), findsNothing);
       await tester.tap(find.text('미리보기 열기'));
       await tester.pumpAndSettle();
-      await tester.tap(_key('logout'));
-      await tester.pumpAndSettle();
+      await _confirmLogout(tester);
       if (exit == 'system_back') {
         await tester.binding.handlePopRoute();
       } else {
@@ -353,8 +376,7 @@ void main() {
             expect(_key(key).hitTestable(), findsOneWidget);
           }
           for (final key in ['logout', 'delete']) {
-            await tester.tap(_key(key));
-            await tester.pumpAndSettle();
+            await _cancelAction(tester, key);
             expect(find.byType(AccountManagementScreen), findsOneWidget);
             expect(tester.takeException(), isNull);
           }
