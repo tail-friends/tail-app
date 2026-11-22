@@ -8,6 +8,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
 import '../../auth/presentation/login_screen.dart';
+import 'account_withdrawal_confirmation_dialog.dart';
+import 'account_withdrawal_screen.dart';
+import 'logout_confirmation_dialog.dart';
 
 const accountManagementPreviewNotice =
     '이 화면은 Figma 디자인 미리보기입니다. 카카오 연결 정보와 가입일은 예시이며, 실제 로그아웃이나 회원 탈퇴는 실행되지 않습니다.';
@@ -55,18 +58,43 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   static const _tertiary = Color(0xFF736E65);
   static const _danger = Color(0xFFB23B30);
   final _messenger = GlobalKey<ScaffoldMessengerState>();
+  bool _actionInProgress = false;
 
-  // UI intents are kept separate from the rows. This preview has no auth,
-  // persistence, session or request handler to invoke for either action.
-  void _onAction(_AccountAction action) {
-    if (!kDebugMode) return;
-    final message = switch (action) {
-      _AccountAction.logout => '로그아웃 기능은 아직 연결되지 않았습니다.',
-      _AccountAction.deleteAccount => '회원 탈퇴 기능은 아직 연결되지 않았습니다.',
-    };
+  void _showNotice(String message) {
     _messenger.currentState
       ?..removeCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // These are Debug presentation intents, not authentication operations.
+  Future<void> _onAction(_AccountAction action) async {
+    if (!kDebugMode ||
+        !mounted ||
+        _actionInProgress ||
+        ModalRoute.of(context)?.isCurrent != true) {
+      return;
+    }
+    _actionInProgress = true;
+    _messenger.currentState?.removeCurrentSnackBar();
+    try {
+      switch (action) {
+        case _AccountAction.logout:
+          final result = await showLogoutConfirmationDialog(context);
+          if (!mounted || result != LogoutConfirmationResult.confirm) return;
+          _showNotice('로그아웃 기능은 아직 연결되지 않았습니다.');
+        case _AccountAction.deleteAccount:
+          await showAccountWithdrawalPreview(
+            context,
+            confirmPreview: (context) async =>
+                await showAccountWithdrawalConfirmationDialog(context) ==
+                AccountWithdrawalConfirmationResult.confirm,
+          );
+      }
+    } catch (_) {
+      if (mounted) _showNotice('미리보기 화면을 열지 못했어요. 다시 시도해 주세요.');
+    } finally {
+      _actionInProgress = false;
+    }
   }
 
   void _back() {
