@@ -5,7 +5,9 @@ struct TailFriendsApp: App {
     var body: some Scene {
         WindowGroup {
 #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-empty") {
+            if ProcessInfo.processInfo.arguments.contains("--preview-care-dial") {
+                MainTabHostView(initialTab: .records)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-empty") {
                 MainTabHostView(initialTab: .pets)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-loading") {
                 MainTabHostView(
@@ -97,6 +99,11 @@ private struct MainTabHostView: View {
                     .allowsHitTesting(selectedTab == .habitat)
                     .accessibilityHidden(selectedTab != .habitat)
 
+                CareDialView(onDestinationTap: showCareDialDestinationNotice)
+                    .opacity(selectedTab == .records ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .records)
+                    .accessibilityHidden(selectedTab != .records)
+
                 Group {
                     if showsCreatureListLoadingPreview {
                         CreatureListLoadingView(automaticallyAdvances: automaticallyAdvances)
@@ -130,9 +137,12 @@ private struct MainTabHostView: View {
     }
 
     private func showUnavailableNotice(for tab: MainTab) {
-        unavailableNoticeMessage = tab == .records
-            ? "기록 화면은 준비 중이에요."
-            : "마이 화면은 준비 중이에요."
+        unavailableNoticeMessage = "마이 화면은 준비 중이에요."
+        isUnavailableNoticePresented = true
+    }
+
+    private func showCareDialDestinationNotice(_ destination: CareDialDestination) {
+        unavailableNoticeMessage = destination.noticeMessage
         isUnavailableNoticePresented = true
     }
 }
@@ -185,9 +195,9 @@ private struct MainTabBar: View {
 
         return Button {
             switch tab {
-            case .habitat, .pets:
+            case .habitat, .records, .pets:
                 selectedTab = tab
-            case .records, .profile:
+            case .profile:
                 onUnavailableTabTap(tab)
             }
         } label: {

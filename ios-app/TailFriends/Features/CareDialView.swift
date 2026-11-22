@@ -57,7 +57,7 @@ struct CareDialView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.bottom, 0)
 
-                    Spacer(minLength: 66)
+                    Spacer(minLength: 56)
 
                     summaryCards
                         .frame(height: 52)
@@ -70,7 +70,7 @@ struct CareDialView: View {
                 }
                 .frame(maxWidth: 342)
                 .padding(.horizontal, 24)
-                .padding(.top, 1)
+                .padding(.top, 11)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
         }
@@ -241,14 +241,14 @@ private struct CareDialGraphic: View {
 
             ZStack {
                 ForEach(0..<48, id: \.self) { tick in
-                    let isMajor = tick.isMultiple(of: 12)
-
-                    Capsule()
-                        .fill(isMajor ? CareDialPalette.secondary : CareDialPalette.muted.opacity(0.72))
-                        .frame(width: isMajor ? 2.5 : 1.5, height: isMajor ? 8 : 4)
-                        .offset(y: -tickRadius)
-                        .rotationEffect(.degrees(Double(tick) * 7.5))
-                        .accessibilityHidden(true)
+                    if !tick.isMultiple(of: 12) {
+                        Capsule()
+                            .fill(CareDialPalette.muted.opacity(0.72))
+                            .frame(width: 1.5, height: 4)
+                            .offset(y: -tickRadius)
+                            .rotationEffect(.degrees(Double(tick) * 7.5))
+                            .accessibilityHidden(true)
+                    }
                 }
 
                 Circle()
