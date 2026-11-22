@@ -92,6 +92,50 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["새 친구 등록"].waitForExistence(timeout: 5))
     }
 
+    func testCreatureListLoadingPreviewShowsSixSkeletonCards() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--preview-creature-list-loading",
+            "--preview-creature-list-loading-static"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["creatureListLoading.title"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["creatureListLoading.sortCount"].label, "등록순 · 7마리")
+        XCTAssertTrue(app.descendants(matching: .any)["creatureListLoading.skeletonList"].exists)
+
+        for index in 0..<6 {
+            XCTAssertTrue(app.descendants(matching: .any)["creatureListLoading.skeleton.\(index)"].exists)
+        }
+
+        let wheelMode = app.buttons["creatureListLoading.mode.wheel"]
+        XCTAssertTrue(wheelMode.waitForExistence(timeout: 3))
+        wheelMode.tap()
+        XCTAssertEqual(wheelMode.value as? String, "선택됨")
+    }
+
+    func testCreatureListLoadingPreviewTransitionsToSevenMockCards() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-creature-list-loading")
+        app.launch()
+
+        let firstName = app.staticTexts["creatureListLoading.card.1.name"]
+        XCTAssertTrue(firstName.waitForExistence(timeout: 6))
+        XCTAssertEqual(firstName.label, "욱이")
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.1.species"].label, "레오파드 게코 · 탠저린")
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.1.weight"].label, "53.4g")
+        XCTAssertTrue(app.staticTexts["creatureListLoading.status.todayFeeding"].exists)
+
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.2.name"].label, "치토")
+        XCTAssertTrue(app.staticTexts["creatureListLoading.status.weightDrop"].exists)
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.3.name"].label, "레오")
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.4.name"].label, "세라")
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.5.name"].label, "토토")
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.6.name"].label, "루비")
+        XCTAssertEqual(app.staticTexts["creatureListLoading.card.7.name"].label, "하루")
+        XCTAssertTrue(app.staticTexts["creatureListLoading.card.7.weightLabel"].exists)
+    }
+
     func testRegistrationPreviewSupportsEditingAndSelections() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-registration")
