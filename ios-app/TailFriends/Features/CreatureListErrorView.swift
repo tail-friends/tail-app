@@ -48,7 +48,9 @@ struct CreatureListErrorView: View {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 3) {
                 Text("내 아이들")
-                    .font(.custom("Jua", size: 22, relativeTo: .title2))
+                    .font(.custom("Jua", size: 13, relativeTo: .title3))
+                    .tracking(-0.1)
+                    .frame(height: 19, alignment: .center)
                     .foregroundStyle(CreatureListErrorPalette.primary)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("creatureListError.title")
@@ -161,8 +163,10 @@ struct CreatureListErrorView: View {
                 onRetry?()
             } label: {
                 Text("다시 시도")
-                    .font(.custom("Jua", size: 16, relativeTo: .headline))
-                    .foregroundStyle(CreatureListErrorPalette.forest)
+                    .font(.custom("Jua", size: 14, relativeTo: .subheadline))
+                    .tracking(-0.2)
+                    .foregroundStyle(CreatureListErrorPalette.primary)
+                    .frame(height: 20, alignment: .center)
                     .frame(width: 200, height: 52)
                     .background(.white, in: Capsule())
                     .shadow(color: CreatureListErrorPalette.shadow, radius: 12, x: 0, y: 6)
