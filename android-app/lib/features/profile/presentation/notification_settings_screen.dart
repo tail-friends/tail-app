@@ -12,9 +12,14 @@ import 'notification_time_sheet.dart';
 
 const notificationSettingsPreviewNotice =
     '이 화면은 Figma 디자인 미리보기입니다. 스위치와 시간은 예시이며 화면 안에서만 변경됩니다. 실제 알림 권한·예약·수신 설정이나 서버 데이터를 바꾸지 않으며, 다시 열면 기본값으로 초기화됩니다.';
+const notificationPermissionOffPreviewNotice =
+    '이 화면은 알림 권한이 꺼진 상태의 Figma 디자인 미리보기입니다. 실제 기기 권한을 확인하거나 변경하지 않습니다. 스위치와 시간은 화면 안에서만 바뀌며 기기 설정 버튼도 실제 설정 앱을 열지 않습니다.';
 final _previewInProgress = Expando<bool>();
 
-Future<void> showNotificationSettingsPreview(BuildContext context) async {
+Future<void> showNotificationSettingsPreview(
+  BuildContext context, {
+  bool permissionOff = false,
+}) async {
   if (!kDebugMode || !context.mounted) return;
   final navigator = Navigator.of(context);
   if (_previewInProgress[navigator] == true) return;
@@ -25,7 +30,11 @@ Future<void> showNotificationSettingsPreview(BuildContext context) async {
       builder: (context) => AlertDialog(
         title: const Text('디자인 미리보기'),
         scrollable: true,
-        content: const Text(notificationSettingsPreviewNotice),
+        content: Text(
+          permissionOff
+              ? notificationPermissionOffPreviewNotice
+              : notificationSettingsPreviewNotice,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -41,7 +50,9 @@ Future<void> showNotificationSettingsPreview(BuildContext context) async {
     if (accepted != true || !context.mounted || !navigator.mounted) return;
     await navigator.push<void>(
       MaterialPageRoute(
-        builder: (_) => const NotificationSettingsScreen.preview(),
+        builder: (_) => permissionOff
+            ? const NotificationSettingsScreen.permissionOffPreview()
+            : const NotificationSettingsScreen.preview(),
       ),
     );
   } finally {
@@ -51,7 +62,13 @@ Future<void> showNotificationSettingsPreview(BuildContext context) async {
 
 /// Debug-only, in-memory UI state. No notification or storage service exists here.
 class NotificationSettingsScreen extends StatefulWidget {
-  const NotificationSettingsScreen.preview({super.key});
+  const NotificationSettingsScreen.preview({super.key})
+    : _permissionOff = false;
+  const NotificationSettingsScreen.permissionOffPreview({super.key})
+    : _permissionOff = true;
+
+  // A design fixture only; never inferred from an actual device permission.
+  final bool _permissionOff;
   @override
   State<NotificationSettingsScreen> createState() =>
       _NotificationSettingsScreenState();
@@ -227,6 +244,10 @@ class _NotificationSettingsScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                if (widget._permissionOff) ...[
+                                  _permissionBanner(),
+                                  const SizedBox(height: 20),
+                                ],
                                 Semantics(
                                   header: true,
                                   child: Text(
@@ -312,6 +333,112 @@ class _NotificationSettingsScreenState
     );
   }
 
+  void _deviceSettingsUnavailable() {
+    _messenger.currentState
+      ?..removeCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('기기 알림 설정 연결은 아직 준비 중입니다. 실제 권한은 변경되지 않았습니다.'),
+        ),
+      );
+  }
+
+  Widget _permissionBanner() => AppGlassSurface(
+    key: const ValueKey('notification_settings_permission_banner'),
+    borderRadius: BorderRadius.circular(22),
+    gradient: const LinearGradient(
+      // Figma's 157.024deg CSS gradient, mapped to the 342x145 banner.
+      begin: Alignment(-.303, -1.69),
+      end: Alignment(.303, 1.69),
+      colors: [Color(0xE0FFFFFF), Color(0xBFF3E2C2)],
+    ),
+    // The 33px visual button has a 44px target inside the banner's bottom space.
+    padding: const EdgeInsets.fromLTRB(19, 19, 19, 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            '알림이 꺼져 있어요',
+            style: AppTypography.titleMedium.copyWith(
+              fontFamily: 'Jua',
+              color: const Color(0xFF2F6B57),
+              letterSpacing: 0,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 300),
+          child: Text(
+            '기기 설정에서 알림을 켜야 급여일과 탈피 예정일을 알려드릴 수 있어요',
+            style: AppTypography.labelMedium.copyWith(
+              fontFamily: 'Jua',
+              height: 17 / 12,
+              color: _secondary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Semantics(
+          button: true,
+          label: '기기 설정으로 가기',
+          hint: '디자인 미리보기에서는 기기 설정을 열지 않습니다',
+          excludeSemantics: true,
+          onTap: _deviceSettingsUnavailable,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              key: const ValueKey('notification_settings_permission_settings'),
+              borderRadius: BorderRadius.circular(999),
+              excludeFromSemantics: true,
+              onTap: _deviceSettingsUnavailable,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 44),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  widthFactor: 1,
+                  heightFactor: 1,
+                  child: DecoratedBox(
+                    key: const ValueKey(
+                      'notification_settings_permission_button_visual',
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2F6B57),
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x3314120F),
+                          offset: Offset(0, 10),
+                          blurRadius: 24,
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        '기기 설정으로 가기',
+                        style: AppTypography.labelMedium.copyWith(
+                          fontFamily: 'Jua',
+                          height: 17 / 12,
+                          color: const Color(0xFFF3E2C2),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
   Widget _group(String name, List<Widget> rows) => AppGlassSurface(
     key: ValueKey('notification_settings_${name}_group'),
     borderRadius: BorderRadius.circular(22),
@@ -359,7 +486,9 @@ class _NotificationSettingsScreenState
   Widget _toggle(_Toggle kind, String title, [String? subtitle]) {
     final value = _values[kind]!;
     void toggle() => setState(() => _values[kind] = !value);
-    final onAsset = kind == _Toggle.feeding
+    final onAsset = widget._permissionOff
+        ? 'notification_permission_switch_on.png'
+        : kind == _Toggle.feeding
         ? 'notification_time_switch_on.png'
         : 'notification_settings_switch_on.png';
     return Semantics(
