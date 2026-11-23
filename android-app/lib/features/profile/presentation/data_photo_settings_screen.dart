@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
 import '../../auth/presentation/login_screen.dart';
+import 'csv_export_sheet.dart';
 
 const dataPhotoSettingsPreviewNotice =
     '이 화면은 Figma 디자인 미리보기입니다. 사진 7장, 저장 용량 및 내보내기 날짜는 예시이며, 실제 사진 보관·삭제·내보내기는 실행되지 않습니다. 캐릭터와 썸네일의 보존 안내도 시안 문구이며 확정된 서비스 정책이 아닙니다.';
@@ -263,8 +264,7 @@ class _DataPhotoSettingsScreenState extends State<DataPhotoSettingsScreen> {
                                     'csv',
                                     'CSV로 내보내기',
                                     '기간: 2026.01.01 – 10.20',
-                                    () =>
-                                        _notice('CSV 내보내기 기능은 아직 연결되지 않았습니다.'),
+                                    () => showCsvExportPreviewSheet(context),
                                     chevron: true,
                                   ),
                                   const Divider(
