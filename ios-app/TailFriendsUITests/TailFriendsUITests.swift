@@ -1,6 +1,39 @@
 import XCTest
 
 final class TailFriendsUITests: XCTestCase {
+    func testCareWeeklyPreviewSupportsDaySelectionAndReturnToToday() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-care-dial")
+        app.launch()
+
+        let weekButton = app.buttons["careDial.period.주간"]
+        XCTAssertTrue(weekButton.waitForExistence(timeout: 5))
+        weekButton.tap()
+
+        XCTAssertTrue(app.staticTexts["careWeekly.headline"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["careWeekly.dateRange"].exists)
+        XCTAssertTrue(app.staticTexts["careWeekly.recordedDays"].exists)
+        XCTAssertTrue(app.staticTexts["careWeekly.nextShedding"].exists)
+
+        let selectedDay = app.buttons["careWeekly.day.20"]
+        let anotherDay = app.buttons["careWeekly.day.17"]
+        XCTAssertTrue(selectedDay.exists)
+        XCTAssertTrue(anotherDay.exists)
+        XCTAssertEqual(selectedDay.value as? String, "선택됨")
+
+        anotherDay.tap()
+        XCTAssertEqual(anotherDay.value as? String, "선택됨")
+        XCTAssertEqual(selectedDay.value as? String, "선택 안 됨")
+
+        app.buttons["careWeekly.calendar"].tap()
+        XCTAssertTrue(app.alerts["준비 중"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["07-2 캘린더 화면은 준비 중이에요."].exists)
+        app.alerts.buttons["확인"].tap()
+
+        app.buttons["careWeekly.period.today"].tap()
+        XCTAssertTrue(app.staticTexts["careDial.headline"].waitForExistence(timeout: 5))
+    }
+
     func testLaunchShowsLoginScreen() {
         let app = XCUIApplication()
         app.launch()
