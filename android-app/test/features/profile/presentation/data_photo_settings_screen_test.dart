@@ -188,21 +188,15 @@ void main() {
     expect(key('confirm'), findsOneWidget);
     expect(keep(tester), isTrue);
   });
-  for (final name in ['csv', 'pdf']) {
+  // CSV now opens its own tested modal; PDF remains an unavailable action.
+  for (final name in ['pdf']) {
     testWidgets('$name only shows unavailable notice without leaving screen', (
       tester,
     ) async {
       await open(tester);
       await tester.tap(key(name));
       await tester.pumpAndSettle();
-      expect(
-        find.text(
-          name == 'csv'
-              ? 'CSV 내보내기 기능은 아직 연결되지 않았습니다.'
-              : 'PDF 리포트 기능은 아직 연결되지 않았습니다.',
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('PDF 리포트 기능은 아직 연결되지 않았습니다.'), findsOneWidget);
       expect(key('screen'), findsOneWidget);
       expect(find.text('기간: 2026.01.01 – 10.20'), findsOneWidget);
     });
@@ -323,7 +317,7 @@ void main() {
       await HttpOverrides.runZoned(
         () async {
           await open(tester);
-          for (final name in ['keep', 'delete', 'csv', 'pdf']) {
+          for (final name in ['keep', 'delete', 'pdf']) {
             await tester.tap(key(name));
             await tester.pumpAndSettle();
           }
