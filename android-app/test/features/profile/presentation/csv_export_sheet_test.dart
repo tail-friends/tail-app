@@ -1,3 +1,4 @@
+import 'package:tail_friends/features/profile/presentation/vet_pdf_report_screen.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -329,7 +330,7 @@ void main() {
     expect(dataKey('confirm'), findsNothing);
     await tester.tap(dataKey('pdf'));
     await tester.pumpAndSettle();
-    expect(find.text('PDF 리포트 기능은 아직 연결되지 않았습니다.'), findsOneWidget);
+    expect(find.text(vetPdfReportPreviewNotice), findsOneWidget);
   });
   testWidgets('independent preview host and normal app startup preserved', (
     tester,
