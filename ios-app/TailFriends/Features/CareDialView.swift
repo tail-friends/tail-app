@@ -363,6 +363,10 @@ private struct CareDialProgressKnob: View {
     let angle: Angle
 
     var body: some View {
+        let radians = Double(angle.radians)
+        let cosine: Double = cos(radians)
+        let sine: Double = sin(radians)
+
         Circle()
             .fill(CareDialPalette.paleSage)
             .frame(width: 22, height: 22)
@@ -382,8 +386,8 @@ private struct CareDialProgressKnob: View {
             }
             .shadow(color: CareDialPalette.shadow, radius: 6, x: 0, y: 3)
             .position(
-                x: center.x + cos(angle.radians) * radius,
-                y: center.y + sin(angle.radians) * radius
+                x: center.x + CGFloat(cosine) * radius,
+                y: center.y + CGFloat(sine) * radius
             )
             .accessibilityHidden(true)
     }
