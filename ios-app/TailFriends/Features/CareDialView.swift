@@ -240,121 +240,20 @@ private struct CareDialGraphic: View {
         GeometryReader { geometry in
             let side = min(geometry.size.width, geometry.size.height)
             let center = CGPoint(x: side / 2, y: side / 2)
-            let ringRadius = diameter / 2
-            let knobAngle = Angle(degrees: -90 + progress * 360)
 
             ZStack {
-                Circle()
-                    .fill(.ultraThinMaterial)
-                    .overlay {
-                        Circle().fill(.white.opacity(0.28))
-                    }
-                    .frame(width: 300, height: 300)
-                    .shadow(color: CareDialPalette.shadow, radius: 18, x: 0, y: 7)
-                    .accessibilityHidden(true)
-
-                ForEach(0..<48, id: \.self) { tick in
-                    let isCardinal = tick.isMultiple(of: 12)
-
-                    Capsule()
-                        .fill(CareDialPalette.muted.opacity(0.7))
-                        .frame(width: 1.25, height: isCardinal ? 12 : 7)
-                        .offset(y: -tickRadius)
-                        .rotationEffect(.degrees(Double(tick) * 7.5))
-                        .accessibilityHidden(true)
-                }
-
-                Circle()
-                    .stroke(CareDialPalette.muted.opacity(0.32), lineWidth: 8)
-                    .frame(width: diameter, height: diameter)
-
-                Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(
-                        AngularGradient(
-                            gradient: Gradient(stops: [
-                                .init(color: CareDialPalette.forest, location: 0),
-                                .init(color: CareDialPalette.forest, location: 0.82),
-                                .init(color: CareDialPalette.sage.opacity(0.72), location: 0.9),
-                                .init(color: CareDialPalette.sage, location: 0.95),
-                                .init(color: CareDialPalette.forest, location: 1)
-                            ]),
-                            center: .center,
-                            startAngle: .degrees(0),
-                            endAngle: .degrees(360)
-                        ),
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                    )
-                    .frame(width: diameter, height: diameter)
-                    .rotationEffect(.degrees(-90))
-                    .shadow(color: CareDialPalette.shadow, radius: 3, x: 0, y: 2)
-
-                Circle()
-                    .fill(.regularMaterial)
-                    .overlay {
-                        Circle().fill(.white.opacity(0.55))
-                    }
-                    .frame(width: centerDiameter, height: centerDiameter)
-                    .overlay {
-                        Circle()
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.92), CareDialPalette.sage.opacity(0.24)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    }
-                    .shadow(color: CareDialPalette.shadow, radius: 8, x: 0, y: 5)
-
-                Circle()
-                    .fill(CareDialPalette.paleSage)
-                    .frame(width: 22, height: 22)
-                    .overlay {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.34), .clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    }
-                    .overlay {
-                        Circle()
-                            .strokeBorder(.white.opacity(0.96), lineWidth: 1.25)
-                    }
-                    .shadow(color: CareDialPalette.shadow, radius: 6, x: 0, y: 3)
-                    .position(
-                        x: center.x + cos(knobAngle.radians) * ringRadius,
-                        y: center.y + sin(knobAngle.radians) * ringRadius
-                    )
-                    .accessibilityHidden(true)
-
-                VStack(spacing: 5) {
-                    Text("다음 급여까지")
-                        .font(.custom("Jua", size: 13, relativeTo: .body))
-                        .foregroundStyle(CareDialPalette.secondary)
-
-                    HStack(alignment: .firstTextBaseline, spacing: 1) {
-                        Text("6")
-                            .font(.custom("Jua", size: 26, relativeTo: .title))
-
-                        Text("시간")
-                            .font(.custom("Jua", size: 14, relativeTo: .body))
-                    }
-                        .foregroundStyle(CareDialPalette.primary)
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("6시간")
-                        .accessibilityIdentifier("careDial.countdown")
-                }
-                .multilineTextAlignment(.center)
-
-                dialLabel("0", x: center.x, y: 3)
-                dialLabel("1일", x: side - 3, y: center.y)
-                dialLabel("2일", x: center.x, y: side - 3)
-                dialLabel("3일", x: 3, y: center.y)
+                CareDialGlassLayer()
+                CareDialTickMarks(radius: tickRadius)
+                CareDialTrack(diameter: diameter)
+                CareDialProgressArc(diameter: diameter, progress: progress)
+                CareDialCore(diameter: centerDiameter)
+                CareDialProgressKnob(
+                    center: center,
+                    radius: diameter / 2,
+                    angle: Angle(degrees: -90 + progress * 360)
+                )
+                CareDialCountdown()
+                CareDialLabels(side: side)
             }
             .frame(width: side, height: side)
         }
@@ -362,8 +261,172 @@ private struct CareDialGraphic: View {
         .accessibilityLabel("다음 급여까지 6시간, 3일 18시간 경과, 주기 96시간")
         .accessibilityIdentifier("careDial.gauge")
     }
+}
 
-    private func dialLabel(_ title: String, x: CGFloat, y: CGFloat) -> some View {
+private struct CareDialGlassLayer: View {
+    var body: some View {
+        Circle()
+            .fill(.ultraThinMaterial)
+            .overlay {
+                Circle().fill(.white.opacity(0.28))
+            }
+            .frame(width: 300, height: 300)
+            .shadow(color: CareDialPalette.shadow, radius: 18, x: 0, y: 7)
+            .accessibilityHidden(true)
+    }
+}
+
+private struct CareDialTickMarks: View {
+    let radius: CGFloat
+
+    var body: some View {
+        ForEach(0..<48, id: \.self) { tick in
+            let isCardinal = tick.isMultiple(of: 12)
+
+            Capsule()
+                .fill(CareDialPalette.muted.opacity(0.7))
+                .frame(width: 1.25, height: isCardinal ? 12 : 7)
+                .offset(y: -radius)
+                .rotationEffect(.degrees(Double(tick) * 7.5))
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+private struct CareDialTrack: View {
+    let diameter: CGFloat
+
+    var body: some View {
+        Circle()
+            .stroke(CareDialPalette.muted.opacity(0.32), lineWidth: 8)
+            .frame(width: diameter, height: diameter)
+    }
+}
+
+private struct CareDialProgressArc: View {
+    let diameter: CGFloat
+    let progress: Double
+
+    private var gradient: AngularGradient {
+        AngularGradient(
+            gradient: Gradient(stops: [
+                .init(color: CareDialPalette.forest, location: 0),
+                .init(color: CareDialPalette.forest, location: 0.82),
+                .init(color: CareDialPalette.sage.opacity(0.72), location: 0.9),
+                .init(color: CareDialPalette.sage, location: 0.95),
+                .init(color: CareDialPalette.forest, location: 1)
+            ]),
+            center: .center,
+            startAngle: .degrees(0),
+            endAngle: .degrees(360)
+        )
+    }
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: progress)
+            .stroke(gradient, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+            .frame(width: diameter, height: diameter)
+            .rotationEffect(.degrees(-90))
+            .shadow(color: CareDialPalette.shadow, radius: 3, x: 0, y: 2)
+    }
+}
+
+private struct CareDialCore: View {
+    let diameter: CGFloat
+
+    var body: some View {
+        Circle()
+            .fill(.regularMaterial)
+            .overlay {
+                Circle().fill(.white.opacity(0.55))
+            }
+            .frame(width: diameter, height: diameter)
+            .overlay {
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [.white.opacity(0.92), CareDialPalette.sage.opacity(0.24)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            }
+            .shadow(color: CareDialPalette.shadow, radius: 8, x: 0, y: 5)
+    }
+}
+
+private struct CareDialProgressKnob: View {
+    let center: CGPoint
+    let radius: CGFloat
+    let angle: Angle
+
+    var body: some View {
+        Circle()
+            .fill(CareDialPalette.paleSage)
+            .frame(width: 22, height: 22)
+            .overlay {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [.white.opacity(0.34), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+            .overlay {
+                Circle()
+                    .strokeBorder(.white.opacity(0.96), lineWidth: 1.25)
+            }
+            .shadow(color: CareDialPalette.shadow, radius: 6, x: 0, y: 3)
+            .position(
+                x: center.x + cos(angle.radians) * radius,
+                y: center.y + sin(angle.radians) * radius
+            )
+            .accessibilityHidden(true)
+    }
+}
+
+private struct CareDialCountdown: View {
+    var body: some View {
+        VStack(spacing: 5) {
+            Text("다음 급여까지")
+                .font(.custom("Jua", size: 13, relativeTo: .body))
+                .foregroundStyle(CareDialPalette.secondary)
+
+            HStack(alignment: .firstTextBaseline, spacing: 1) {
+                Text("6")
+                    .font(.custom("Jua", size: 26, relativeTo: .title))
+
+                Text("시간")
+                    .font(.custom("Jua", size: 14, relativeTo: .body))
+            }
+            .foregroundStyle(CareDialPalette.primary)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("6시간")
+            .accessibilityIdentifier("careDial.countdown")
+        }
+        .multilineTextAlignment(.center)
+    }
+}
+
+private struct CareDialLabels: View {
+    let side: CGFloat
+
+    private var center: CGFloat { side / 2 }
+
+    var body: some View {
+        ZStack {
+            label("0", x: center, y: 3)
+            label("1일", x: side - 3, y: center)
+            label("2일", x: center, y: side - 3)
+            label("3일", x: 3, y: center)
+        }
+    }
+
+    private func label(_ title: String, x: CGFloat, y: CGFloat) -> some View {
         Text(title)
             .font(.custom("Jua", size: 10, relativeTo: .caption))
             .foregroundStyle(CareDialPalette.secondary)
