@@ -9,6 +9,7 @@ import '../../../core/design_system/design_system.dart';
 import '../../../core/design_system/widgets/app_glass_surface.dart';
 import '../../auth/presentation/login_screen.dart';
 import 'csv_export_sheet.dart';
+import 'vet_pdf_report_screen.dart';
 
 const dataPhotoSettingsPreviewNotice =
     '이 화면은 Figma 디자인 미리보기입니다. 사진 7장, 저장 용량 및 내보내기 날짜는 예시이며, 실제 사진 보관·삭제·내보내기는 실행되지 않습니다. 캐릭터와 썸네일의 보존 안내도 시안 문구이며 확정된 서비스 정책이 아닙니다.';
@@ -276,7 +277,7 @@ class _DataPhotoSettingsScreenState extends State<DataPhotoSettingsScreen> {
                                     'pdf',
                                     '수의사용 PDF 리포트',
                                     '최근 3개월 체중·급여·탈피·진료 요약',
-                                    () => _notice('PDF 리포트 기능은 아직 연결되지 않았습니다.'),
+                                    () => showVetPdfReportPreview(context),
                                     chevron: true,
                                   ),
                                 ]),
