@@ -7,6 +7,8 @@ struct TailFriendsApp: App {
 #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--preview-care-weekly") {
                 MainTabHostView(initialTab: .records, startsWithCareWeekly: true)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-care-calendar") {
+                MainTabHostView(initialTab: .records, startsWithCareCalendar: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-dial") {
                 MainTabHostView(initialTab: .records)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-empty") {
@@ -70,6 +72,8 @@ enum MainTab: String {
 private struct MainTabHostView: View {
     @State private var selectedTab: MainTab
     @State private var isCareWeeklyVisible: Bool
+    @State private var isCareCalendarVisible: Bool
+    @State private var careCalendarOrigin: CareCalendarOrigin
     @State private var isUnavailableNoticePresented = false
     @State private var unavailableNoticeMessage = ""
     private let showsCreatureListLoadingPreview: Bool
@@ -79,10 +83,13 @@ private struct MainTabHostView: View {
         initialTab: MainTab,
         showsCreatureListLoadingPreview: Bool = false,
         automaticallyAdvances: Bool = true,
-        startsWithCareWeekly: Bool = false
+        startsWithCareWeekly: Bool = false,
+        startsWithCareCalendar: Bool = false
     ) {
         _selectedTab = State(initialValue: initialTab)
         _isCareWeeklyVisible = State(initialValue: startsWithCareWeekly)
+        _isCareCalendarVisible = State(initialValue: startsWithCareCalendar)
+        _careCalendarOrigin = State(initialValue: startsWithCareWeekly ? .weekly : .today)
         self.showsCreatureListLoadingPreview = showsCreatureListLoadingPreview
         self.automaticallyAdvances = automaticallyAdvances
     }
@@ -105,7 +112,9 @@ private struct MainTabHostView: View {
                     .accessibilityHidden(selectedTab != .habitat)
 
                 Group {
-                    if isCareWeeklyVisible {
+                    if isCareCalendarVisible {
+                        CareCalendarView(onBack: returnFromCareCalendar)
+                    } else if isCareWeeklyVisible {
                         CareWeeklyView(
                             onTodayTap: {
                                 withAnimation(.easeInOut(duration: 0.18)) {
@@ -113,7 +122,7 @@ private struct MainTabHostView: View {
                                 }
                             },
                             onCalendarTap: {
-                                showCareDialDestinationNotice(.calendar)
+                                showCareCalendar(from: .weekly)
                             }
                         )
                     } else {
@@ -138,14 +147,16 @@ private struct MainTabHostView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(.easeInOut(duration: 0.18), value: selectedTab)
             .overlay(alignment: .bottom) {
-                MainTabBar(
-                    selectedTab: $selectedTab,
-                    accessibilityPrefix: navigationAccessibilityPrefix,
-                    onUnavailableTabTap: showUnavailableNotice(for:)
-                )
-                .padding(.horizontal, 24)
-                .offset(y: geometry.safeAreaInsets.bottom - 24)
-                .frame(maxWidth: .infinity)
+                if !isCareCalendarVisible {
+                    MainTabBar(
+                        selectedTab: $selectedTab,
+                        accessibilityPrefix: navigationAccessibilityPrefix,
+                        onUnavailableTabTap: showUnavailableNotice(for:)
+                    )
+                    .padding(.horizontal, 24)
+                    .offset(y: geometry.safeAreaInsets.bottom - 24)
+                    .frame(maxWidth: .infinity)
+                }
             }
         }
         .alert("준비 중", isPresented: $isUnavailableNoticePresented) {
@@ -166,15 +177,36 @@ private struct MainTabHostView: View {
         isUnavailableNoticePresented = true
     }
 
+    private func showCareCalendar(from origin: CareCalendarOrigin) {
+        careCalendarOrigin = origin
+        withAnimation(.easeInOut(duration: 0.18)) {
+            isCareCalendarVisible = true
+        }
+    }
+
+    private func returnFromCareCalendar() {
+        withAnimation(.easeInOut(duration: 0.18)) {
+            isCareCalendarVisible = false
+            isCareWeeklyVisible = careCalendarOrigin == .weekly
+        }
+    }
+
     private func handleCareDialDestination(_ destination: CareDialDestination) {
         switch destination {
         case .week:
             withAnimation(.easeInOut(duration: 0.18)) {
                 isCareWeeklyVisible = true
             }
-        case .calendar, .feeding:
+        case .calendar:
+            showCareCalendar(from: .today)
+        case .feeding:
             showCareDialDestinationNotice(destination)
         }
+    }
+
+    private enum CareCalendarOrigin {
+        case today
+        case weekly
     }
 }
 
