@@ -5,7 +5,9 @@ struct TailFriendsApp: App {
     var body: some Scene {
         WindowGroup {
 #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--preview-care-dial") {
+            if ProcessInfo.processInfo.arguments.contains("--preview-care-weekly") {
+                MainTabHostView(initialTab: .records, startsWithCareWeekly: true)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-care-dial") {
                 MainTabHostView(initialTab: .records)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-empty") {
                 MainTabHostView(initialTab: .pets)
@@ -67,6 +69,7 @@ enum MainTab: String {
 
 private struct MainTabHostView: View {
     @State private var selectedTab: MainTab
+    @State private var isCareWeeklyVisible: Bool
     @State private var isUnavailableNoticePresented = false
     @State private var unavailableNoticeMessage = ""
     private let showsCreatureListLoadingPreview: Bool
@@ -75,9 +78,11 @@ private struct MainTabHostView: View {
     init(
         initialTab: MainTab,
         showsCreatureListLoadingPreview: Bool = false,
-        automaticallyAdvances: Bool = true
+        automaticallyAdvances: Bool = true,
+        startsWithCareWeekly: Bool = false
     ) {
         _selectedTab = State(initialValue: initialTab)
+        _isCareWeeklyVisible = State(initialValue: startsWithCareWeekly)
         self.showsCreatureListLoadingPreview = showsCreatureListLoadingPreview
         self.automaticallyAdvances = automaticallyAdvances
     }
@@ -99,7 +104,22 @@ private struct MainTabHostView: View {
                     .allowsHitTesting(selectedTab == .habitat)
                     .accessibilityHidden(selectedTab != .habitat)
 
-                CareDialView(onDestinationTap: showCareDialDestinationNotice)
+                Group {
+                    if isCareWeeklyVisible {
+                        CareWeeklyView(
+                            onTodayTap: {
+                                withAnimation(.easeInOut(duration: 0.18)) {
+                                    isCareWeeklyVisible = false
+                                }
+                            },
+                            onCalendarTap: {
+                                showCareDialDestinationNotice(.calendar)
+                            }
+                        )
+                    } else {
+                        CareDialView(onDestinationTap: handleCareDialDestination)
+                    }
+                }
                     .opacity(selectedTab == .records ? 1 : 0)
                     .allowsHitTesting(selectedTab == .records)
                     .accessibilityHidden(selectedTab != .records)
@@ -144,6 +164,17 @@ private struct MainTabHostView: View {
     private func showCareDialDestinationNotice(_ destination: CareDialDestination) {
         unavailableNoticeMessage = destination.noticeMessage
         isUnavailableNoticePresented = true
+    }
+
+    private func handleCareDialDestination(_ destination: CareDialDestination) {
+        switch destination {
+        case .week:
+            withAnimation(.easeInOut(duration: 0.18)) {
+                isCareWeeklyVisible = true
+            }
+        case .calendar, .feeding:
+            showCareDialDestinationNotice(destination)
+        }
     }
 }
 
