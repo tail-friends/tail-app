@@ -1,7 +1,7 @@
 import XCTest
 
 final class TailFriendsUITests: XCTestCase {
-    func testCareWeeklyPreviewSupportsDaySelectionAndReturnToToday() {
+    func testCareWeeklyPreviewSupportsDaySelectionAndCalendarNavigation() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-care-dial")
         app.launch()
@@ -26,12 +26,53 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertEqual(selectedDay.value as? String, "선택 안 됨")
 
         app.buttons["careWeekly.calendar"].tap()
-        XCTAssertTrue(app.alerts["준비 중"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["07-2 캘린더 화면은 준비 중이에요."].exists)
-        app.alerts.buttons["확인"].tap()
+        XCTAssertTrue(app.staticTexts["careCalendar.month"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["careCalendar.month"].label, "2026년 10월")
+        app.buttons["careCalendar.back"].tap()
+        XCTAssertTrue(app.staticTexts["careWeekly.headline"].waitForExistence(timeout: 5))
 
         app.buttons["careWeekly.period.today"].tap()
         XCTAssertTrue(app.staticTexts["careDial.headline"].waitForExistence(timeout: 5))
+    }
+
+    func testCareCalendarPreviewSelectsDaysAndNavigatesMonths() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-care-calendar")
+        app.launch()
+
+        let month = app.staticTexts["careCalendar.month"]
+        XCTAssertTrue(month.waitForExistence(timeout: 5))
+        XCTAssertEqual(month.label, "2026년 10월")
+        XCTAssertEqual(app.staticTexts["careCalendar.selectedDate"].label, "10월 20일 화요일")
+        XCTAssertEqual(app.staticTexts["careCalendar.record.weight.detail"].label, "53.4g · +1.4g")
+        XCTAssertEqual(app.staticTexts["careCalendar.record.feeding.detail"].label, "귀뚜라미 50마리 · 칼슘")
+
+        let selectedDay = app.buttons["careCalendar.day.20"]
+        let anotherDay = app.buttons["careCalendar.day.21"]
+        XCTAssertEqual(selectedDay.value as? String, "선택됨")
+        anotherDay.tap()
+        XCTAssertEqual(anotherDay.value as? String, "선택됨")
+        XCTAssertEqual(selectedDay.value as? String, "선택 안 됨")
+        XCTAssertEqual(app.staticTexts["careCalendar.selectedDate"].label, "10월 21일 수요일")
+        XCTAssertTrue(app.staticTexts["careCalendar.emptyRecords"].exists)
+
+        app.buttons["careCalendar.month.previous"].tap()
+        XCTAssertEqual(month.label, "2026년 9월")
+        XCTAssertEqual(app.staticTexts["careCalendar.selectedDate"].label, "9월 21일 월요일")
+        app.buttons["careCalendar.month.next"].tap()
+        XCTAssertEqual(month.label, "2026년 10월")
+
+        app.buttons["careCalendar.day.20"].tap()
+        app.buttons["careCalendar.today"].tap()
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: "ko_KR")
+        let today = calendar.startOfDay(for: Date())
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        dateFormatter.calendar = calendar
+        dateFormatter.dateFormat = "M월 d일 EEEE"
+        XCTAssertEqual(app.staticTexts["careCalendar.selectedDate"].label, dateFormatter.string(from: today))
     }
 
     func testLaunchShowsLoginScreen() {
