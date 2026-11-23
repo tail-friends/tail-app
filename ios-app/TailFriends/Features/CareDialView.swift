@@ -45,19 +45,19 @@ struct CareDialView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .frame(height: 48, alignment: .topLeading)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(.bottom, 18)
+                        .padding(.bottom, 8)
                         .accessibilityIdentifier("careDial.headline")
 
                     careIndicators
                         .frame(height: 18)
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 29)
 
                     CareDialGraphic()
-                        .frame(width: 296, height: 296)
+                        .frame(width: 330, height: 330)
                         .frame(maxWidth: .infinity)
                         .padding(.bottom, 0)
 
-                    Spacer(minLength: 56)
+                    Spacer(minLength: 45)
 
                     summaryCards
                         .frame(height: 52)
@@ -145,7 +145,7 @@ struct CareDialView: View {
             indicator(title: "탈피", color: CareDialPalette.forest)
             indicator(title: "체중", color: CareDialPalette.muted)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("careDial.indicators")
     }
@@ -175,19 +175,21 @@ struct CareDialView: View {
     }
 
     private func summaryCard(title: String, value: String, identifier: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .center, spacing: 3) {
             Text(title)
                 .font(.custom("Jua", size: 10, relativeTo: .caption))
                 .foregroundStyle(CareDialPalette.secondary)
                 .lineLimit(1)
+                .multilineTextAlignment(.center)
 
             Text(value)
                 .font(.custom("Jua", size: 11, relativeTo: .caption))
                 .foregroundStyle(CareDialPalette.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
+                .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(.horizontal, 9)
         .background {
             RoundedRectangle(cornerRadius: 16)
@@ -230,8 +232,9 @@ struct CareDialView: View {
 
 private struct CareDialGraphic: View {
     private let progress = 90.0 / 96.0
-    private let diameter: CGFloat = 244
-    private let tickRadius: CGFloat = 141
+    private let diameter: CGFloat = 232
+    private let centerDiameter: CGFloat = 176
+    private let tickRadius: CGFloat = 132
 
     var body: some View {
         GeometryReader { geometry in
@@ -242,59 +245,87 @@ private struct CareDialGraphic: View {
 
             ZStack {
                 Circle()
-                    .fill(CareDialPalette.paleSage.opacity(0.52))
-                    .frame(width: 280, height: 280)
+                    .fill(.ultraThinMaterial)
+                    .overlay {
+                        Circle().fill(.white.opacity(0.28))
+                    }
+                    .frame(width: 300, height: 300)
+                    .shadow(color: CareDialPalette.shadow, radius: 18, x: 0, y: 7)
                     .accessibilityHidden(true)
 
                 ForEach(0..<48, id: \.self) { tick in
-                    if !tick.isMultiple(of: 12) {
-                        Capsule()
-                            .fill(CareDialPalette.muted.opacity(0.72))
-                            .frame(width: 1.5, height: 4)
-                            .offset(y: -tickRadius)
-                            .rotationEffect(.degrees(Double(tick) * 7.5))
-                            .accessibilityHidden(true)
-                    }
+                    let isCardinal = tick.isMultiple(of: 12)
+
+                    Capsule()
+                        .fill(CareDialPalette.muted.opacity(0.7))
+                        .frame(width: 1.25, height: isCardinal ? 12 : 7)
+                        .offset(y: -tickRadius)
+                        .rotationEffect(.degrees(Double(tick) * 7.5))
+                        .accessibilityHidden(true)
                 }
 
                 Circle()
-                    .stroke(CareDialPalette.muted.opacity(0.24), lineWidth: 7)
+                    .stroke(CareDialPalette.muted.opacity(0.32), lineWidth: 8)
                     .frame(width: diameter, height: diameter)
 
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(
-                        CareDialPalette.forest,
-                        style: StrokeStyle(lineWidth: 7, lineCap: .round)
+                        AngularGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: CareDialPalette.forest, location: 0),
+                                .init(color: CareDialPalette.forest, location: 0.82),
+                                .init(color: CareDialPalette.sage.opacity(0.72), location: 0.9),
+                                .init(color: CareDialPalette.sage, location: 0.95),
+                                .init(color: CareDialPalette.forest, location: 1)
+                            ]),
+                            center: .center,
+                            startAngle: .degrees(0),
+                            endAngle: .degrees(360)
+                        ),
+                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
                     )
                     .frame(width: diameter, height: diameter)
                     .rotationEffect(.degrees(-90))
+                    .shadow(color: CareDialPalette.shadow, radius: 3, x: 0, y: 2)
 
                 Circle()
-                    .trim(from: progress - 0.055, to: progress)
-                    .stroke(
-                        CareDialPalette.sage,
-                        style: StrokeStyle(lineWidth: 7, lineCap: .round)
-                    )
-                    .frame(width: diameter, height: diameter)
-                    .rotationEffect(.degrees(-90))
-
-                Circle()
-                    .fill(.white.opacity(0.76))
-                    .frame(width: diameter - 12, height: diameter - 12)
+                    .fill(.regularMaterial)
+                    .overlay {
+                        Circle().fill(.white.opacity(0.55))
+                    }
+                    .frame(width: centerDiameter, height: centerDiameter)
                     .overlay {
                         Circle()
-                            .strokeBorder(.white.opacity(0.86), lineWidth: 1)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.92), CareDialPalette.sage.opacity(0.24)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
                     }
+                    .shadow(color: CareDialPalette.shadow, radius: 8, x: 0, y: 5)
 
                 Circle()
                     .fill(CareDialPalette.paleSage)
-                    .frame(width: 14, height: 14)
+                    .frame(width: 22, height: 22)
                     .overlay {
                         Circle()
-                            .strokeBorder(.white, lineWidth: 2)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.34), .clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                     }
-                    .shadow(color: CareDialPalette.shadow, radius: 4, x: 0, y: 2)
+                    .overlay {
+                        Circle()
+                            .strokeBorder(.white.opacity(0.96), lineWidth: 1.25)
+                    }
+                    .shadow(color: CareDialPalette.shadow, radius: 6, x: 0, y: 3)
                     .position(
                         x: center.x + cos(knobAngle.radians) * ringRadius,
                         y: center.y + sin(knobAngle.radians) * ringRadius
@@ -308,10 +339,10 @@ private struct CareDialGraphic: View {
 
                     HStack(alignment: .firstTextBaseline, spacing: 1) {
                         Text("6")
-                            .font(.custom("Jua", size: 40, relativeTo: .largeTitle))
+                            .font(.custom("Jua", size: 26, relativeTo: .title))
 
                         Text("시간")
-                            .font(.custom("Jua", size: 18, relativeTo: .body))
+                            .font(.custom("Jua", size: 14, relativeTo: .body))
                     }
                         .foregroundStyle(CareDialPalette.primary)
                         .accessibilityElement(children: .ignore)
@@ -320,10 +351,10 @@ private struct CareDialGraphic: View {
                 }
                 .multilineTextAlignment(.center)
 
-                dialLabel("0", x: center.x, y: 12)
-                dialLabel("1일", x: side - 15, y: center.y)
-                dialLabel("2일", x: center.x, y: side - 12)
-                dialLabel("3일", x: 15, y: center.y)
+                dialLabel("0", x: center.x, y: 3)
+                dialLabel("1일", x: side - 3, y: center.y)
+                dialLabel("2일", x: center.x, y: side - 3)
+                dialLabel("3일", x: 3, y: center.y)
             }
             .frame(width: side, height: side)
         }
