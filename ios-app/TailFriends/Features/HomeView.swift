@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     var showsBottomNavigation = true
+    var onAllRecordsTap: (() -> Void)? = nil
 
     private var dateText: String {
         let formatter = DateFormatter()
@@ -253,12 +254,25 @@ struct HomeView: View {
                     .foregroundStyle(HomePalette.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text("전체")
-                    .font(.custom("Jua", size: 11, relativeTo: .caption))
-                    .foregroundStyle(HomePalette.secondary)
-                    .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
-                    .accessibilityLabel("전체 기록 보기. 준비 중")
+                if let onAllRecordsTap {
+                    Button(action: onAllRecordsTap) {
+                        Text("전체")
+                            .font(.custom("Jua", size: 11, relativeTo: .caption))
+                            .foregroundStyle(HomePalette.secondary)
+                            .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("전체 기록 보기")
                     .accessibilityIdentifier("home.records.all")
+                } else {
+                    Text("전체")
+                        .font(.custom("Jua", size: 11, relativeTo: .caption))
+                        .foregroundStyle(HomePalette.secondary)
+                        .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
+                        .accessibilityLabel("전체 기록 보기. 준비 중")
+                        .accessibilityIdentifier("home.records.all")
+                }
             }
 
             HomeGlassCard {

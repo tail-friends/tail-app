@@ -9,6 +9,8 @@ struct TailFriendsApp: App {
                 MainTabHostView(initialTab: .records, startsWithCareWeekly: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-calendar") {
                 MainTabHostView(initialTab: .records, startsWithCareCalendar: true)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-record-list") {
+                MainTabHostView(initialTab: .habitat, startsWithRecordList: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-dial") {
                 MainTabHostView(initialTab: .records)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-creature-list-empty") {
@@ -73,6 +75,7 @@ private struct MainTabHostView: View {
     @State private var selectedTab: MainTab
     @State private var isCareWeeklyVisible: Bool
     @State private var isCareCalendarVisible: Bool
+    @State private var isRecordListVisible: Bool
     @State private var careCalendarOrigin: CareCalendarOrigin
     @State private var isUnavailableNoticePresented = false
     @State private var unavailableNoticeMessage = ""
@@ -84,11 +87,13 @@ private struct MainTabHostView: View {
         showsCreatureListLoadingPreview: Bool = false,
         automaticallyAdvances: Bool = true,
         startsWithCareWeekly: Bool = false,
-        startsWithCareCalendar: Bool = false
+        startsWithCareCalendar: Bool = false,
+        startsWithRecordList: Bool = false
     ) {
         _selectedTab = State(initialValue: initialTab)
         _isCareWeeklyVisible = State(initialValue: startsWithCareWeekly)
         _isCareCalendarVisible = State(initialValue: startsWithCareCalendar)
+        _isRecordListVisible = State(initialValue: startsWithRecordList)
         _careCalendarOrigin = State(initialValue: startsWithCareWeekly ? .weekly : .today)
         self.showsCreatureListLoadingPreview = showsCreatureListLoadingPreview
         self.automaticallyAdvances = automaticallyAdvances
@@ -106,7 +111,16 @@ private struct MainTabHostView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                HomeView(showsBottomNavigation: false)
+                Group {
+                    if isRecordListVisible {
+                        RecordListView(onBack: returnFromRecordList)
+                    } else {
+                        HomeView(
+                            showsBottomNavigation: false,
+                            onAllRecordsTap: showRecordList
+                        )
+                    }
+                }
                     .opacity(selectedTab == .habitat ? 1 : 0)
                     .allowsHitTesting(selectedTab == .habitat)
                     .accessibilityHidden(selectedTab != .habitat)
@@ -146,8 +160,9 @@ private struct MainTabHostView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(.easeInOut(duration: 0.18), value: selectedTab)
+            .animation(.easeInOut(duration: 0.18), value: isRecordListVisible)
             .overlay(alignment: .bottom) {
-                if !isCareCalendarVisible {
+                if !isCareCalendarVisible && !isRecordListVisible {
                     MainTabBar(
                         selectedTab: $selectedTab,
                         accessibilityPrefix: navigationAccessibilityPrefix,
@@ -175,6 +190,18 @@ private struct MainTabHostView: View {
     private func showCareDialDestinationNotice(_ destination: CareDialDestination) {
         unavailableNoticeMessage = destination.noticeMessage
         isUnavailableNoticePresented = true
+    }
+
+    private func showRecordList() {
+        withAnimation(.easeInOut(duration: 0.18)) {
+            isRecordListVisible = true
+        }
+    }
+
+    private func returnFromRecordList() {
+        withAnimation(.easeInOut(duration: 0.18)) {
+            isRecordListVisible = false
+        }
     }
 
     private func showCareCalendar(from origin: CareCalendarOrigin) {
