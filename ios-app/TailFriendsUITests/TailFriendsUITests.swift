@@ -1,6 +1,30 @@
 import XCTest
 
 final class TailFriendsUITests: XCTestCase {
+    func testRecordListPreviewFiltersRecordsAndReturnsHome() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-record-list")
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["recordList.title"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["오늘 · 10월 20일"].exists)
+        XCTAssertTrue(app.buttons["recordList.record.weight-1020"].exists)
+        XCTAssertTrue(app.buttons["recordList.record.feeding-1020"].exists)
+
+        app.buttons["recordList.filter.weight"].tap()
+        XCTAssertTrue(app.buttons["recordList.record.weight-1020"].exists)
+        XCTAssertFalse(app.buttons["recordList.record.feeding-1020"].exists)
+        XCTAssertTrue(app.staticTexts["10월 13일"].exists)
+
+        app.buttons["recordList.filter.memo"].tap()
+        XCTAssertTrue(app.buttons["recordList.record.feeding-1017"].exists)
+        XCTAssertTrue(app.buttons["recordList.record.shedding-1008"].exists)
+        XCTAssertFalse(app.buttons["recordList.record.weight-1020"].exists)
+
+        app.buttons["recordList.back"].tap()
+        XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
+    }
+
     func testCareWeeklyPreviewSupportsDaySelectionAndCalendarNavigation() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-care-dial")
