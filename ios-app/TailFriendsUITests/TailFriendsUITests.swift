@@ -25,6 +25,51 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
     }
 
+    func testFeedingRecordEditLoadsSelectedRecordAndSavesChangesToList() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-record-list")
+        app.launch()
+
+        let feedingRecord = app.buttons["recordList.record.feeding-1017"]
+        XCTAssertTrue(feedingRecord.waitForExistence(timeout: 5))
+        feedingRecord.tap()
+
+        XCTAssertTrue(app.staticTexts["feedingEdit.title"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["feedingEdit.date"].label, "날짜, 10월 17일 (토)")
+        XCTAssertEqual(app.buttons["feedingEdit.food.귀뚜라미"].value as? String, "선택됨")
+        XCTAssertEqual(app.staticTexts["feedingEdit.quantity.value"].label, "50")
+
+        let memo = app.descendants(matching: .any)["feedingEdit.memo"]
+        XCTAssertEqual(memo.value as? String, "잘 받아먹음")
+
+        app.buttons["feedingEdit.date"].tap()
+        XCTAssertTrue(app.buttons["feedingEdit.date.done"].waitForExistence(timeout: 3))
+        app.buttons["feedingEdit.date.done"].tap()
+
+        app.buttons["feedingEdit.food.밀웜"].tap()
+        app.buttons["feedingEdit.quantity.increase"].tap()
+        app.buttons["feedingEdit.notEaten"].tap()
+        XCTAssertEqual(app.buttons["feedingEdit.notEaten"].value as? String, "켬")
+
+        app.buttons["feedingEdit.save"].tap()
+        XCTAssertTrue(
+            app.staticTexts["recordList.title"].waitForExistence(timeout: 5),
+            "Saving should return to the record list. Current screen: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            feedingRecord.waitForExistence(timeout: 5),
+            "The edited feeding row should remain visible. Current screen: \(app.debugDescription)"
+        )
+        let updatedLabel = feedingRecord.label
+        XCTAssertTrue(updatedLabel.contains("밀웜"), updatedLabel)
+        XCTAssertTrue(updatedLabel.contains("안 먹음"), updatedLabel)
+        XCTAssertTrue(updatedLabel.contains("잘 받아먹음"), updatedLabel)
+
+        feedingRecord.tap()
+        XCTAssertEqual(app.staticTexts["feedingEdit.quantity.value"].label, "51")
+        XCTAssertEqual(app.buttons["feedingEdit.notEaten"].value as? String, "켬")
+    }
+
     func testCareWeeklyPreviewSupportsDaySelectionAndCalendarNavigation() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-care-dial")
