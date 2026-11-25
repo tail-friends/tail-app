@@ -1,3 +1,4 @@
+import 'package:tail_friends/features/profile/presentation/vet_pdf_report_screen.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -188,15 +189,15 @@ void main() {
     expect(key('confirm'), findsOneWidget);
     expect(keep(tester), isTrue);
   });
-  // CSV now opens its own tested modal; PDF remains an unavailable action.
+  // PDF now opens a guarded design preview; validate disclosure before navigation.
   for (final name in ['pdf']) {
-    testWidgets('$name only shows unavailable notice without leaving screen', (
+    testWidgets('$name shows design disclosure before navigation', (
       tester,
     ) async {
       await open(tester);
       await tester.tap(key(name));
       await tester.pumpAndSettle();
-      expect(find.text('PDF 리포트 기능은 아직 연결되지 않았습니다.'), findsOneWidget);
+      expect(find.text(vetPdfReportPreviewNotice), findsOneWidget);
       expect(key('screen'), findsOneWidget);
       expect(find.text('기간: 2026.01.01 – 10.20'), findsOneWidget);
     });
