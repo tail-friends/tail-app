@@ -3,15 +3,22 @@ import SwiftUI
 struct RecordListView: View {
     let onBack: () -> Void
 
+    @State private var recordGroups = RecordListGroup.samples
     @State private var selectedFilter: RecordListFilter = .all
+    @State private var editSession: RecordListEditSession?
     @State private var isNoticePresented = false
     @State private var noticeMessage = ""
 
     private var visibleGroups: [RecordListGroup] {
-        RecordListGroup.samples.compactMap { group in
+        recordGroups.compactMap { group in
             let records = group.records.filter { selectedFilter.includes($0) }
             guard !records.isEmpty else { return nil }
-            return RecordListGroup(id: group.id, dateTitle: group.dateTitle, records: records)
+            return RecordListGroup(
+                id: group.id,
+                dateTitle: group.dateTitle,
+                date: group.date,
+                records: records
+            )
         }
     }
 
@@ -61,6 +68,19 @@ struct RecordListView: View {
                     .accessibilityIdentifier("recordList.scroll")
                 }
                 .padding(.top, 10)
+                .accessibilityHidden(editSession != nil)
+
+                if let editSession {
+                    FeedingRecordEditView(
+                        initialData: editSession.data,
+                        onBack: cancelEditing,
+                        onSave: { updatedData in
+                            saveEditedRecord(updatedData, id: editSession.recordID)
+                        }
+                    )
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+                }
             }
         }
         .preferredColorScheme(.light)
@@ -203,7 +223,13 @@ struct RecordListView: View {
 
     private func recordRow(_ record: RecordListRecord, minimumHeight: CGFloat) -> some View {
         Button {
-            showNotice("08-1 기록 상세 화면은 준비 중이에요.")
+            if let feedingData = record.feedingData {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    editSession = RecordListEditSession(recordID: record.id, data: feedingData)
+                }
+            } else {
+                showNotice("이 기록의 상세 화면은 준비 중이에요.")
+            }
         } label: {
             HStack(spacing: 12) {
                 ZStack {
@@ -264,6 +290,64 @@ struct RecordListView: View {
         noticeMessage = message
         isNoticePresented = true
     }
+
+    private func cancelEditing() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            editSession = nil
+        }
+    }
+
+    private func saveEditedRecord(_ data: FeedingRecordEditData, id: String) {
+        guard let sourceGroupIndex = recordGroups.firstIndex(where: { group in
+            group.records.contains(where: { $0.id == id })
+        }),
+        let sourceRecordIndex = recordGroups[sourceGroupIndex].records.firstIndex(where: { $0.id == id }) else {
+            cancelEditing()
+            return
+        }
+
+        var updatedRecord = recordGroups[sourceGroupIndex].records[sourceRecordIndex]
+        updatedRecord.feedingData = data
+        updatedRecord.detail = data.listDetail
+        updatedRecord.hasMemo = !data.memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        let destinationID = RecordListGroup.dateID(for: data.date)
+        let sourceID = recordGroups[sourceGroupIndex].id
+
+        if destinationID == sourceID {
+            recordGroups[sourceGroupIndex].dateTitle = RecordListGroup.dateTitle(for: data.date)
+            recordGroups[sourceGroupIndex].records[sourceRecordIndex] = updatedRecord
+        } else {
+            recordGroups[sourceGroupIndex].records.remove(at: sourceRecordIndex)
+            if recordGroups[sourceGroupIndex].records.isEmpty {
+                recordGroups.remove(at: sourceGroupIndex)
+            }
+
+            if let destinationIndex = recordGroups.firstIndex(where: { $0.id == destinationID }) {
+                recordGroups[destinationIndex].records.append(updatedRecord)
+                recordGroups[destinationIndex].records.sort { $0.time > $1.time }
+            } else {
+                recordGroups.append(
+                    RecordListGroup(
+                        id: destinationID,
+                        dateTitle: RecordListGroup.dateTitle(for: data.date),
+                        date: Calendar.current.startOfDay(for: data.date),
+                        records: [updatedRecord]
+                    )
+                )
+            }
+            recordGroups.sort { $0.date > $1.date }
+        }
+
+        withAnimation(.easeInOut(duration: 0.2)) {
+            editSession = nil
+        }
+    }
+}
+
+private struct RecordListEditSession {
+    let recordID: String
+    let data: FeedingRecordEditData
 }
 
 private enum RecordListFilter: String, CaseIterable, Identifiable {
@@ -313,35 +397,91 @@ private enum RecordListKind {
 private struct RecordListRecord: Identifiable {
     let id: String
     let kind: RecordListKind
-    let detail: String
+    var detail: String
     let time: String
-    let hasMemo: Bool
+    var hasMemo: Bool
+    var feedingData: FeedingRecordEditData? = nil
 }
 
 private struct RecordListGroup: Identifiable {
-    let id: String
-    let dateTitle: String
-    let records: [RecordListRecord]
+    var id: String
+    var dateTitle: String
+    let date: Date
+    var records: [RecordListRecord]
+
+    static func dateID(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+
+    static func dateTitle(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "M월 d일"
+        let dateText = formatter.string(from: date)
+
+        return Calendar.current.isDate(date, inSameDayAs: sampleDate(day: 20))
+            ? "오늘 · \(dateText)"
+            : dateText
+    }
+
+    private static func sampleDate(day: Int) -> Date {
+        Calendar.current.date(from: DateComponents(year: 2026, month: 10, day: day)) ?? .now
+    }
 
     static let samples = [
         RecordListGroup(
             id: "2026-10-20",
             dateTitle: "오늘 · 10월 20일",
+            date: sampleDate(day: 20),
             records: [
                 RecordListRecord(id: "weight-1020", kind: .weight, detail: "53.4g · +1.4g", time: "09:12", hasMemo: false),
-                RecordListRecord(id: "feeding-1020", kind: .feeding, detail: "귀뚜라미 50마리 · 칼슘", time: "09:05", hasMemo: false)
+                RecordListRecord(
+                    id: "feeding-1020",
+                    kind: .feeding,
+                    detail: "귀뚜라미 50마리 · 칼슘",
+                    time: "09:05",
+                    hasMemo: false,
+                    feedingData: FeedingRecordEditData(
+                        date: sampleDate(day: 20),
+                        food: "귀뚜라미",
+                        quantity: 50,
+                        didNotEat: false,
+                        memo: "칼슘"
+                    )
+                )
             ]
         ),
         RecordListGroup(
             id: "2026-10-17",
             dateTitle: "10월 17일",
+            date: sampleDate(day: 17),
             records: [
-                RecordListRecord(id: "feeding-1017", kind: .feeding, detail: "귀뚜라미 50마리 · 잘 받아먹음", time: "20:30", hasMemo: true)
+                RecordListRecord(
+                    id: "feeding-1017",
+                    kind: .feeding,
+                    detail: "귀뚜라미 50마리 · 잘 받아먹음",
+                    time: "20:30",
+                    hasMemo: true,
+                    feedingData: FeedingRecordEditData(
+                        date: sampleDate(day: 17),
+                        food: "귀뚜라미",
+                        quantity: 50,
+                        didNotEat: false,
+                        memo: "잘 받아먹음"
+                    )
+                )
             ]
         ),
         RecordListGroup(
             id: "2026-10-13",
             dateTitle: "10월 13일",
+            date: sampleDate(day: 13),
             records: [
                 RecordListRecord(id: "weight-1013", kind: .weight, detail: "52.0g · +1g", time: "10:00", hasMemo: false)
             ]
@@ -349,9 +489,23 @@ private struct RecordListGroup: Identifiable {
         RecordListGroup(
             id: "2026-10-08",
             dateTitle: "10월 8일",
+            date: sampleDate(day: 8),
             records: [
                 RecordListRecord(id: "shedding-1008", kind: .shedding, detail: "완전 탈피 · 발가락 확인", time: "07:40", hasMemo: true),
-                RecordListRecord(id: "feeding-1008", kind: .feeding, detail: "밀웜 4마리", time: "19:10", hasMemo: false)
+                RecordListRecord(
+                    id: "feeding-1008",
+                    kind: .feeding,
+                    detail: "밀웜 4마리",
+                    time: "19:10",
+                    hasMemo: false,
+                    feedingData: FeedingRecordEditData(
+                        date: sampleDate(day: 8),
+                        food: "밀웜",
+                        quantity: 4,
+                        didNotEat: false,
+                        memo: ""
+                    )
+                )
             ]
         )
     ]
