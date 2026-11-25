@@ -9,6 +9,20 @@ struct TailFriendsApp: App {
                 MainTabHostView(initialTab: .records, startsWithCareWeekly: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-calendar") {
                 MainTabHostView(initialTab: .records, startsWithCareCalendar: true)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-feeding-record-edit") {
+                FeedingRecordEditView(
+                    initialData: FeedingRecordEditData(
+                        date: Calendar.current.date(
+                            from: DateComponents(year: 2026, month: 10, day: 17)
+                        ) ?? .now,
+                        food: "귀뚜라미",
+                        quantity: 50,
+                        didNotEat: false,
+                        memo: "잘 받아먹음"
+                    ),
+                    onBack: {},
+                    onSave: { _ in }
+                )
             } else if ProcessInfo.processInfo.arguments.contains("--preview-record-list") {
                 MainTabHostView(initialTab: .habitat, startsWithRecordList: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-dial") {
