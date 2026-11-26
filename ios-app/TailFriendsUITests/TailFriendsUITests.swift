@@ -25,6 +25,109 @@ final class TailFriendsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["오늘의 사육장"].waitForExistence(timeout: 5))
     }
 
+    func testRecordListFriendSelectionOpensAndUpdatesTemporarySelection() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-record-list")
+        app.launch()
+
+        let petSelector = app.buttons["recordList.petSelector"]
+        XCTAssertTrue(petSelector.waitForExistence(timeout: 5))
+        petSelector.tap()
+
+        XCTAssertTrue(app.staticTexts["friendSelection.title"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["friendSelection.subtitle"].exists)
+        XCTAssertTrue(app.buttons["friendSelection.all"].exists)
+        XCTAssertEqual(
+            app.staticTexts["friendSelection.title"].frame.minX,
+            app.staticTexts["friendSelection.subtitle"].frame.minX,
+            accuracy: 1
+        )
+        XCTAssertEqual(app.buttons["friendSelection.friend.yukyi"].value as? String, "선택됨")
+
+        let chito = app.buttons["friendSelection.friend.chito"]
+        XCTAssertTrue(chito.isHittable)
+        chito.tap()
+        XCTAssertEqual(chito.value as? String, "선택됨")
+        XCTAssertEqual(app.buttons["friendSelection.friend.yukyi"].value as? String, "선택 안 됨")
+        XCTAssertEqual(petSelector.label, "친구 치토 선택")
+
+        let friendScroll = app.scrollViews["friendSelection.scroll"]
+        friendScroll.swipeUp()
+        XCTAssertTrue(app.buttons["friendSelection.friend.haru"].isHittable)
+
+        app.buttons["friendSelection.close"].tap()
+        XCTAssertTrue(app.staticTexts["recordList.title"].waitForExistence(timeout: 5))
+        XCTAssertEqual(petSelector.label, "친구 치토 선택")
+        XCTAssertEqual(
+            app.staticTexts["recordList.empty"].waitForExistence(timeout: 5) ? app.staticTexts["recordList.empty"].label : nil,
+            "아직 기록이 없어요"
+        )
+        XCTAssertFalse(app.buttons["recordList.record.feeding-1017"].exists)
+
+        petSelector.tap()
+        XCTAssertTrue(app.staticTexts["friendSelection.title"].waitForExistence(timeout: 5))
+        app.buttons["friendSelection.friend.yukyi"].tap()
+        app.buttons["friendSelection.close"].tap()
+        XCTAssertEqual(petSelector.label, "친구 육이 선택")
+        XCTAssertTrue(app.buttons["recordList.record.feeding-1017"].waitForExistence(timeout: 5))
+
+        petSelector.tap()
+        XCTAssertTrue(app.staticTexts["friendSelection.title"].waitForExistence(timeout: 5))
+        let allFriends = app.buttons["friendSelection.all"]
+        allFriends.tap()
+        XCTAssertEqual(allFriends.value as? String, "선택됨")
+
+        let selectionScroll = app.scrollViews["friendSelection.scroll"]
+        for friendID in ["yukyi", "chito", "leo", "sera"] {
+            XCTAssertEqual(app.buttons["friendSelection.friend.\(friendID)"].value as? String, "선택됨")
+        }
+        selectionScroll.swipeUp()
+        for friendID in ["toto", "ruby", "haru"] {
+            XCTAssertEqual(app.buttons["friendSelection.friend.\(friendID)"].value as? String, "선택됨")
+        }
+
+        app.buttons["friendSelection.close"].tap()
+        XCTAssertEqual(petSelector.label, "친구 전체 친구 선택")
+        XCTAssertTrue(app.buttons["recordList.record.feeding-1017"].waitForExistence(timeout: 5))
+
+        petSelector.tap()
+        XCTAssertTrue(app.staticTexts["friendSelection.title"].waitForExistence(timeout: 5))
+        let allFriendsToClear = app.buttons["friendSelection.all"]
+        XCTAssertEqual(allFriendsToClear.value as? String, "선택됨")
+        allFriendsToClear.tap()
+        XCTAssertEqual(allFriendsToClear.value as? String, "선택 안 됨")
+        let noneSelectionScroll = app.scrollViews["friendSelection.scroll"]
+        for friendID in ["yukyi", "chito", "leo", "sera"] {
+            XCTAssertEqual(app.buttons["friendSelection.friend.\(friendID)"].value as? String, "선택 안 됨")
+        }
+        noneSelectionScroll.swipeUp()
+        for friendID in ["toto", "ruby", "haru"] {
+            XCTAssertEqual(app.buttons["friendSelection.friend.\(friendID)"].value as? String, "선택 안 됨")
+        }
+        app.buttons["friendSelection.close"].tap()
+        XCTAssertEqual(petSelector.label, "선택된 친구 없음")
+        XCTAssertEqual(app.staticTexts["recordList.empty"].waitForExistence(timeout: 5) ? app.staticTexts["recordList.empty"].label : nil, "아직 기록이 없어요")
+        XCTAssertFalse(app.buttons["recordList.record.feeding-1017"].exists)
+
+        petSelector.tap()
+        XCTAssertTrue(app.staticTexts["friendSelection.title"].waitForExistence(timeout: 5))
+        let reselectAllFriends = app.buttons["friendSelection.all"]
+        XCTAssertEqual(reselectAllFriends.value as? String, "선택 안 됨")
+        reselectAllFriends.tap()
+        XCTAssertEqual(reselectAllFriends.value as? String, "선택됨")
+        let reselectScroll = app.scrollViews["friendSelection.scroll"]
+        for friendID in ["yukyi", "chito", "leo", "sera"] {
+            XCTAssertEqual(app.buttons["friendSelection.friend.\(friendID)"].value as? String, "선택됨")
+        }
+        reselectScroll.swipeUp()
+        for friendID in ["toto", "ruby", "haru"] {
+            XCTAssertEqual(app.buttons["friendSelection.friend.\(friendID)"].value as? String, "선택됨")
+        }
+        app.buttons["friendSelection.close"].tap()
+        XCTAssertEqual(petSelector.label, "친구 전체 친구 선택")
+        XCTAssertTrue(app.buttons["recordList.record.feeding-1017"].waitForExistence(timeout: 5))
+    }
+
     func testFeedingRecordEditLoadsSelectedRecordAndSavesChangesToList() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-record-list")
