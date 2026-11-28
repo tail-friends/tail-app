@@ -5,7 +5,9 @@ struct TailFriendsApp: App {
     var body: some Scene {
         WindowGroup {
 #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--preview-care-weekly") {
+            if ProcessInfo.processInfo.arguments.contains("--preview-notification-settings") {
+                NotificationSettingsView()
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-care-weekly") {
                 MainTabHostView(initialTab: .records, startsWithCareWeekly: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-calendar") {
                 MainTabHostView(initialTab: .records, startsWithCareCalendar: true)
