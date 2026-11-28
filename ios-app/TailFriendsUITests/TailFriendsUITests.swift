@@ -1,6 +1,21 @@
 import XCTest
 
 final class TailFriendsUITests: XCTestCase {
+    func testHabitatThemePreviewShowsCurrentAndUnavailableThemes() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-habitat-theme")
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["사육장 테마"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["개체 상세 맨 위 사육장 배경이 바뀌어요"].exists)
+        XCTAssertTrue(app.buttons["habitatTheme.desert"].exists)
+        XCTAssertTrue(app.buttons["habitatTheme.rainforest"].exists)
+        XCTAssertEqual(app.buttons["habitatTheme.desert"].label, "사막, 사용 중")
+
+        app.buttons["habitatTheme.rainforest"].tap()
+        XCTAssertTrue(app.staticTexts["habitatTheme.toast"].waitForExistence(timeout: 2))
+    }
+
     func testNotificationSettingsPreviewUpdatesTogglesAndOpensTimePickers() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-notification-settings")
@@ -476,6 +491,11 @@ final class TailFriendsUITests: XCTestCase {
         let clearInterval = app.buttons["registration.feedingInterval.clear"]
         XCTAssertTrue(clearInterval.waitForExistence(timeout: 3))
         clearInterval.tap()
+        let intervalWasCleared = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value != %@", "4"),
+            object: feedingInterval
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [intervalWasCleared], timeout: 2), .completed)
         feedingInterval.typeText("6")
         XCTAssertEqual(feedingInterval.value as? String, "6")
 
