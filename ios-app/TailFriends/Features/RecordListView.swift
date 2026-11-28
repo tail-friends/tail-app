@@ -6,11 +6,64 @@ struct RecordListView: View {
     @State private var recordGroups = RecordListGroup.samples
     @State private var selectedFilter: RecordListFilter = .all
     @State private var editSession: RecordListEditSession?
+#if DEBUG
+    @State private var isFriendSelectionPresented = ProcessInfo.processInfo.arguments.contains("--preview-friend-selection")
+#else
+    @State private var isFriendSelectionPresented = false
+#endif
+#if DEBUG
+    @State private var friendSelection: FriendSelectionState = {
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--preview-friend-selection-all") {
+            return .all
+        }
+        if arguments.contains("--preview-friend-selection-none") {
+            return .none
+        }
+        if arguments.contains("--preview-friend-selection-empty") {
+            return .friend("chito")
+        }
+        return .friend(FriendSelectionFriend.idWithLocalRecordSamples)
+    }()
+#else
+    @State private var friendSelection: FriendSelectionState = .friend(FriendSelectionFriend.idWithLocalRecordSamples)
+#endif
     @State private var isNoticePresented = false
     @State private var noticeMessage = ""
 
+    private var selectedFriendName: String {
+        switch friendSelection {
+        case .all:
+            return "전체 친구"
+        case .none:
+            return "선택 없음"
+        case .friend(let id):
+            return FriendSelectionFriend.samples.first(where: { $0.id == id })?.name ?? "육이"
+        }
+    }
+
+    private var petSelectorAccessibilityLabel: String {
+        friendSelection == .none ? "선택된 친구 없음" : "친구 \(selectedFriendName) 선택"
+    }
+
+    private var selectedFriendHasLocalRecords: Bool {
+        switch friendSelection {
+        case .all:
+            return true
+        case .none:
+            return false
+        case .friend(let id):
+            return id == FriendSelectionFriend.idWithLocalRecordSamples
+        }
+    }
+
+    private var emptyRecordMessage: String {
+        selectedFriendHasLocalRecords ? "선택한 유형의 기록이 없어요" : "아직 기록이 없어요"
+    }
+
     private var visibleGroups: [RecordListGroup] {
-        recordGroups.compactMap { group in
+        guard selectedFriendHasLocalRecords else { return [] }
+        return recordGroups.compactMap { group in
             let records = group.records.filter { selectedFilter.includes($0) }
             guard !records.isEmpty else { return nil }
             return RecordListGroup(
@@ -52,7 +105,7 @@ struct RecordListView: View {
                             }
 
                             if visibleGroups.isEmpty {
-                                Text("선택한 유형의 기록이 없어요")
+                                Text(emptyRecordMessage)
                                     .font(.custom("Jua", size: 11, relativeTo: .caption))
                                     .foregroundStyle(RecordListPalette.tertiary)
                                     .frame(maxWidth: .infinity, minHeight: 96)
@@ -89,6 +142,13 @@ struct RecordListView: View {
         } message: {
             Text(noticeMessage)
         }
+        .sheet(isPresented: $isFriendSelectionPresented) {
+            FriendSelectionSheet(selectionState: $friendSelection)
+                .presentationDetents([.height(479)])
+                .presentationCornerRadius(28)
+                .presentationDragIndicator(.hidden)
+                .presentationBackground(.white)
+        }
     }
 
     private var navigationHeader: some View {
@@ -114,10 +174,10 @@ struct RecordListView: View {
                 Spacer(minLength: 8)
 
                 Button {
-                    showNotice("08-3 친구 선택 화면은 준비 중이에요.")
+                    isFriendSelectionPresented = true
                 } label: {
                     HStack(spacing: 5) {
-                        Text("육이")
+                        Text(selectedFriendName)
                             .font(.custom("Jua", size: 10, relativeTo: .caption))
                             .foregroundStyle(RecordListPalette.secondary)
 
@@ -136,7 +196,7 @@ struct RecordListView: View {
                     .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("친구 육이 선택")
+                .accessibilityLabel(petSelectorAccessibilityLabel)
                 .accessibilityIdentifier("recordList.petSelector")
             }
         }
