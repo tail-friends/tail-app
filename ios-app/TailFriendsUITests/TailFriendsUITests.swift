@@ -1,6 +1,39 @@
 import XCTest
 
 final class TailFriendsUITests: XCTestCase {
+    func testNotificationSettingsPreviewUpdatesTogglesAndOpensTimePickers() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--preview-notification-settings")
+        app.launch()
+
+        let feeding = app.switches["notification.feeding"]
+        let shedding = app.switches["notification.shedding"]
+        let weight = app.switches["notification.weight"]
+        let growthNews = app.switches["notification.growthNews"]
+        let events = app.switches["notification.events"]
+
+        XCTAssertTrue(app.staticTexts["알림 설정"].waitForExistence(timeout: 5))
+        XCTAssertEqual(feeding.value as? String, "1")
+        XCTAssertEqual(shedding.value as? String, "1")
+        XCTAssertEqual(weight.value as? String, "0")
+        XCTAssertEqual(growthNews.value as? String, "1")
+        XCTAssertEqual(events.value as? String, "0")
+
+        weight.tap()
+        XCTAssertEqual(weight.value as? String, "1")
+        events.tap()
+        XCTAssertEqual(events.value as? String, "1")
+
+        app.buttons["notification.feedingTime"].tap()
+        XCTAssertTrue(app.datePickers["notification.time.feedingPicker"].waitForExistence(timeout: 3))
+        app.buttons["notification.time.done"].tap()
+
+        app.buttons["notification.quietHours"].tap()
+        XCTAssertTrue(app.datePickers["notification.time.quietStartPicker"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.datePickers["notification.time.quietEndPicker"].exists)
+        app.buttons["notification.time.done"].tap()
+    }
+
     func testRecordListPreviewFiltersRecordsAndReturnsHome() {
         let app = XCUIApplication()
         app.launchArguments.append("--preview-record-list")
