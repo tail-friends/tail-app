@@ -7,6 +7,8 @@ struct TailFriendsApp: App {
 #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--preview-notification-settings") {
                 NotificationSettingsView()
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-habitat-theme") {
+                HabitatThemeView(onBack: {})
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-weekly") {
                 MainTabHostView(initialTab: .records, startsWithCareWeekly: true)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-care-calendar") {
