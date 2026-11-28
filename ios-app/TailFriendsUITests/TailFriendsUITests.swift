@@ -491,6 +491,11 @@ final class TailFriendsUITests: XCTestCase {
         let clearInterval = app.buttons["registration.feedingInterval.clear"]
         XCTAssertTrue(clearInterval.waitForExistence(timeout: 3))
         clearInterval.tap()
+        let intervalWasCleared = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value != %@", "4"),
+            object: feedingInterval
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [intervalWasCleared], timeout: 2), .completed)
         feedingInterval.typeText("6")
         XCTAssertEqual(feedingInterval.value as? String, "6")
 
